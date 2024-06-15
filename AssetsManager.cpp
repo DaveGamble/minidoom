@@ -47,8 +47,7 @@ void AssetsManager::LoadPatch(const std::string &sPatchName)
 	PatchHeader.pColumnOffsets = new uint32_t[PatchHeader.Width];
 	memcpy(PatchHeader.pColumnOffsets, ptr + 8, PatchHeader.Width * sizeof(uint32_t));
 
-	m_PatchesCache[sPatchName] = std::unique_ptr<Patch> (new Patch(sPatchName));
-	m_PatchesCache[sPatchName]->Initialize(PatchHeader);
+	m_PatchesCache[sPatchName] = std::unique_ptr<Patch> (new Patch(PatchHeader));
 	Patch *pPatch = m_PatchesCache[sPatchName].get();
 
 	PatchColumnData PatchColumn;

@@ -13,13 +13,7 @@ DoomEngine::DoomEngine()
 	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);
 	m_pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
 	const uint8_t *palette = m_WADLoader.GetPalette();
-	for (int i = 0; i < 256; ++i)
-	{
-		m_ColorPallette[i].r = palette[i * 3 + 0];
-		m_ColorPallette[i].g = palette[i * 3 + 1];
-		m_ColorPallette[i].b = palette[i * 3 + 2];
-		m_ColorPallette[i].a = 255;
-	}
+	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
 	AssetsManager::GetInstance()->Init(&m_WADLoader);
@@ -66,7 +60,7 @@ bool DoomEngine::Tick()
 	m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
 	m_Player.Render(pScreenBuffer, m_iRenderWidth);
 
-	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPallette, 0, 256);
+	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);
 	SDL_UpdateTexture(m_pTexture, nullptr, m_pRGBBuffer->pixels, m_pRGBBuffer->pitch);
 	SDL_RenderCopy(m_pRenderer, m_pTexture, nullptr, nullptr);

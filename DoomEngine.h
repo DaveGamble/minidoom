@@ -14,38 +14,30 @@
 class DoomEngine
 {
 public:
-    DoomEngine();
-    ~DoomEngine();
+	DoomEngine() {}
+	~DoomEngine() {}
 
-    virtual void Render();
-    virtual void KeyPressed(SDL_Event &event);
-    virtual void UpdateKeyStatus(const Uint8* KeyStates);
-    virtual void KeyReleased(SDL_Event &event);
-    virtual void Quit();
-    virtual void Update();
+    void Render();
+	void KeyPressed(SDL_Event &event) { if (event.key.keysym.sym == SDLK_ESCAPE) Quit(); }
+    void UpdateKeyStatus(const Uint8* KeyStates);
+	void KeyReleased(SDL_Event &event) {}
+	void Quit() { m_bIsOver = true; }
+	void Update() { m_pPlayer->Think(m_pMap->GetPlayerSubSectorHieght()); }
 
-    virtual bool IsOver();
-    virtual bool Init();
+	bool IsOver() const { return m_bIsOver; }
+    bool Init();
 
-    virtual int GetRenderWidth();
-    virtual int GetRenderHeight();
-    virtual int GetTimePerFrame();
+	int GetRenderWidth() const { return m_iRenderWidth; }
+	int GetRenderHeight() const { return m_iRenderHeight; }
+	int GetTimePerFrame() const { return 16; }	// 1000/60, as int. how many miliseconds per frame
 
-    virtual std::string GetWADFileName();
-    virtual std::string GetAppName();
+	std::string GetWADFileName() const { return "DOOM.WAD"; }
+	std::string GetAppName() const { return "DIYDOOM"; }
 
 protected:
-    void LoadWAD();
-    void ReadDataFromWAD();
-
-    int m_iRenderWidth;
-    int m_iRenderHeight;
-
-    bool m_bIsOver;
-
-    std::string m_sAppName;
+	int m_iRenderWidth {320}, m_iRenderHeight {200};
+	bool m_bIsOver {false};
     WADLoader m_WADLoader;
-
     std::unique_ptr<Map> m_pMap;
     std::unique_ptr<Player> m_pPlayer;
     std::unique_ptr<Things> m_pThings;

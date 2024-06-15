@@ -56,7 +56,6 @@
 		55FEA46B2C1DBCC800F9DCAC /* WADReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WADReader.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
-		55FEA46E2C1DBCC800F9DCAC /* DIYDoom.vcxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = DIYDoom.vcxproj; sourceTree = SOURCE_ROOT; };
 		55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoomEngine.h; sourceTree = SOURCE_ROOT; };
 		55FEA4702C1DBCC800F9DCAC /* Game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = SOURCE_ROOT; };
 		55FEA4722C1DBCC800F9DCAC /* Things.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Things.h; sourceTree = SOURCE_ROOT; };
@@ -222,7 +221,6 @@
 				55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */,
 				55FEA4742C1DBCC800F9DCAC /* DisplayManager.h */,
 				55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */,
-				55FEA46E2C1DBCC800F9DCAC /* DIYDoom.vcxproj */,
 				55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */,
 				55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */,
 				55FEA4C92C1DBCC800F9DCAC /* Game.cpp */,

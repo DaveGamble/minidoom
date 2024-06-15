@@ -24,9 +24,6 @@ public:
     
 
 protected:
-	struct lump {const uint8_t *ptr {nullptr}; size_t size {0};};
-
-	lump FindMapLump(Map *pMap, const std::string& lumpName);
     int FindLumpByName(const std::string &LumpName, size_t start = 0);
 
     std::string m_sWADFilePath;

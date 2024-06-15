@@ -12,15 +12,30 @@ class AssetsManager
 {
 public:
     static AssetsManager* GetInstance();
-    void Init(WADLoader* pWADLoader);
+    void Init(WADLoader* pWADLoader)
+	{
+		m_pWADLoader = pWADLoader;
+		LoadTextures();
+	}
 
 	~AssetsManager() {}
 
-    Patch* AddPatch(const std::string &sPatchName, WADPatchHeader &PatchHeader);
-    Patch* GetPatch(const std::string &sPatchName);
+    Patch* AddPatch(const std::string &sPatchName, WADPatchHeader &PatchHeader)
+	{
+		m_PatchesCache[sPatchName] = std::unique_ptr<Patch> (new Patch(sPatchName));
+		m_PatchesCache[sPatchName]->Initialize(PatchHeader);
+		return m_PatchesCache[sPatchName].get();
+	}
+	Patch* GetPatch(const std::string &sPatchName) { if (m_PatchesCache.count(sPatchName) <= 0) LoadPatch(sPatchName); return m_PatchesCache[sPatchName].get(); }
 
-    Texture* AddTexture(WADTextureData &TextureData);
-    Texture* GetTexture(const std::string &sTextureName);
+    void AddTexture(WADTextureData &TextureData) { m_TexturesCache[TextureData.TextureName] = std::unique_ptr<Texture>(new Texture(TextureData)); }
+    Texture* GetTexture(const std::string &sTextureName)
+	{
+		if (!m_TexturesCache.count(sTextureName)) return nullptr;
+		Texture* pTexture = m_TexturesCache[sTextureName].get();
+		if (!pTexture->IsComposed()) pTexture->Compose();
+		return pTexture;
+	}
 
 	void AddPName(const std::string &PName) { m_PNameLookup.push_back(PName); }
 	std::string GetPName(int PNameIndex) { return m_PNameLookup[PNameIndex]; }

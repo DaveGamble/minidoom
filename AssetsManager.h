@@ -14,28 +14,13 @@ public:
 	AssetsManager(WADLoader *l);
 	~AssetsManager() {}
 
-    Patch* AddPatch(const std::string &sPatchName, WADPatchHeader &PatchHeader)
-	{
-		m_PatchesCache[sPatchName] = std::unique_ptr<Patch> (new Patch(sPatchName));
-		m_PatchesCache[sPatchName]->Initialize(PatchHeader);
-		return m_PatchesCache[sPatchName].get();
-	}
 	Patch* GetPatch(const std::string &sPatchName) { if (m_PatchesCache.count(sPatchName) <= 0) LoadPatch(sPatchName); return m_PatchesCache[sPatchName].get(); }
 
-    Texture* GetTexture(const std::string &sTextureName)
-	{
-		if (!m_TexturesCache.count(sTextureName)) return nullptr;
-		Texture* pTexture = m_TexturesCache[sTextureName].get();
-		if (!pTexture->IsComposed()) pTexture->Compose(this);
-		return pTexture;
-	}
-
+    Texture* GetTexture(const std::string &sTextureName) { return m_TexturesCache[sTextureName].get(); }
 	std::string GetPName(int PNameIndex) { return m_PNameLookup[PNameIndex]; }
-
-
 protected:
 
-	void LoadPatch(const std::string &sPatchName) { m_pWADLoader->LoadPatch(sPatchName, this); }
+	void LoadPatch(const std::string &sPatchName);
 
 
     std::map<std::string, std::unique_ptr<Patch>> m_PatchesCache;

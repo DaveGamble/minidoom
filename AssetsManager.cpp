@@ -29,7 +29,48 @@ AssetsManager::AssetsManager(WADLoader *l) : m_pWADLoader(l)
 			const uint8_t *ptr = data.data() + asint[i + 1];
 			memcpy(TextureData.TextureName, ptr, 22);
 			TextureData.pTexturePatch = (WADTexturePatch*)(ptr + 22);
-			m_TexturesCache[TextureData.TextureName] = std::unique_ptr<Texture>(new Texture(TextureData));
+			auto texture = std::unique_ptr<Texture>(new Texture(TextureData));
+			if (!texture->IsComposed()) texture->Compose(this);
+			m_TexturesCache[TextureData.TextureName] = std::move(texture);
 		}
+	}
+}
+
+void AssetsManager::LoadPatch(const std::string &sPatchName)
+{
+	std::vector<uint8_t> lump = m_pWADLoader->GetLumpNamed(sPatchName);
+	if (!lump.size()) return;
+
+	WADPatchHeader PatchHeader;
+	const uint8_t *ptr = lump.data();
+	memcpy(&PatchHeader, ptr, 8);
+	PatchHeader.pColumnOffsets = new uint32_t[PatchHeader.Width];
+	memcpy(PatchHeader.pColumnOffsets, ptr + 8, PatchHeader.Width * sizeof(uint32_t));
+
+	m_PatchesCache[sPatchName] = std::unique_ptr<Patch> (new Patch(sPatchName));
+	m_PatchesCache[sPatchName]->Initialize(PatchHeader);
+	Patch *pPatch = m_PatchesCache[sPatchName].get();
+
+	PatchColumnData PatchColumn;
+
+	for (int i = 0; i < PatchHeader.Width; ++i)
+	{
+		int Offset = PatchHeader.pColumnOffsets[i];
+		pPatch->AppendColumnStartIndex();
+		do
+		{
+			PatchColumn.TopDelta = ptr[Offset++];
+			if (PatchColumn.TopDelta != 0xFF)
+			{
+				PatchColumn.Length = ptr[Offset++];
+				PatchColumn.PaddingPre = ptr[Offset++];
+				// TODO: use smart pointer
+				PatchColumn.pColumnData = new uint8_t[PatchColumn.Length];
+				memcpy(PatchColumn.pColumnData, ptr + Offset, PatchColumn.Length);
+				Offset += PatchColumn.Length;
+				PatchColumn.PaddingPost = ptr[Offset++];
+			}
+			pPatch->AppendPatchColumn(PatchColumn);
+		} while (PatchColumn.TopDelta != 0xFF);
 	}
 }

@@ -11,7 +11,6 @@ public:
 	~WADLoader() {}
     bool LoadMapData(class Map *pMap);
 	std::vector<uint8_t> GetLumpNamed(const std::string& name) const;
-    bool LoadPatch(const std::string &sPatchName, class AssetsManager *assets);
     
 
 protected:

@@ -1,21 +1,22 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine() : m_WADLoader("DOOM.WAD"), m_DisplayManager(m_iRenderWidth, m_iRenderHeight, "DIY DOOM")
+DoomEngine::DoomEngine()
+: m_WADLoader("DOOM.WAD")
+, m_DisplayManager(m_iRenderWidth, m_iRenderHeight, "DIY DOOM")
+, m_Player(&m_ViewRenderer, 1)
+, m_Map(&m_ViewRenderer, "E1M1", &m_Player, &m_Things)
 {
     // Load WAD 
     AssetsManager::GetInstance()->Init(&m_WADLoader);
 
     // Delay object creation to this point so renderer is inistilized correctly
-    m_pViewRenderer = std::unique_ptr<ViewRenderer> (new ViewRenderer());
-    m_pPlayer = std::unique_ptr<Player>(new Player(m_pViewRenderer.get(), 1));
-    m_pMap = std::unique_ptr<Map>(new Map(m_pViewRenderer.get(), "E1M1", m_pPlayer.get(), &m_Things));
    
 	m_WADLoader.LoadPalette(&m_DisplayManager);
-	m_WADLoader.LoadMapData(m_pMap.get());
+	m_WADLoader.LoadMapData(&m_Map);
 
-    m_pViewRenderer->Init(m_pMap.get(), m_pPlayer.get());
-    m_pPlayer->Init((m_pMap->GetThings())->GetThingByID(m_pPlayer->GetID()));
-    m_pMap->Init();
+    m_ViewRenderer.Init(&m_Map, &m_Player);
+    m_Player.Init((m_Map.GetThings())->GetThingByID(m_Player.GetID()));
+    m_Map.Init();
 }
 
 void DoomEngine::Tick()
@@ -31,21 +32,21 @@ void DoomEngine::Tick()
 	}
 	
 	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
-	if (KeyStates[SDL_SCANCODE_UP]) m_pPlayer->MoveForward();
-	if (KeyStates[SDL_SCANCODE_DOWN]) m_pPlayer->MoveLeftward();
-	if (KeyStates[SDL_SCANCODE_LEFT]) m_pPlayer->RotateLeft();
-	if (KeyStates[SDL_SCANCODE_RIGHT]) m_pPlayer->RotateRight();
-	if (KeyStates[SDL_SCANCODE_Z]) m_pPlayer->Fly();
-	if (KeyStates[SDL_SCANCODE_X]) m_pPlayer->Sink();
+	if (KeyStates[SDL_SCANCODE_UP]) m_Player.MoveForward();
+	if (KeyStates[SDL_SCANCODE_DOWN]) m_Player.MoveLeftward();
+	if (KeyStates[SDL_SCANCODE_LEFT]) m_Player.RotateLeft();
+	if (KeyStates[SDL_SCANCODE_RIGHT]) m_Player.RotateRight();
+	if (KeyStates[SDL_SCANCODE_Z]) m_Player.Fly();
+	if (KeyStates[SDL_SCANCODE_X]) m_Player.Sink();
 	
 	// Update
-	m_pPlayer->Think(m_pMap->GetPlayerSubSectorHieght());
+	m_Player.Think(m_Map.GetPlayerSubSectorHieght());
 	
 	// Render
 	uint8_t *pScreenBuffer = m_DisplayManager.GetScreenBuffer();
 	m_DisplayManager.InitFrame();
-	m_pViewRenderer->Render(pScreenBuffer, m_iRenderWidth);
-	m_pPlayer->Render(pScreenBuffer, m_iRenderWidth);
+	m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
+	m_Player.Render(pScreenBuffer, m_iRenderWidth);
 	m_DisplayManager.Render();
 	
 	// Delay

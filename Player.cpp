@@ -4,7 +4,6 @@
 Player::Player(ViewRenderer *pViewRenderer, int iID) : m_pViewRenderer(pViewRenderer), m_iPlayerID(iID), m_FOV(90), m_iRotationSpeed(4), m_iMoveSpeed(4), m_EyeLevel(41)
 {
     m_ZPosition = m_EyeLevel;
-    m_pWeapon = std::unique_ptr<Weapon>(new Weapon("PISGA0"));
 }
 
 Player::~Player()
@@ -13,6 +12,7 @@ Player::~Player()
 
 void Player::Init(Thing thing)
 {
+	m_pWeapon = std::unique_ptr<Weapon>(new Weapon("PISGA0"));
     SetXPosition(thing.XPosition);
     SetYPosition(thing.YPosition);
     SetAngle(thing.Angle);

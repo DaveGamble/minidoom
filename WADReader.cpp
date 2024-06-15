@@ -32,7 +32,7 @@ void WADReader::ReadTextureData(const uint8_t *pWADData, int offset, WADTextureD
     offset += 22;
     for (int i = 0; i < texture.PatchCount; ++i)
     {
-        ReadTexturePatch(pWADData, offset, texture.pTexturePatch[i]);
+        ReadTexturePatch(pWADData + offset, texture.pTexturePatch[i]);
         offset += 10;
     }
 }

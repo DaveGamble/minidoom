@@ -10,22 +10,22 @@ public:
 	WADReader() {}
 	~WADReader() {}
 
-	void ReadHeaderData(const uint8_t *pWADData, int offset, Header &header) { memcpy(&header, pWADData + offset, sizeof(header)); }
-	void ReadDirectoryData(const uint8_t *pWADData, int offset, Directory &directory) { memcpy(&directory, pWADData + offset, 16); }
-	void ReadVertexData(const uint8_t *pWADData, int offset, Vertex &vertex) { memcpy(&vertex, pWADData + offset, sizeof(vertex)); }
-	void ReadSectorData(const uint8_t *pWADData, int offset, WADSector &sector) { memcpy(&sector, pWADData + offset, sizeof(sector)); }
-	void ReadSidedefData(const uint8_t *pWADData, int offset, WADSidedef &sidedef) { memcpy(&sidedef, pWADData + offset, sizeof(sidedef)); }
-	void ReadLinedefData(const uint8_t *pWADData, int offset, WADLinedef &linedef) { memcpy(&linedef, pWADData + offset, sizeof(linedef)); }
-	void ReadThingData(const uint8_t *pWADData, int offset, Thing &thing) { memcpy(&thing, pWADData + offset, sizeof(thing)); }
-	void ReadNodeData(const uint8_t *pWADData, int offset, Node &node) { memcpy(&node, pWADData + offset, sizeof(node)); }
-	void ReadSubsectorData(const uint8_t *pWADData, int offset, Subsector &subsector) { memcpy(&subsector, pWADData + offset, sizeof(subsector)); }
-	void ReadSegData(const uint8_t *pWADData, int offset, WADSeg &seg) { memcpy(&seg, pWADData + offset, sizeof(seg)); }
-	void ReadPalette(const uint8_t *pWADData, int offset, WADPalette &palette) { memcpy(&palette, pWADData + offset, sizeof(palette)); }
-    void ReadPatchHeader(const uint8_t *pWADData, int offset, WADPatchHeader &patchheader)
+	void ReadHeaderData(const uint8_t *pWADData, Header &header) { memcpy(&header, pWADData, sizeof(header)); }
+	void ReadDirectoryData(const uint8_t *pWADData, Directory &directory) { memcpy(&directory, pWADData, 16); }
+	void ReadVertexData(const uint8_t *pWADData, Vertex &vertex) { memcpy(&vertex, pWADData, sizeof(vertex)); }
+	void ReadSectorData(const uint8_t *pWADData, WADSector &sector) { memcpy(&sector, pWADData, sizeof(sector)); }
+	void ReadSidedefData(const uint8_t *pWADData, WADSidedef &sidedef) { memcpy(&sidedef, pWADData, sizeof(sidedef)); }
+	void ReadLinedefData(const uint8_t *pWADData, WADLinedef &linedef) { memcpy(&linedef, pWADData, sizeof(linedef)); }
+	void ReadThingData(const uint8_t *pWADData, Thing &thing) { memcpy(&thing, pWADData, sizeof(thing)); }
+	void ReadNodeData(const uint8_t *pWADData, Node &node) { memcpy(&node, pWADData, sizeof(node)); }
+	void ReadSubsectorData(const uint8_t *pWADData, Subsector &subsector) { memcpy(&subsector, pWADData, sizeof(subsector)); }
+	void ReadSegData(const uint8_t *pWADData, WADSeg &seg) { memcpy(&seg, pWADData, sizeof(seg)); }
+	void ReadPalette(const uint8_t *pWADData, WADPalette &palette) { memcpy(&palette, pWADData, sizeof(palette)); }
+    void ReadPatchHeader(const uint8_t *pWADData, WADPatchHeader &patchheader)
 	{
-		memcpy(&patchheader, pWADData + offset, 8);
+		memcpy(&patchheader, pWADData, 8);
 		patchheader.pColumnOffsets = new uint32_t[patchheader.Width];
-		memcpy(patchheader.pColumnOffsets, pWADData + offset + 8, patchheader.Width * sizeof(uint32_t));
+		memcpy(patchheader.pColumnOffsets, pWADData + 8, patchheader.Width * sizeof(uint32_t));
 	}
 
     void ReadPName(const uint8_t *pWADData, int offset, WADPNames &PNames)
@@ -34,15 +34,15 @@ public:
 		PNames.PNameOffset = offset + 4;
 	}
 
-    void ReadTextureHeader(const uint8_t *pWADData, int offset, WADTextureHeader &textureheader)
+    void ReadTextureHeader(const uint8_t *pWADData, WADTextureHeader &textureheader)
 	{
-		memcpy(&textureheader, pWADData + offset, 8);
+		memcpy(&textureheader, pWADData, 8);
 		textureheader.pTexturesDataOffset = new uint32_t[textureheader.TexturesCount];
-		memcpy(textureheader.pTexturesDataOffset, pWADData + offset + 4, textureheader.TexturesCount * sizeof(uint32_t));	// <-- How is this +4 correct???
+		memcpy(textureheader.pTexturesDataOffset, pWADData + 4, textureheader.TexturesCount * sizeof(uint32_t));	// <-- How is this +4 correct???
 	}
     void ReadTextureData(const uint8_t *pWADData, int offset, WADTextureData &texture);
-	void ReadTexturePatch(const uint8_t *pWADData, int offset, WADTexturePatch &texturepatch) { memcpy(&texturepatch, pWADData + offset, sizeof(texturepatch)); }
-	void Read8Characters(const uint8_t *pWADData, int offset, char *pName) { memcpy(pName, pWADData + offset, 8); }
+	void ReadTexturePatch(const uint8_t *pWADData, WADTexturePatch &texturepatch) { memcpy(&texturepatch, pWADData, sizeof(texturepatch)); }
+	void Read8Characters(const uint8_t *pWADData, char *pName) { memcpy(pName, pWADData, 8); }
 
     int ReadPatchColumn(const uint8_t *pWADData, int offset, PatchColumnData &patch);
     

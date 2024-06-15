@@ -2,80 +2,15 @@
 #include "AssetsManager.h"
 #include <math.h>
 
-Player::Player(ViewRenderer *pViewRenderer, int iID) : m_pViewRenderer(pViewRenderer), m_iPlayerID(iID), m_FOV(90), m_iRotationSpeed(4), m_iMoveSpeed(4), m_EyeLevel(41)
-{
-    m_ZPosition = m_EyeLevel;
-}
-
-Player::~Player()
-{
-}
-
 void Player::Init(Thing* thing, AssetsManager *assets)
 {
 	m_pWeapon = assets->GetPatch("PISGA0");
 	if (thing)
 	{
-		SetXPosition(thing->XPosition);
-		SetYPosition(thing->YPosition);
-		SetAngle(thing->Angle);
+		m_XPosition = thing->XPosition;
+		m_YPosition = thing->YPosition;
+		m_Angle = thing->Angle;
 	}
-    m_HalfFOV = m_FOV / 2;
-}
-
-int Player::GetID()
-{
-    return m_iPlayerID;
-}
-
-int Player::GetXPosition()
-{
-    return m_XPosition;
-}
-
-int Player::GetYPosition()
-{
-    return m_YPosition;
-}
-
-int Player::GetZPosition()
-{
-    return m_ZPosition;
-}
-
-Angle Player::GetAngle()
-{
-    return m_Angle;
-}
-
-void Player::SetXPosition(int XPosition)
-{
-    m_XPosition = XPosition;
-}
-
-void Player::SetYPosition(int YPosition)
-{
-    m_YPosition = YPosition;
-}
-
-void Player::SetZPosition(int ZPosition)
-{
-    m_ZPosition = ZPosition;
-}
-
-void Player::SetAngle(int Angle)
-{
-    m_Angle = (float)Angle;
-}
-
-Angle Player::AngleToVertex(Vertex &vertex)
-{
-    float Vdx = vertex.XPosition - m_XPosition;
-    float Vdy = vertex.YPosition - m_YPosition;
-
-    Angle VertexAngle(atan2f(Vdy, Vdx) * 180.0f / PI);
-
-    return VertexAngle;
 }
 
 bool Player::ClipVertexesInFOV(Vertex &V1, Vertex &V2, Angle &V1Angle, Angle &V2Angle, Angle &V1AngleFromPlayer, Angle &V2AngleFromPlayer)
@@ -129,59 +64,4 @@ bool Player::ClipVertexesInFOV(Vertex &V1, Vertex &V2, Angle &V1Angle, Angle &V2
     V2AngleFromPlayer += 90;
 
     return true;
-}
-
-void Player::MoveForward()
-{
-    m_XPosition += m_Angle.GetCosValue() * m_iMoveSpeed;
-    m_YPosition += m_Angle.GetSinValue() * m_iMoveSpeed;
-}
-
-void Player::MoveLeftward()
-{
-    m_XPosition -= m_Angle.GetCosValue() * m_iMoveSpeed;
-    m_YPosition -= m_Angle.GetSinValue() * m_iMoveSpeed;
-}
-
-void Player::RotateLeft()
-{
-    m_Angle += (0.1875f * m_iRotationSpeed);
-}
-
-void Player::RotateRight()
-{
-    m_Angle -= (0.1875f * m_iRotationSpeed);
-}
-
-void Player::Fly()
-{
-    m_ZPosition += 1;
-}
-
-void Player::Sink()
-{
-    m_ZPosition -= 1;
-}
-
-float Player::DistanceToPoint(Vertex &V)
-{
-    // We have two points, where the player is and the vertex passed.
-    // To calculate the distance just use "The Distance Formula"
-    // distance = square root ((X2 - X1)^2 + (y2 - y1)^2)
-    return sqrt(pow(m_XPosition - V.XPosition, 2) + pow(m_YPosition - V.YPosition, 2));
-}
-
-int Player::GetFOV()
-{
-    return m_FOV;
-}
-
-void Player::Think(int iSubSectorHieght)
-{
-    m_ZPosition = iSubSectorHieght + m_EyeLevel;
-}
-
-void Player::Render(uint8_t *pScreenBuffer, int iBufferPitch)
-{
-	m_pWeapon->Render(pScreenBuffer, iBufferPitch, -m_pWeapon->GetXOffset(), -m_pWeapon->GetYOffset());
 }

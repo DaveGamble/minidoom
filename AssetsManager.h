@@ -1,9 +1,8 @@
 #pragma once
-#include <map>
-#include <vector>
-#include <memory>
-#include <string>
 
+#include <map>
+#include <string>
+#include <vector>
 #include "DataTypes.h"
 
 class Patch;
@@ -44,5 +43,5 @@ protected:
 
     std::vector<std::string> m_PNameLookup;
 
-    WADLoader* m_pWADLoader;
+	WADLoader* m_pWADLoader {nullptr};
 };

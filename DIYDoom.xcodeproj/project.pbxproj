@@ -213,9 +213,9 @@
 			children = (
 				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
 				55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */,
+				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */,
 				55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */,
 				55FEA4C22C1DBCC800F9DCAC /* AssetsManager.h */,
-				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */,
 				55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */,
 				55FEA4742C1DBCC800F9DCAC /* DisplayManager.h */,
 				55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */,

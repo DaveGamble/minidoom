@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "Map.h"
+#include "Texture.h"
 #include "Player.h"
 #include "AssetsManager.h"
 

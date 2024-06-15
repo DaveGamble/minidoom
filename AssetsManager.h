@@ -4,11 +4,10 @@
 #include <memory>
 #include <string>
 
-#include "Patch.h"
-#include "Texture.h"
 #include "DataTypes.h"
-#include "WADLoader.h"
 
+class Patch;
+class Texture;
 class WADLoader;
 
 class AssetsManager

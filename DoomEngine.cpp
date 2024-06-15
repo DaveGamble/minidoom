@@ -6,13 +6,9 @@ DoomEngine::DoomEngine()
 , m_Player(&m_ViewRenderer, 1)
 , m_Map(&m_ViewRenderer, "E1M1", &m_Player, &m_Things)
 {
-    // Load WAD 
     AssetsManager::GetInstance()->Init(&m_WADLoader);
-
-    // Delay object creation to this point so renderer is inistilized correctly
 	m_WADLoader.LoadPalette(&m_DisplayManager);
 	m_WADLoader.LoadMapData(&m_Map);
-
     m_ViewRenderer.Init(&m_Map, &m_Player);
     m_Player.Init((m_Map.GetThings())->GetThingByID(m_Player.GetID()));
     m_Map.Init();

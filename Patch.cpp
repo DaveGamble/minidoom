@@ -60,12 +60,13 @@ void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, 
     {
         iYIndex = iYOffset * -1;
     }
+	float scl = m_PatchData[iColumn].Length / iMaxHeight;
 
     while (m_PatchData[iColumn].TopDelta != 0xFF && iTotalHeight < iMaxHeight)
     {
         while (iYIndex < m_PatchData[iColumn].Length && iTotalHeight < iMaxHeight)
         {
-            pScreenBuffer[iBufferPitch * (iYScreenLocation + m_PatchData[iColumn].TopDelta + iYIndex + iYOffset) + iXScreenLocation] = m_PatchData[iColumn].pColumnData[iYIndex];
+            pScreenBuffer[iBufferPitch * (iYScreenLocation + m_PatchData[iColumn].TopDelta + iYIndex + iYOffset) + iXScreenLocation] = m_PatchData[iColumn].pColumnData[(int)floor(iYIndex * scl)];
             ++iTotalHeight;
             ++iYIndex;
         }

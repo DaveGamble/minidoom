@@ -9,12 +9,12 @@ WADLoader::WADLoader(const std::string& filename)
 	fseek(f, 0, SEEK_END);
 	size_t length = ftell(f);
 	fseek(f, 0, SEEK_SET);
-	m_pWADData = std::unique_ptr<uint8_t[]>(new uint8_t[length]);
-	fread(m_pWADData.get(), 1, length, f);
+	data = new uint8_t[length];
+	fread(data, 1, length, f);
 	fclose(f);
 
-	numLumps = ((const uint32_t*)m_pWADData.get())[1];
-	m_WADDirectories = (const Directory*)(m_pWADData.get() + ((const uint32_t*)m_pWADData.get())[2]);
+	numLumps = ((const uint32_t*)data)[1];
+	dirs = (const Directory*)(data + ((const uint32_t*)data)[2]);
 }
 
 bool WADLoader::LoadMapData(Map *pMap) const
@@ -26,8 +26,8 @@ bool WADLoader::LoadMapData(Map *pMap) const
 	auto seek = [&](const std::string& name) {
 		int f = FindLumpByName(name, li);
 		if (f == -1) return (const uint8_t*)nullptr;
-		ptr = m_pWADData.get() + m_WADDirectories[f].LumpOffset;
-		size = m_WADDirectories[f].LumpSize;
+		ptr = data + dirs[f].LumpOffset;
+		size = dirs[f].LumpSize;
 		return ptr;
 	};
 	
@@ -44,14 +44,13 @@ bool WADLoader::LoadMapData(Map *pMap) const
 
 int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset) const
 {
-	for (size_t i = offset; i < numLumps; ++i) if (!strncasecmp(m_WADDirectories[i].LumpName, LumpName.c_str(), 8)) return (int)i;
+	for (size_t i = offset; i < numLumps; ++i) if (!strncasecmp(dirs[i].LumpName, LumpName.c_str(), 8)) return (int)i;
 	return -1;
 }
 
 std::vector<uint8_t> WADLoader::GetLumpNamed(const std::string& name) const
 {
 	int id = FindLumpByName(name);
-	if (id == -1) return {};
-	return std::vector<uint8_t>(m_pWADData.get() + m_WADDirectories[id].LumpOffset, m_pWADData.get() + m_WADDirectories[id].LumpOffset + m_WADDirectories[id].LumpSize);
+	return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].LumpOffset, data + dirs[id].LumpOffset + dirs[id].LumpSize);
 }
 

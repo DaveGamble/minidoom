@@ -10,10 +10,10 @@ int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset)
 	return -1;
 }
 
-bool WADLoader::LoadWADToMemory()
+WADLoader::WADLoader(const std::string& filename)
 {
-	FILE *f = fopen(m_sWADFilePath.c_str(), "rb");
-	if (!f) return false;
+	FILE *f = fopen(filename.c_str(), "rb");
+	if (!f) return;
 	fseek(f, 0, SEEK_END);
 	size_t length = ftell(f);
 	fseek(f, 0, SEEK_SET);
@@ -28,7 +28,6 @@ bool WADLoader::LoadWADToMemory()
 		memcpy(&directory, m_pWADData.get() + header->DirectoryOffset + i * 16, 16);
 		m_WADDirectories.push_back(directory);
 	}
-	return true;
 }
 
 bool WADLoader::LoadMapData(Map *pMap)

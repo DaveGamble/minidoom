@@ -1,10 +1,8 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine()
+DoomEngine::DoomEngine() : m_WADLoader("DOOM.WAD")
 {
     // Load WAD 
-	m_WADLoader.SetWADFilePath("DOOM.WAD");
-	m_WADLoader.LoadWADToMemory();
     AssetsManager::GetInstance()->Init(&m_WADLoader);
 
     m_pDisplayManager = std::unique_ptr < DisplayManager>(new DisplayManager(m_iRenderWidth, m_iRenderHeight));

@@ -61,16 +61,9 @@ int WADLoader::FindLumpByName(const string &LumpName, size_t offset)
 
 bool WADLoader::LoadPalette(DisplayManager *pDisplayManager)
 {
-    std::cout << "Info: Loading PLAYPAL (Color Palettes)" << endl;
     int iPlaypalIndex = FindLumpByName("PLAYPAL");
-
-    if (strcmp(m_WADDirectories[iPlaypalIndex].LumpName, "PLAYPAL") != 0) return false;
-    for (int i = 0; i < 14; ++i)
-    {
-		WADPalette palette;
-		memcpy(&palette, m_pWADData.get() + m_WADDirectories[iPlaypalIndex].LumpOffset + (i * 768), sizeof(palette));
-        pDisplayManager->AddColorPalette(palette);
-    }
+	if (iPlaypalIndex == -1) return false;
+    for (int i = 0; i < 14; ++i) pDisplayManager->AddColorPalette(*(WADPalette*)(m_pWADData.get() + m_WADDirectories[iPlaypalIndex].LumpOffset + (i * 768)));
     return true;
 }
 
@@ -161,17 +154,13 @@ bool WADLoader::LoadPNames()
 {
     AssetsManager *pAssetsManager = AssetsManager::GetInstance();
     int iPNameIndex = FindLumpByName("PNAMES");
-    if (strcmp(m_WADDirectories[iPNameIndex].LumpName, "PNAMES") != 0)
-    {
-        return false;
-    }
+    if (strcmp(m_WADDirectories[iPNameIndex].LumpName, "PNAMES") != 0) return false;
 
     WADPNames PNames;
 	memcpy(&PNames, m_pWADData.get() + m_WADDirectories[iPNameIndex].LumpOffset, sizeof(uint32_t));
 	PNames.PNameOffset = m_WADDirectories[iPNameIndex].LumpOffset + 4;
 
-    char Name[9];
-    Name[8] = '\0';
+	char Name[9] {};
     for (int i = 0; i < PNames.PNameCount; ++i)
     {
 		memcpy(Name, m_pWADData.get() + PNames.PNameOffset, 8);

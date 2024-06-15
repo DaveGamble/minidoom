@@ -42,7 +42,7 @@ void DoomEngine::LoadWAD()
 
 std::string DoomEngine::GetWADFileName()
 {
-    return "..\\..\\..\\external\\assets\\DOOM.WAD";
+    return "DOOM.WAD";
 }
 
 void DoomEngine::Render()

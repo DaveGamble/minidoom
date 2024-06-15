@@ -7,7 +7,6 @@
 #include "Map.h"
 #include "Player.h"
 #include "WADLoader.h"
-#include "DisplayManager.h"
 #include "ViewRenderer.h"
 #include "AssetsManager.h"
 

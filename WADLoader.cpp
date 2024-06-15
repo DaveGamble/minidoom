@@ -1,7 +1,6 @@
 #include "WADLoader.h"
 #include "AssetsManager.h"
 #include "Map.h"
-#include "DisplayManager.h"
 
 
 int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset) const

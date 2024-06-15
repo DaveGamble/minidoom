@@ -88,7 +88,7 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
     //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("SKY1");
     //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("TEKWALL5");
     //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("SW1DIRT");
-	pTexture->Render(pScreenBuffer, iBufferPitch, 10, 10);
+//	pTexture->Render(pScreenBuffer, iBufferPitch, 10, 10);
        
 }
 

@@ -8,9 +8,6 @@ using namespace std;
 bool AssetsManager::m_bInitialized = false;
 std::unique_ptr<AssetsManager> AssetsManager::m_pInstance = nullptr;
 
-AssetsManager::AssetsManager() : m_pWADLoader(nullptr)
-{
-}
 
 AssetsManager* AssetsManager::GetInstance()
 {
@@ -29,9 +26,6 @@ void AssetsManager::Init(WADLoader *pWADLoader)
     LoadTextures();
 }
 
-AssetsManager::~AssetsManager()
-{
-}
 
 Patch* AssetsManager::AddPatch(const std::string &sPatchName, WADPatchHeader &PatchHeader)
 {
@@ -76,26 +70,4 @@ Texture* AssetsManager::GetTexture(const std::string & sTextureName)
     }
 
     return pTexture;
-}
-
-void AssetsManager::AddPName(const std::string &PName)
-{
-    m_PNameLookup.push_back(PName);
-}
-
-std::string AssetsManager::GetPName(int PNameIndex)
-{
-    return m_PNameLookup[PNameIndex];
-}
-
-void AssetsManager::LoadPatch(const std::string &sPatchName)
-{
-    m_pWADLoader->LoadPatch(sPatchName);
-}
-
-void AssetsManager::LoadTextures()
-{
-    m_pWADLoader->LoadPNames();
-    m_pWADLoader->LoadTextures("TEXTURE1");
-    m_pWADLoader->LoadTextures("TEXTURE2");
 }

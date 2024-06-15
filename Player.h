@@ -8,7 +8,7 @@
 class Player
 {
 public:
-	Player(ViewRenderer *pViewRenderer, int iID) : m_pViewRenderer(pViewRenderer), m_iPlayerID(iID) {}
+	Player(int iID = 1) : m_iPlayerID(iID) {}
 	~Player() {}
 
     void Init(Thing *thing, class AssetsManager *assets);
@@ -38,6 +38,5 @@ public:
 protected:
 	int m_iPlayerID, m_XPosition, m_YPosition, m_ZPosition {41}, m_EyeLevel {41}, m_FOV {90}, m_iRotationSpeed {4}, m_iMoveSpeed {4};
 	Angle m_Angle, m_HalfFOV {45};
-    ViewRenderer *m_pViewRenderer;
 	Patch *m_pWeapon;
 };

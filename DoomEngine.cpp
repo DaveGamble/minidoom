@@ -3,7 +3,6 @@
 DoomEngine::DoomEngine()
 : m_WADLoader("DOOM.WAD")
 , assets(&m_WADLoader)
-, m_Player(&m_ViewRenderer, 1)
 , m_Map(&m_ViewRenderer, "E1M1", &m_Player, &m_Things)
 {
 	// SDL

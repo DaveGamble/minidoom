@@ -33,9 +33,9 @@ void Map::BuildSectors()
         wadsector = m_pSectors->at(i);
         sector.FloorHeight = wadsector.FloorHeight;
         sector.CeilingHeight = wadsector.CeilingHeight;
-        strncpy_s(sector.FloorTexture, wadsector.FloorTexture, 8);
+        strncpy(sector.FloorTexture, wadsector.FloorTexture, 8);
         sector.FloorTexture[8] = '\0';
-        strncpy_s(sector.CeilingTexture, wadsector.CeilingTexture, 8);
+        strncpy(sector.CeilingTexture, wadsector.CeilingTexture, 8);
         sector.CeilingTexture[8] = '\0';
         sector.Lightlevel = wadsector.Lightlevel;
         sector.Type = wadsector.Type;
@@ -55,11 +55,11 @@ void Map::BuildSidedefs()
         wadsidedef = m_pSidedefs->at(i);
         sidedef.XOffset = wadsidedef.XOffset;
         sidedef.YOffset = wadsidedef.YOffset;
-        strncpy_s(sidedef.UpperTexture, wadsidedef.UpperTexture, 8);
+        strncpy(sidedef.UpperTexture, wadsidedef.UpperTexture, 8);
         sidedef.UpperTexture[8] = '\0';
-        strncpy_s(sidedef.LowerTexture, wadsidedef.LowerTexture, 8);
+        strncpy(sidedef.LowerTexture, wadsidedef.LowerTexture, 8);
         sidedef.LowerTexture[8] = '\0';
-        strncpy_s(sidedef.MiddleTexture, wadsidedef.MiddleTexture, 8);
+        strncpy(sidedef.MiddleTexture, wadsidedef.MiddleTexture, 8);
         sidedef.MiddleTexture[8] = '\0';
         sidedef.pSector = &m_Sectors[wadsidedef.SectorID];
         m_Sidedefs.push_back(sidedef);

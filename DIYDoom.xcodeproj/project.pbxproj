@@ -13,7 +13,6 @@
 		55FEA4D12C1DBCC800F9DCAC /* Angle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4712C1DBCC800F9DCAC /* Angle.cpp */; };
 		55FEA4D22C1DBCC800F9DCAC /* Patch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4752C1DBCC800F9DCAC /* Patch.cpp */; };
 		55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */; };
-		55FEA4D42C1DBCC800F9DCAC /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA47B2C1DBCC800F9DCAC /* libSDL2.a */; };
 		55FEA4D52C1DBCC800F9DCAC /* AssetsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */; };
 		55FEA4D62C1DBCC800F9DCAC /* Weapon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4BF2C1DBCC800F9DCAC /* Weapon.cpp */; };
 		55FEA4D72C1DBCC800F9DCAC /* Player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C02C1DBCC800F9DCAC /* Player.cpp */; };
@@ -23,6 +22,21 @@
 		55FEA4DB2C1DBCC800F9DCAC /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */; };
 		55FEA4DC2C1DBCC800F9DCAC /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C92C1DBCC800F9DCAC /* Game.cpp */; };
 		55FEA4DD2C1DBCC800F9DCAC /* DisplayManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */; };
+		55FEA6082C1DBDE500F9DCAC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F92C1DBDC200F9DCAC /* AudioToolbox.framework */; };
+		55FEA6092C1DBDE500F9DCAC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5EE2C1DBDC200F9DCAC /* IOKit.framework */; };
+		55FEA60A2C1DBDE500F9DCAC /* ForceFeedback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5ED2C1DBDC200F9DCAC /* ForceFeedback.framework */; };
+		55FEA60B2C1DBDE500F9DCAC /* AudioUnit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F82C1DBDC200F9DCAC /* AudioUnit.framework */; };
+		55FEA60C2C1DBDE500F9DCAC /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F72C1DBDC200F9DCAC /* Cocoa.framework */; };
+		55FEA60D2C1DBDE500F9DCAC /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5EB2C1DBDC200F9DCAC /* CoreGraphics.framework */; };
+		55FEA60E2C1DBDE500F9DCAC /* CoreHaptics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F22C1DBDC200F9DCAC /* CoreHaptics.framework */; };
+		55FEA60F2C1DBDE500F9DCAC /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F42C1DBDC200F9DCAC /* Metal.framework */; };
+		55FEA6102C1DBDE500F9DCAC /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F12C1DBDC200F9DCAC /* Carbon.framework */; };
+		55FEA6112C1DBDE500F9DCAC /* MetalKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F32C1DBDC200F9DCAC /* MetalKit.framework */; };
+		55FEA6122C1DBDE500F9DCAC /* CoreAudioKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F52C1DBDC200F9DCAC /* CoreAudioKit.framework */; };
+		55FEA6132C1DBDE500F9DCAC /* CoreAudio.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F02C1DBDC200F9DCAC /* CoreAudio.framework */; };
+		55FEA6142C1DBDE500F9DCAC /* CoreVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5EC2C1DBDC200F9DCAC /* CoreVideo.framework */; };
+		55FEA6152C1DBDE500F9DCAC /* GameController.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5EF2C1DBDC200F9DCAC /* GameController.framework */; };
+		55FEA6162C1DBDF600F9DCAC /* libSDL2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA47B2C1DBCC800F9DCAC /* libSDL2.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -138,6 +152,21 @@
 		55FEA4CB2C1DBCC800F9DCAC /* WADReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WADReader.h; sourceTree = SOURCE_ROOT; };
 		55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DisplayManager.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WADLoader.h; sourceTree = SOURCE_ROOT; };
+		55FEA5EB2C1DBDC200F9DCAC /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		55FEA5EC2C1DBDC200F9DCAC /* CoreVideo.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreVideo.framework; path = System/Library/Frameworks/CoreVideo.framework; sourceTree = SDKROOT; };
+		55FEA5ED2C1DBDC200F9DCAC /* ForceFeedback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ForceFeedback.framework; path = System/Library/Frameworks/ForceFeedback.framework; sourceTree = SDKROOT; };
+		55FEA5EE2C1DBDC200F9DCAC /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
+		55FEA5EF2C1DBDC200F9DCAC /* GameController.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameController.framework; path = System/Library/Frameworks/GameController.framework; sourceTree = SDKROOT; };
+		55FEA5F02C1DBDC200F9DCAC /* CoreAudio.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudio.framework; path = System/Library/Frameworks/CoreAudio.framework; sourceTree = SDKROOT; };
+		55FEA5F12C1DBDC200F9DCAC /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
+		55FEA5F22C1DBDC200F9DCAC /* CoreHaptics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreHaptics.framework; path = System/Library/Frameworks/CoreHaptics.framework; sourceTree = SDKROOT; };
+		55FEA5F32C1DBDC200F9DCAC /* MetalKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MetalKit.framework; path = System/Library/Frameworks/MetalKit.framework; sourceTree = SDKROOT; };
+		55FEA5F42C1DBDC200F9DCAC /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		55FEA5F52C1DBDC200F9DCAC /* CoreAudioKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreAudioKit.framework; path = System/Library/Frameworks/CoreAudioKit.framework; sourceTree = SDKROOT; };
+		55FEA5F62C1DBDC200F9DCAC /* libobjc.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libobjc.tbd; path = usr/lib/libobjc.tbd; sourceTree = SDKROOT; };
+		55FEA5F72C1DBDC200F9DCAC /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		55FEA5F82C1DBDC200F9DCAC /* AudioUnit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioUnit.framework; path = System/Library/Frameworks/AudioUnit.framework; sourceTree = SDKROOT; };
+		55FEA5F92C1DBDC200F9DCAC /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,7 +174,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				55FEA4D42C1DBCC800F9DCAC /* libSDL2.a in Frameworks */,
+				55FEA6082C1DBDE500F9DCAC /* AudioToolbox.framework in Frameworks */,
+				55FEA6092C1DBDE500F9DCAC /* IOKit.framework in Frameworks */,
+				55FEA60A2C1DBDE500F9DCAC /* ForceFeedback.framework in Frameworks */,
+				55FEA60B2C1DBDE500F9DCAC /* AudioUnit.framework in Frameworks */,
+				55FEA60C2C1DBDE500F9DCAC /* Cocoa.framework in Frameworks */,
+				55FEA6162C1DBDF600F9DCAC /* libSDL2.a in Frameworks */,
+				55FEA60D2C1DBDE500F9DCAC /* CoreGraphics.framework in Frameworks */,
+				55FEA60E2C1DBDE500F9DCAC /* CoreHaptics.framework in Frameworks */,
+				55FEA60F2C1DBDE500F9DCAC /* Metal.framework in Frameworks */,
+				55FEA6102C1DBDE500F9DCAC /* Carbon.framework in Frameworks */,
+				55FEA6112C1DBDE500F9DCAC /* MetalKit.framework in Frameworks */,
+				55FEA6122C1DBDE500F9DCAC /* CoreAudioKit.framework in Frameworks */,
+				55FEA6132C1DBDE500F9DCAC /* CoreAudio.framework in Frameworks */,
+				55FEA6142C1DBDE500F9DCAC /* CoreVideo.framework in Frameworks */,
+				55FEA6152C1DBDE500F9DCAC /* GameController.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,6 +200,7 @@
 			children = (
 				55FEA4622C1DBCB400F9DCAC /* DIYDoom */,
 				55FEA4612C1DBCB400F9DCAC /* Products */,
+				55FEA5EA2C1DBDC200F9DCAC /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -281,6 +325,28 @@
 			);
 			path = SDL2;
 			sourceTree = SOURCE_ROOT;
+		};
+		55FEA5EA2C1DBDC200F9DCAC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				55FEA5F92C1DBDC200F9DCAC /* AudioToolbox.framework */,
+				55FEA5F82C1DBDC200F9DCAC /* AudioUnit.framework */,
+				55FEA5F12C1DBDC200F9DCAC /* Carbon.framework */,
+				55FEA5F72C1DBDC200F9DCAC /* Cocoa.framework */,
+				55FEA5F02C1DBDC200F9DCAC /* CoreAudio.framework */,
+				55FEA5F52C1DBDC200F9DCAC /* CoreAudioKit.framework */,
+				55FEA5EB2C1DBDC200F9DCAC /* CoreGraphics.framework */,
+				55FEA5F22C1DBDC200F9DCAC /* CoreHaptics.framework */,
+				55FEA5EC2C1DBDC200F9DCAC /* CoreVideo.framework */,
+				55FEA5ED2C1DBDC200F9DCAC /* ForceFeedback.framework */,
+				55FEA5EF2C1DBDC200F9DCAC /* GameController.framework */,
+				55FEA5EE2C1DBDC200F9DCAC /* IOKit.framework */,
+				55FEA5F62C1DBDC200F9DCAC /* libobjc.tbd */,
+				55FEA5F42C1DBDC200F9DCAC /* Metal.framework */,
+				55FEA5F32C1DBDC200F9DCAC /* MetalKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
@@ -481,6 +547,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZTMS6M322L;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/SDL2",
+					"$(PROJECT_DIR)",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SDL2",
@@ -495,6 +565,10 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = ZTMS6M322L;
 				ENABLE_HARDENED_RUNTIME = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(PROJECT_DIR)/SDL2",
+					"$(PROJECT_DIR)",
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/SDL2",

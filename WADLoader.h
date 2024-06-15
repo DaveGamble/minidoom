@@ -15,7 +15,7 @@ public:
 	WADLoader() {}
 	~WADLoader() {}
 	void SetWADFilePath(const std::string &sWADFilePath) {  m_sWADFilePath = sWADFilePath; }
-	bool LoadWADToMemory() { return OpenAndLoad() && ReadDirectories(); }
+	bool LoadWADToMemory();
     bool LoadMapData(Map *pMap);
     bool LoadPalette(DisplayManager *pDisplayManager);
     bool LoadPatch(const std::string &sPatchName);
@@ -25,8 +25,6 @@ public:
 
 protected:
 	struct lump {const uint8_t *ptr {nullptr}; size_t size {0};};
-    bool OpenAndLoad();
-    bool ReadDirectories();
     bool ReadMapVertexes(Map *pMap);
     bool ReadMapLinedefs(Map *pMap);
     bool ReadMapThings(Map *pMap);

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-bool WADLoader::OpenAndLoad()
+bool WADLoader::LoadWADToMemory()
 {
 	FILE *f = fopen(m_sWADFilePath.c_str(), "rb");
 	if (!f) return false;
@@ -16,19 +16,15 @@ bool WADLoader::OpenAndLoad()
 	m_pWADData = std::unique_ptr<uint8_t[]>(new uint8_t[length]);
 	fread(m_pWADData.get(), 1, length, f);
 	fclose(f);
-    return true;
-}
 
-bool WADLoader::ReadDirectories()
-{
 	struct Header { char WADType[4]; uint32_t DirectoryCount, DirectoryOffset; } *header = (Header*)m_pWADData.get();
-    for (unsigned int i = 0; i < header->DirectoryCount; ++i)
-    {
+	for (unsigned int i = 0; i < header->DirectoryCount; ++i)
+	{
 		Directory directory;
 		memcpy(&directory, m_pWADData.get() + header->DirectoryOffset + i * 16, 16);
-        m_WADDirectories.push_back(directory);
-    }
-    return true;
+		m_WADDirectories.push_back(directory);
+	}
+	return true;
 }
 
 bool WADLoader::LoadMapData(Map *pMap)

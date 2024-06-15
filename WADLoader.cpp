@@ -29,66 +29,22 @@ bool WADLoader::LoadWADToMemory()
 
 bool WADLoader::LoadMapData(Map *pMap)
 {
-    std::cout << "Info: Parsing Map: " << pMap->GetName() << endl;
-
-    std::cout << "Info: Processing Map Vertexes" << endl;
-    if (!ReadMapVertexes(pMap))
-    {
-        cout << "Error: Failed to load map vertexes data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    // Load Sector
-    std::cout << "Info: Processing Map Sectors" << endl;
-    if (!ReadMapSectors(pMap))
-    {
-        cout << "Error: Failed to load map sectors data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    // Load Sidedef
-    std::cout << "Info: Processing Map Sidedefs" << endl;
-    if (!ReadMapSidedefs(pMap))
-    {
-        cout << "Error: Failed to load map Sidedefs data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    std::cout << "Info: Processing Map Linedefs" << endl;
-    if (!ReadMapLinedefs(pMap))
-    {
-        cout << "Error: Failed to load map linedefs data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    std::cout << "Info: Processing Map Segs" << endl;
-    if (!ReadMapSegs(pMap))
-    {
-        cout << "Error: Failed to load map segs data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    std::cout << "Info: Processing Map Things" << endl;
-    if (!ReadMapThings(pMap))
-    {
-        cout << "Error: Failed to load map things data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    std::cout << "Info: Processing Map Nodes" << endl;
-    if (!ReadMapNodes(pMap))
-    {
-        cout << "Error: Failed to load map nodes data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
-    std::cout << "Info: Processing Map Subsectors" << endl;
-    if (!ReadMapSubsectors(pMap))
-    {
-        cout << "Error: Failed to load map subsectors data MAP: " << pMap->GetName() << endl;
-        return false;
-    }
-
+	lump l = FindMapLump(pMap, "VERTEXES");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(Vertex)) pMap->AddVertex(*(Vertex*)(l.ptr + i));
+	l = FindMapLump(pMap, "SECTORS");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(WADSector)) pMap->AddSector(*(WADSector*)(l.ptr + i));
+	l = FindMapLump(pMap, "SIDEDEFS");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(WADSidedef)) pMap->AddSidedef(*(WADSidedef*)(l.ptr + i));
+	l = FindMapLump(pMap, "LINEDEFS");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(WADLinedef)) pMap->AddLinedef(*(WADLinedef*)(l.ptr + i));
+	l = FindMapLump(pMap, "SEGS");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(WADSeg)) pMap->AddSeg(*(WADSeg*)(l.ptr + i));
+	l = FindMapLump(pMap, "THINGS");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(Thing)) pMap->GetThings()->AddThing(*(Thing*)(l.ptr + i));
+	l = FindMapLump(pMap, "NODES");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(Node)) pMap->AddNode(*(Node*)(l.ptr + i));
+	l = FindMapLump(pMap, "SSECTORS");
+	if (l.ptr) for (int i = 0; i < l.size; i += sizeof(Subsector)) pMap->AddSubsector(*(Subsector*)(l.ptr + i));
     return true;
 }
 
@@ -107,75 +63,10 @@ WADLoader::lump WADLoader::FindMapLump(Map *pMap, const std::string& lumpName)
 	}
 	return l;
 }
-
 int WADLoader::FindLumpByName(const string &LumpName, size_t offset)
 {
-    for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (m_WADDirectories[i].LumpName == LumpName) return (int)i;
-    return -1;
-}
-
-bool WADLoader::ReadMapVertexes(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "VERTEXES");
-	if (!l.ptr) return false;
-    for (int i = 0; i < l.size; i += sizeof(Vertex)) pMap->AddVertex(*(Vertex*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapSectors(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "SECTORS");
-    if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(WADSector)) pMap->AddSector(*(WADSector*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapSidedefs(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "SIDEDEFS");
-    if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(WADSidedef)) pMap->AddSidedef(*(WADSidedef*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapLinedefs(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "LINEDEFS");
-    if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(WADLinedef)) pMap->AddLinedef(*(WADLinedef*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapThings(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "THINGS");
-    if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(Thing)) pMap->GetThings()->AddThing(*(Thing*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapNodes(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "NODES");
-	if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(Node)) pMap->AddNode(*(Node*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapSubsectors(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "SSECTORS");
-	if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(Subsector)) pMap->AddSubsector(*(Subsector*)(l.ptr + i));
-    return true;
-}
-
-bool WADLoader::ReadMapSegs(Map *pMap)
-{
-	lump l = FindMapLump(pMap, "SEGS");
-	if (!l.ptr) return false;
-	for (int i = 0; i < l.size; i += sizeof(WADSeg)) pMap->AddSeg(*(WADSeg*)(l.ptr + i));
-    return true;
+	for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (m_WADDirectories[i].LumpName == LumpName) return (int)i;
+	return -1;
 }
 
 bool WADLoader::LoadPalette(DisplayManager *pDisplayManager)

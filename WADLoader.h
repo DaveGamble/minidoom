@@ -25,14 +25,6 @@ public:
 
 protected:
 	struct lump {const uint8_t *ptr {nullptr}; size_t size {0};};
-    bool ReadMapVertexes(Map *pMap);
-    bool ReadMapLinedefs(Map *pMap);
-    bool ReadMapThings(Map *pMap);
-    bool ReadMapNodes(Map *pMap);
-    bool ReadMapSubsectors(Map *pMap);
-    bool ReadMapSectors(Map *pMap);
-    bool ReadMapSidedefs(Map *pMap);
-    bool ReadMapSegs(Map *pMap);
 
 	lump FindMapLump(Map *pMap, const std::string& lumpName);
     int FindLumpByName(const std::string &LumpName, size_t start = 0);

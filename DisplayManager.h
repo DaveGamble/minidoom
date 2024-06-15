@@ -23,7 +23,7 @@ protected:
     int m_iScreenWidth;
     int m_iScreenHeight;
 
-    std::vector<WADPalette> m_ColorPallettes;
+    SDL_Color m_ColorPallette[256];
 
     SDL_Window *m_pWindow;
     SDL_Renderer *m_pRenderer;

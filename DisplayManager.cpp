@@ -76,7 +76,13 @@ SDL_Renderer* DisplayManager::Init(const std::string &sWindowTitle)
 
 void DisplayManager::AddColorPalette(WADPalette &palette)
 {
-    m_ColorPallettes.push_back(palette);
+	for (int i = 0; i < 256; ++i)
+	{
+		m_ColorPallette[i].r = palette.bytes[i * 3 + 0];
+		m_ColorPallette[i].g = palette.bytes[i * 3 + 1];
+		m_ColorPallette[i].b = palette.bytes[i * 3 + 2];
+		m_ColorPallette[i].a = 255;
+	}
 }
 
 void DisplayManager::InitFrame()
@@ -86,7 +92,7 @@ void DisplayManager::InitFrame()
 
 void DisplayManager::Render()
 {
-    SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPallettes[0].Colors, 0, 256);
+    SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPallette, 0, 256);
 
     SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);
     SDL_UpdateTexture(m_pTexture, nullptr, m_pRGBBuffer->pixels, m_pRGBBuffer->pitch);

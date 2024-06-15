@@ -189,13 +189,7 @@ void WADReader::ReadSegData(const uint8_t *pWADData, int offset, WADSeg &seg)
 
 void WADReader::ReadPalette(const uint8_t *pWADData, int offset, WADPalette &palette)
 {
-    for (int i = 0; i < 256; ++i)
-    {
-        palette.Colors[i].r = pWADData[offset++];
-        palette.Colors[i].g = pWADData[offset++];
-        palette.Colors[i].b = pWADData[offset++];
-        palette.Colors[i].a = 255;
-    }
+	memcpy(palette.bytes, pWADData + offset, 768);
 }
 
 void WADReader::ReadPatchHeader(const uint8_t *pWADData, int offset, WADPatchHeader &patchheader)

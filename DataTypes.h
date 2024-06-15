@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL.h>
-
 #include <cstdint>
 #include "Angle.hpp"
 
@@ -33,4 +31,4 @@ struct WADPNames { uint32_t PNameCount, PNameOffset; };
 struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
 struct WADTexturePatch { int16_t XOffset, YOffset; uint16_t PNameIndex, StepDir, ColorMap; }; // StepDir, ColorMap Unused values.
 struct WADTextureData { char TextureName[9]; uint32_t Flags; uint16_t Width, Height; uint32_t ColumnDirectory; uint16_t PatchCount; WADTexturePatch *pTexturePatch; };// ColumnDirectory Unused value.
-struct WADPalette { SDL_Color Colors[256]; };
+struct WADPalette { uint8_t bytes[768]; };

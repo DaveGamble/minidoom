@@ -200,6 +200,8 @@
 				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
 				55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */,
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */,
+				55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */,
+				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */,
 				55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */,
 				55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */,
 				55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */,
@@ -214,8 +216,6 @@
 				55FEA4762C1DBCC800F9DCAC /* Texture.h */,
 				55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */,
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */,
-				55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */,
-				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */,
 			);
 			path = DIYDoom;
 			sourceTree = "<group>";

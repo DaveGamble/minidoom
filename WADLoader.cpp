@@ -42,15 +42,15 @@ bool WADLoader::LoadMapData(Map *pMap) const
     return true;
 }
 
-int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset) const
+int WADLoader::FindLumpByName(const std::string &LumpName, size_t after) const
 {
-	for (size_t i = offset; i < numLumps; ++i) if (!strncasecmp(dirs[i].LumpName, LumpName.c_str(), 8)) return (int)i;
+	for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].LumpName, LumpName.c_str(), 8)) return (int)i;
 	return -1;
 }
 
-std::vector<uint8_t> WADLoader::GetLumpNamed(const std::string& name) const
+std::vector<uint8_t> WADLoader::GetLumpNamed(const std::string& name, size_t after) const
 {
-	int id = FindLumpByName(name);
+	int id = FindLumpByName(name, after);
 	return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].LumpOffset, data + dirs[id].LumpOffset + dirs[id].LumpSize);
 }
 

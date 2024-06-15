@@ -1,10 +1,14 @@
 #include "WADLoader.h"
-
 #include "AssetsManager.h"
+#include "Map.h"
+#include "DisplayManager.h"
 
-#include <iostream>
 
-using namespace std;
+int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset)
+{
+	for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (m_WADDirectories[i].LumpName == LumpName) return (int)i;
+	return -1;
+}
 
 bool WADLoader::LoadWADToMemory()
 {
@@ -52,12 +56,6 @@ bool WADLoader::LoadMapData(Map *pMap)
     return true;
 }
 
-
-int WADLoader::FindLumpByName(const string &LumpName, size_t offset)
-{
-	for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (m_WADDirectories[i].LumpName == LumpName) return (int)i;
-	return -1;
-}
 
 bool WADLoader::LoadPalette(DisplayManager *pDisplayManager)
 {

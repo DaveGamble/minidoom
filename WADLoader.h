@@ -6,8 +6,6 @@
 #include <vector>
 
 #include "DataTypes.h"
-#include "Map.h"
-#include "DisplayManager.h"
 
 class WADLoader
 {
@@ -16,8 +14,8 @@ public:
 	~WADLoader() {}
 	void SetWADFilePath(const std::string &sWADFilePath) {  m_sWADFilePath = sWADFilePath; }
 	bool LoadWADToMemory();
-    bool LoadMapData(Map *pMap);
-    bool LoadPalette(DisplayManager *pDisplayManager);
+    bool LoadMapData(class Map *pMap);
+    bool LoadPalette(class DisplayManager *pDisplayManager);
     bool LoadPatch(const std::string &sPatchName);
     bool LoadTextures(const std::string &sTextureName);
     bool LoadPNames();

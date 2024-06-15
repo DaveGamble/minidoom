@@ -5,7 +5,7 @@
 
 int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset) const
 {
-	for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (m_WADDirectories[i].LumpName == LumpName) return (int)i;
+	for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (!strncasecmp(m_WADDirectories[i].LumpName, LumpName.c_str(), 8)) return (int)i;
 	return -1;
 }
 

@@ -14,7 +14,11 @@ AssetsManager::AssetsManager(WADLoader *l) : m_pWADLoader(l)
 		memcpy(Name, lump.data() + 4 + 8 * i, 8);
 		m_PNameLookup.push_back(Name);
 	}
+	
+	const char *toload[2] = {"TEXTURE1", "TEXTURE2"};
+	for (int i = 0; i < 2; i++)
+	{
+		m_pWADLoader->LoadTextures(toload[i], this);
 
-	m_pWADLoader->LoadTextures("TEXTURE1", this);
-	m_pWADLoader->LoadTextures("TEXTURE2", this);
+	}
 }

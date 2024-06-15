@@ -107,16 +107,7 @@ bool WADLoader::LoadPatch(const std::string &sPatchName, AssetsManager *assets)
 bool WADLoader::LoadTextures(const std::string &sTextureName, AssetsManager *assets)
 {
     int iTextureIndex = FindLumpByName(sTextureName);
-	
-	if (iTextureIndex < 0)
-	{
-		return false;
-	}
-
-    if (strcmp(m_WADDirectories[iTextureIndex].LumpName, sTextureName.c_str()) != 0)
-    {
-        return false;
-    }
+	if (iTextureIndex < 0) return false;
 
     WADTextureHeader TextureHeader;
 	const uint8_t *ptr = m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset;

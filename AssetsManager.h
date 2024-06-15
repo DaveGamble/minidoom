@@ -31,7 +31,6 @@ public:
 		return pTexture;
 	}
 
-	void AddPName(const std::string &PName) { m_PNameLookup.push_back(PName); }
 	std::string GetPName(int PNameIndex) { return m_PNameLookup[PNameIndex]; }
 
 

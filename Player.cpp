@@ -11,12 +11,15 @@ Player::~Player()
 {
 }
 
-void Player::Init(Thing thing)
+void Player::Init(Thing* thing)
 {
 	m_pWeapon = AssetsManager::GetInstance()->GetPatch("PISGA0");
-    SetXPosition(thing.XPosition);
-    SetYPosition(thing.YPosition);
-    SetAngle(thing.Angle);
+	if (thing)
+	{
+		SetXPosition(thing->XPosition);
+		SetYPosition(thing->YPosition);
+		SetAngle(thing->Angle);
+	}
     m_HalfFOV = m_FOV / 2;
 }
 

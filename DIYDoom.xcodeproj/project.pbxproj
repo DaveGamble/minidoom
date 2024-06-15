@@ -14,7 +14,6 @@
 		55FEA4D52C1DBCC800F9DCAC /* AssetsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */; };
 		55FEA4D72C1DBCC800F9DCAC /* Player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C02C1DBCC800F9DCAC /* Player.cpp */; };
 		55FEA4D82C1DBCC800F9DCAC /* WADLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */; };
-		55FEA4D92C1DBCC800F9DCAC /* Things.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C32C1DBCC800F9DCAC /* Things.cpp */; };
 		55FEA4DA2C1DBCC800F9DCAC /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C42C1DBCC800F9DCAC /* Map.cpp */; };
 		55FEA4DB2C1DBCC800F9DCAC /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */; };
 		55FEA6082C1DBDE500F9DCAC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F92C1DBDC200F9DCAC /* AudioToolbox.framework */; };
@@ -52,7 +51,6 @@
 		55FEA46A2C1DBCC800F9DCAC /* Patch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Patch.h; sourceTree = SOURCE_ROOT; };
 		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoomEngine.h; sourceTree = SOURCE_ROOT; };
-		55FEA4722C1DBCC800F9DCAC /* Things.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Things.h; sourceTree = SOURCE_ROOT; };
 		55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewRenderer.h; sourceTree = SOURCE_ROOT; };
 		55FEA4752C1DBCC800F9DCAC /* Patch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Patch.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4762C1DBCC800F9DCAC /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = SOURCE_ROOT; };
@@ -129,7 +127,6 @@
 		55FEA4C02C1DBCC800F9DCAC /* Player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Player.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WADLoader.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C22C1DBCC800F9DCAC /* AssetsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AssetsManager.h; sourceTree = SOURCE_ROOT; };
-		55FEA4C32C1DBCC800F9DCAC /* Things.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Things.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C42C1DBCC800F9DCAC /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Angle.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C72C1DBCC800F9DCAC /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = SOURCE_ROOT; };
@@ -215,8 +212,6 @@
 				55FEA4C72C1DBCC800F9DCAC /* Player.h */,
 				55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */,
 				55FEA4762C1DBCC800F9DCAC /* Texture.h */,
-				55FEA4C32C1DBCC800F9DCAC /* Things.cpp */,
-				55FEA4722C1DBCC800F9DCAC /* Things.h */,
 				55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */,
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */,
 				55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */,
@@ -383,7 +378,6 @@
 				55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */,
 				55FEA4D72C1DBCC800F9DCAC /* Player.cpp in Sources */,
 				55FEA4D22C1DBCC800F9DCAC /* Patch.cpp in Sources */,
-				55FEA4D92C1DBCC800F9DCAC /* Things.cpp in Sources */,
 				55FEA4DB2C1DBCC800F9DCAC /* Texture.cpp in Sources */,
 				55FEA4DA2C1DBCC800F9DCAC /* Map.cpp in Sources */,
 				55FEA4D52C1DBCC800F9DCAC /* AssetsManager.cpp in Sources */,

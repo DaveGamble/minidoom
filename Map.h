@@ -6,7 +6,6 @@
 #include "DataTypes.h"
 #include "Player.h"
 #include "ViewRenderer.h"
-#include "Things.h"
 
 class Map
 {

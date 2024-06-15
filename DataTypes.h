@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <vector>
 #include "Angle.hpp"
 
 #define SUBSECTORIDENTIFIER 0x8000 // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
@@ -30,3 +31,12 @@ struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesData
 struct WADTexturePatch { int16_t XOffset, YOffset; uint16_t PNameIndex, StepDir, ColorMap; }; // StepDir, ColorMap Unused values.
 struct WADTextureData { char TextureName[9]; uint32_t Flags; uint16_t Width, Height; uint32_t ColumnDirectory; uint16_t PatchCount; WADTexturePatch *pTexturePatch; };// ColumnDirectory Unused value.
 struct WADPalette { uint8_t bytes[768]; };
+
+class Things
+{
+public:
+	void AddThing(Thing &thing) {m_Things.push_back(thing);}
+	Thing* GetThingByID(int iID) { for (auto& t : m_Things) if (t.Type == iID) return &t; return nullptr; }
+protected:
+	std::vector<Thing> m_Things;
+};

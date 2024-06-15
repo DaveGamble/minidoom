@@ -11,7 +11,7 @@
 class AssetsManager
 {
 public:
-	AssetsManager(WADLoader *l) : m_pWADLoader(l) {LoadTextures();}
+	AssetsManager(WADLoader *l);
 	~AssetsManager() {}
 
     Patch* AddPatch(const std::string &sPatchName, WADPatchHeader &PatchHeader)
@@ -38,7 +38,6 @@ public:
 protected:
 
 	void LoadPatch(const std::string &sPatchName) { m_pWADLoader->LoadPatch(sPatchName, this); }
-	void LoadTextures() { m_pWADLoader->LoadPNames(this); m_pWADLoader->LoadTextures("TEXTURE1", this); m_pWADLoader->LoadTextures("TEXTURE2", this); }
 
 
     std::map<std::string, std::unique_ptr<Patch>> m_PatchesCache;

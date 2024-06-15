@@ -54,6 +54,13 @@ bool WADLoader::LoadMapData(Map *pMap)
     return true;
 }
 
+std::vector<uint8_t> WADLoader::GetLumpNamed(const std::string& name) const
+{
+	int id = FindLumpByName(name);
+	if (id == -1) return {};
+	return std::vector<uint8_t>(m_pWADData.get() + m_WADDirectories[id].LumpOffset, m_pWADData.get() + m_WADDirectories[id].LumpOffset + m_WADDirectories[id].LumpSize);
+}
+
 
 bool WADLoader::LoadPatch(const std::string &sPatchName, AssetsManager *assets)
 {
@@ -133,26 +140,6 @@ bool WADLoader::LoadTextures(const std::string &sTextureName, AssetsManager *ass
 
     delete[] TextureHeader.pTexturesDataOffset;
     TextureHeader.pTexturesDataOffset = nullptr;
-    return true;
-}
-
-bool WADLoader::LoadPNames(AssetsManager *assets)
-{
-    int iPNameIndex = FindLumpByName("PNAMES");
-    if (strcmp(m_WADDirectories[iPNameIndex].LumpName, "PNAMES") != 0) return false;
-
-    WADPNames PNames;
-	memcpy(&PNames, m_pWADData.get() + m_WADDirectories[iPNameIndex].LumpOffset, sizeof(uint32_t));
-	PNames.PNameOffset = m_WADDirectories[iPNameIndex].LumpOffset + 4;
-
-	char Name[9] {};
-    for (int i = 0; i < PNames.PNameCount; ++i)
-    {
-		memcpy(Name, m_pWADData.get() + PNames.PNameOffset, 8);
-        assets->AddPName(Name);
-        PNames.PNameOffset += 8;
-    }
-
     return true;
 }
 

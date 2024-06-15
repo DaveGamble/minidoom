@@ -38,7 +38,7 @@ bool Texture::Initialize()
     {
         //Lookup patch
         Patch *pPatch = pAssetsManager->GetPatch(pAssetsManager->GetPName(m_TexturePatches[i].PNameIndex));
-		if (!pPatch) continue;
+
         int iXStart = m_TexturePatches[i].XOffset;
         int iMaxWidth = iXStart + pPatch->GetWidth();
 
@@ -93,8 +93,7 @@ bool Texture::Compose()
     {
         //Lookup patch
         Patch *pPatch = pAssetsManager->GetPatch(pAssetsManager->GetPName(m_TexturePatches[i].PNameIndex));
-		if (!pPatch) continue;
-		
+
         int iXStart = m_TexturePatches[i].XOffset;
         int iMaxWidth = iXStart + pPatch->GetWidth();
 
@@ -134,22 +133,22 @@ void Texture::Render(uint8_t * pScreenBuffer, int iBufferPitch, int iXScreenLoca
 {
     for (size_t iCurrentColumnIndex = 0; iCurrentColumnIndex < m_iWidth; ++iCurrentColumnIndex)
     {
-        RenderColumn(pScreenBuffer, iBufferPitch, iXScreenLocation + iCurrentColumnIndex, iYScreenLocation, iCurrentColumnIndex, m_iHeight);
+        RenderColumn(pScreenBuffer, iBufferPitch, iXScreenLocation + iCurrentColumnIndex, iYScreenLocation, iCurrentColumnIndex);
     }
 }
 
-void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex,int height)
+void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex)
 {
     AssetsManager *pAssetsManager = AssetsManager::GetInstance();
     if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
     {
         Patch *pPatch = pAssetsManager->GetPatch(pAssetsManager->GetPName(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].PNameIndex));
         
-        if (pPatch) pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], iXScreenLocation, iYScreenLocation, height, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].YOffset);
+        pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], iXScreenLocation, iYScreenLocation, m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].YOffset);
     }
     else
     {
-        for (int iYIndex = 0; iYIndex < height; ++iYIndex)
+        for (int iYIndex = 0; iYIndex < m_iHeight; ++iYIndex)
         {
             pScreenBuffer[iBufferPitch * (iYScreenLocation + iYIndex) + iXScreenLocation] = m_pOverLapColumnData[m_ColumnIndex[iCurrentColumnIndex] + iYIndex];
         }

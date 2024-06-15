@@ -482,16 +482,14 @@ void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
 
 void ViewRenderer::DrawMiddleSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd, int CurrentFloorStart)
 {
-	float dx = (iXCurrent - RenderData.V1XScreen) / (float)(RenderData.V2XScreen - RenderData.V1XScreen);
 	uint8_t color = GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->MiddleTexture);
-	DrawVerticalLine(RenderData.pSeg->pLinedef->pRightSidedef->MiddleTexture, dx, iXCurrent, CurrentCeilingEnd, CurrentFloorStart, color);
+	DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, color);
     m_CeilingClipHeight[iXCurrent] = m_iRenderYSize;
     m_FloorClipHeight[iXCurrent] = -1;
 }
 
 void ViewRenderer::DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentFloorStart)
 {
-	float dx = (iXCurrent - RenderData.V1XScreen) / (RenderData.V2XScreen - RenderData.V1XScreen);
     if (RenderData.bDrawLowerSection)
     {
 		int iLowerHeight = RenderData.iLowerHeight;
@@ -505,7 +503,7 @@ void ViewRenderer::DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData,
         if (iLowerHeight <= CurrentFloorStart)
         {
 			uint8_t color = GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->LowerTexture);
-			DrawVerticalLine(RenderData.pSeg->pLinedef->pRightSidedef->LowerTexture, dx, iXCurrent, iLowerHeight, CurrentFloorStart, color);
+			DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, color);
             m_FloorClipHeight[iXCurrent] = iLowerHeight;
         }
         else
@@ -519,7 +517,6 @@ void ViewRenderer::DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData,
 
 void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd)
 {
-	float dx = (iXCurrent - RenderData.V1XScreen) / (RenderData.V2XScreen - RenderData.V1XScreen);
     if (RenderData.bDrawUpperSection)
     {
         int iUpperHeight = RenderData.iUpperHeight;
@@ -533,7 +530,7 @@ void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData,
         if (iUpperHeight >= CurrentCeilingEnd)
         {
 			uint8_t color = GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->UpperTexture);
-			DrawVerticalLine(RenderData.pSeg->pLinedef->pRightSidedef->UpperTexture, dx, iXCurrent, CurrentCeilingEnd, iUpperHeight, color);
+			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, color);
             m_CeilingClipHeight[iXCurrent] = iUpperHeight;
         }
         else
@@ -609,15 +606,12 @@ uint8_t ViewRenderer::GetSectionColor(const std::string &TextureName)
     return color;
 }
 
-void ViewRenderer::DrawVerticalLine(char texture[9], float dx, int iX, int iStartY, int iEndY, uint8_t color)
+void ViewRenderer::DrawVerticalLine(int iX, int iStartY, int iEndY, uint8_t color)
 {
-	Texture *pTexture = AssetsManager::GetInstance()->GetTexture(texture);
-	if (!pTexture) return;
-	pTexture->RenderColumn(m_pScreenBuffer, m_iBufferPitch, iX, iStartY, dx * 10, iEndY - iStartY);
 	//int iStartY = line->y1;
-//	while (iStartY < iEndY)
-//	{
-//		m_pScreenBuffer[m_iBufferPitch * iStartY + iX] = color;
-//		++iStartY;
-//	}
+	while (iStartY < iEndY)
+	{
+		m_pScreenBuffer[m_iBufferPitch * iStartY + iX] = color;
+		++iStartY;
+	}
 }

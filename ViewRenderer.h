@@ -69,7 +69,7 @@ protected:
     };
 
     void Render3DView();
-	void DrawVerticalLine(char texture[9], float dx, int iX, int iStartY, int iEndY, uint8_t color);
+	void DrawVerticalLine(int iX, int iStartY, int iEndY, uint8_t color);
 
     void ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void ClipPassWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);

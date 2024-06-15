@@ -26,8 +26,9 @@ protected:
 	SDL_Renderer *m_pRenderer {nullptr};
 	SDL_Texture *m_pTexture {nullptr};
 	// SDL
-
+	
 	WADLoader m_WADLoader;
+	AssetsManager assets;
 	ViewRenderer m_ViewRenderer;
 	Things m_Things;
 	Player m_Player;

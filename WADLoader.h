@@ -11,9 +11,9 @@ public:
 	~WADLoader() {}
     bool LoadMapData(class Map *pMap);
 	const uint8_t *GetPalette() const { return m_pWADData.get() + m_WADDirectories[FindLumpByName("PLAYPAL")].LumpOffset; }
-    bool LoadPatch(const std::string &sPatchName);
-    bool LoadTextures(const std::string &sTextureName);
-    bool LoadPNames();
+    bool LoadPatch(const std::string &sPatchName, class AssetsManager *assets);
+    bool LoadTextures(const std::string &sTextureName, class AssetsManager *assets);
+    bool LoadPNames(class AssetsManager *assets);
     
 
 protected:

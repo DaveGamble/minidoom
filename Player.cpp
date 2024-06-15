@@ -11,9 +11,9 @@ Player::~Player()
 {
 }
 
-void Player::Init(Thing* thing)
+void Player::Init(Thing* thing, AssetsManager *assets)
 {
-	m_pWeapon = AssetsManager::GetInstance()->GetPatch("PISGA0");
+	m_pWeapon = assets->GetPatch("PISGA0");
 	if (thing)
 	{
 		SetXPosition(thing->XPosition);

@@ -12,8 +12,8 @@ public:
     ~Texture();
 
     bool IsComposed();
-    bool Initialize();
-    bool Compose();
+    bool Initialize(class AssetsManager *assets);
+    bool Compose(class AssetsManager *assets);
 
     void Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation);
     void RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex);

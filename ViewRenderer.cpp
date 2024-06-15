@@ -71,25 +71,6 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 
     InitFrame();
     Render3DView();
-
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("AASTINKY");
-    Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BROWN1");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BROWNPIP");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BROWN144");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BIGDOOR1");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BIGDOOR2");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BIGDOOR4");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("COMP2");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BRNSMAL1");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BRNBIGC");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BRNPOIS");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("BRNPOIS2");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("EXITDOOR");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("SKY1");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("TEKWALL5");
-    //Texture *pTexture = AssetsManager::GetInstance()->GetTexture("SW1DIRT");
-//	pTexture->Render(pScreenBuffer, iBufferPitch, 10, 10);
-       
 }
 
 void ViewRenderer::InitFrame()

@@ -2,6 +2,7 @@
 
 DoomEngine::DoomEngine()
 : m_WADLoader("DOOM.WAD")
+, assets(&m_WADLoader)
 , m_Player(&m_ViewRenderer, 1)
 , m_Map(&m_ViewRenderer, "E1M1", &m_Player, &m_Things)
 {
@@ -16,10 +17,9 @@ DoomEngine::DoomEngine()
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
-	AssetsManager::GetInstance()->Init(&m_WADLoader);
 	m_WADLoader.LoadMapData(&m_Map);
     m_ViewRenderer.Init(&m_Map, &m_Player);
-    m_Player.Init((m_Map.GetThings())->GetThingByID(m_Player.GetID()));
+    m_Player.Init((m_Map.GetThings())->GetThingByID(m_Player.GetID()), &assets);
     m_Map.Init();
 }
 

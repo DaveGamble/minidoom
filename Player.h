@@ -11,7 +11,7 @@ public:
     Player(ViewRenderer *pViewRenderer, int iID);
     ~Player();
 
-    void Init(Thing *thing);
+    void Init(Thing *thing, class AssetsManager *assets);
     void SetXPosition(int XPosition);
     void SetYPosition(int YPosition);
     void SetZPosition(int ZPosition);

@@ -55,9 +55,8 @@ bool WADLoader::LoadMapData(Map *pMap)
 }
 
 
-bool WADLoader::LoadPatch(const std::string &sPatchName)
+bool WADLoader::LoadPatch(const std::string &sPatchName, AssetsManager *assets)
 {
-    AssetsManager *pAssetsManager = AssetsManager::GetInstance();
     int iPatchIndex = FindLumpByName(sPatchName);
     if (strcmp(m_WADDirectories[iPatchIndex].LumpName, sPatchName.c_str()) != 0)
     {
@@ -70,7 +69,7 @@ bool WADLoader::LoadPatch(const std::string &sPatchName)
 	PatchHeader.pColumnOffsets = new uint32_t[PatchHeader.Width];
 	memcpy(PatchHeader.pColumnOffsets, ptr + 8, PatchHeader.Width * sizeof(uint32_t));
 
-    Patch *pPatch = pAssetsManager->AddPatch(sPatchName, PatchHeader);
+    Patch *pPatch = assets->AddPatch(sPatchName, PatchHeader);
 
     PatchColumnData PatchColumn;
 
@@ -98,9 +97,8 @@ bool WADLoader::LoadPatch(const std::string &sPatchName)
     return true;
 }
 
-bool WADLoader::LoadTextures(const std::string &sTextureName)
+bool WADLoader::LoadTextures(const std::string &sTextureName, AssetsManager *assets)
 {
-    AssetsManager *pAssetsManager = AssetsManager::GetInstance();
     int iTextureIndex = FindLumpByName(sTextureName);
 	
 	if (iTextureIndex < 0)
@@ -128,7 +126,7 @@ bool WADLoader::LoadTextures(const std::string &sTextureName)
 		memcpy(&TextureData.Flags, ptr + 8, 14);
 		TextureData.pTexturePatch = new WADTexturePatch[TextureData.PatchCount];
 		memcpy(TextureData.pTexturePatch, ptr + 22, TextureData.PatchCount * 10);
-        pAssetsManager->AddTexture(TextureData);
+        assets->AddTexture(TextureData);
         delete[] TextureData.pTexturePatch;
         TextureData.pTexturePatch = nullptr;
     }
@@ -138,9 +136,8 @@ bool WADLoader::LoadTextures(const std::string &sTextureName)
     return true;
 }
 
-bool WADLoader::LoadPNames()
+bool WADLoader::LoadPNames(AssetsManager *assets)
 {
-    AssetsManager *pAssetsManager = AssetsManager::GetInstance();
     int iPNameIndex = FindLumpByName("PNAMES");
     if (strcmp(m_WADDirectories[iPNameIndex].LumpName, "PNAMES") != 0) return false;
 
@@ -152,7 +149,7 @@ bool WADLoader::LoadPNames()
     for (int i = 0; i < PNames.PNameCount; ++i)
     {
 		memcpy(Name, m_pWADData.get() + PNames.PNameOffset, 8);
-        pAssetsManager->AddPName(Name);
+        assets->AddPName(Name);
         PNames.PNameOffset += 8;
     }
 

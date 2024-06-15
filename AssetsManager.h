@@ -11,13 +11,7 @@
 class AssetsManager
 {
 public:
-    static AssetsManager* GetInstance();
-    void Init(WADLoader* pWADLoader)
-	{
-		m_pWADLoader = pWADLoader;
-		LoadTextures();
-	}
-
+	AssetsManager(WADLoader *l) : m_pWADLoader(l) {LoadTextures();}
 	~AssetsManager() {}
 
     Patch* AddPatch(const std::string &sPatchName, WADPatchHeader &PatchHeader)
@@ -33,7 +27,7 @@ public:
 	{
 		if (!m_TexturesCache.count(sTextureName)) return nullptr;
 		Texture* pTexture = m_TexturesCache[sTextureName].get();
-		if (!pTexture->IsComposed()) pTexture->Compose();
+		if (!pTexture->IsComposed()) pTexture->Compose(this);
 		return pTexture;
 	}
 
@@ -42,13 +36,9 @@ public:
 
 
 protected:
-    static bool m_bInitialized;
-    static std::unique_ptr <AssetsManager> m_pInstance;
 
-	AssetsManager() {}
-
-	void LoadPatch(const std::string &sPatchName) { m_pWADLoader->LoadPatch(sPatchName); }
-	void LoadTextures() { m_pWADLoader->LoadPNames(); m_pWADLoader->LoadTextures("TEXTURE1"); m_pWADLoader->LoadTextures("TEXTURE2"); }
+	void LoadPatch(const std::string &sPatchName) { m_pWADLoader->LoadPatch(sPatchName, this); }
+	void LoadTextures() { m_pWADLoader->LoadPNames(this); m_pWADLoader->LoadTextures("TEXTURE1", this); m_pWADLoader->LoadTextures("TEXTURE2", this); }
 
 
     std::map<std::string, std::unique_ptr<Patch>> m_PatchesCache;

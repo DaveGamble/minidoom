@@ -63,7 +63,6 @@
 		55FEA4742C1DBCC800F9DCAC /* DisplayManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisplayManager.h; sourceTree = SOURCE_ROOT; };
 		55FEA4752C1DBCC800F9DCAC /* Patch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Patch.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4762C1DBCC800F9DCAC /* Texture.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Texture.h; sourceTree = SOURCE_ROOT; };
-		55FEA4772C1DBCC800F9DCAC /* ClassicDefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ClassicDefs.h; sourceTree = SOURCE_ROOT; };
 		55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ViewRenderer.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4792C1DBCC800F9DCAC /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = begin_code.h; sourceTree = "<group>"; };
 		55FEA47A2C1DBCC800F9DCAC /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = close_code.h; sourceTree = "<group>"; };
@@ -216,7 +215,6 @@
 				55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */,
 				55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */,
 				55FEA4C22C1DBCC800F9DCAC /* AssetsManager.h */,
-				55FEA4772C1DBCC800F9DCAC /* ClassicDefs.h */,
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */,
 				55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */,
 				55FEA4742C1DBCC800F9DCAC /* DisplayManager.h */,

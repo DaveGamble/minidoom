@@ -143,7 +143,6 @@
 		55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C92C1DBCC800F9DCAC /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataTypes.h; sourceTree = SOURCE_ROOT; };
-		55FEA4CB2C1DBCC800F9DCAC /* WADReader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WADReader.h; sourceTree = SOURCE_ROOT; };
 		55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DisplayManager.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WADLoader.h; sourceTree = SOURCE_ROOT; };
 		55FEA5EB2C1DBDC200F9DCAC /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -235,7 +234,6 @@
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */,
 				55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */,
-				55FEA4CB2C1DBCC800F9DCAC /* WADReader.h */,
 				55FEA4BF2C1DBCC800F9DCAC /* Weapon.cpp */,
 				55FEA4C62C1DBCC800F9DCAC /* Weapon.h */,
 			);

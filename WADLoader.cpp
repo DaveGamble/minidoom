@@ -326,7 +326,10 @@ bool WADLoader::LoadPatch(const std::string &sPatchName)
     }
 
     WADPatchHeader PatchHeader;
-    m_Reader.ReadPatchHeader(m_pWADData.get() + m_WADDirectories[iPatchIndex].LumpOffset, PatchHeader);
+	const uint8_t *ptr = m_pWADData.get() + m_WADDirectories[iPatchIndex].LumpOffset;
+	memcpy(&PatchHeader, ptr, 8);
+	PatchHeader.pColumnOffsets = new uint32_t[PatchHeader.Width];
+	memcpy(PatchHeader.pColumnOffsets, ptr + 8, PatchHeader.Width * sizeof(uint32_t));
 
     Patch *pPatch = pAssetsManager->AddPatch(sPatchName, PatchHeader);
 
@@ -338,7 +341,17 @@ bool WADLoader::LoadPatch(const std::string &sPatchName)
         pPatch->AppendColumnStartIndex();
         do
         {
-            Offset = m_Reader.ReadPatchColumn(m_pWADData.get(), Offset, PatchColumn);
+			PatchColumn.TopDelta = m_pWADData[Offset++];
+			if (PatchColumn.TopDelta != 0xFF)
+			{
+				PatchColumn.Length = m_pWADData[Offset++];
+				PatchColumn.PaddingPre = m_pWADData[Offset++];
+				// TODO: use smart pointer
+				PatchColumn.pColumnData = new uint8_t[PatchColumn.Length];
+				memcpy(PatchColumn.pColumnData, m_pWADData.get() + Offset, PatchColumn.Length);
+				Offset += PatchColumn.Length;
+				PatchColumn.PaddingPost = m_pWADData[Offset++];
+			}
             pPatch->AppendPatchColumn(PatchColumn);
         } while (PatchColumn.TopDelta != 0xFF);
     }
@@ -362,12 +375,20 @@ bool WADLoader::LoadTextures(const std::string &sTextureName)
     }
 
     WADTextureHeader TextureHeader;
-    m_Reader.ReadTextureHeader(m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset, TextureHeader);
+	const uint8_t *ptr = m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset;
+	memcpy(&TextureHeader, ptr, 8);
+	TextureHeader.pTexturesDataOffset = new uint32_t[TextureHeader.TexturesCount];
+	memcpy(TextureHeader.pTexturesDataOffset, ptr + 4, TextureHeader.TexturesCount * sizeof(uint32_t));	// <-- How is this +4 correct???
 
-    WADTextureData TextureData;
+	WADTextureData TextureData;
     for (int i = 0; i < TextureHeader.TexturesCount; ++i)
     {
-        m_Reader.ReadTextureData(m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset + TextureHeader.pTexturesDataOffset[i], TextureData);
+		ptr = m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset + TextureHeader.pTexturesDataOffset[i];
+		memcpy(TextureData.TextureName, ptr, 8);
+		TextureData.TextureName[8] = '\0';
+		memcpy(&TextureData.Flags, ptr + 8, 14);
+		TextureData.pTexturePatch = new WADTexturePatch[TextureData.PatchCount];
+		memcpy(TextureData.pTexturePatch, ptr + 22, TextureData.PatchCount * 10);
         pAssetsManager->AddTexture(TextureData);
         delete[] TextureData.pTexturePatch;
         TextureData.pTexturePatch = nullptr;
@@ -388,7 +409,9 @@ bool WADLoader::LoadPNames()
     }
 
     WADPNames PNames;
-    m_Reader.ReadPName(m_pWADData.get(), m_WADDirectories[iPNameIndex].LumpOffset, PNames);
+	memcpy(&PNames, m_pWADData.get() + m_WADDirectories[iPNameIndex].LumpOffset, sizeof(uint32_t));
+	PNames.PNameOffset = m_WADDirectories[iPNameIndex].LumpOffset + 4;
+
     char Name[9];
     Name[8] = '\0';
     for (int i = 0; i < PNames.PNameCount; ++i)

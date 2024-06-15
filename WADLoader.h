@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "DataTypes.h"
-#include "WADReader.h"
 #include "Map.h"
 #include "DisplayManager.h"
 
@@ -44,5 +43,4 @@ protected:
     std::ifstream m_WADFile;
     std::vector<Directory> m_WADDirectories;
     std::unique_ptr<uint8_t[]> m_pWADData;
-    WADReader m_Reader;
 };

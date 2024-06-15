@@ -3,7 +3,7 @@
 #include "Texture.h"
 #include "WADLoader.h"
 
-AssetsManager::AssetsManager(WADLoader *l) : m_pWADLoader(l)
+AssetsManager::AssetsManager(WADLoader *l) : wadLoader(l)
 {
 	std::vector<uint8_t> lump = l->GetLumpNamed("PNAMES");
 	
@@ -38,7 +38,7 @@ AssetsManager::AssetsManager(WADLoader *l) : m_pWADLoader(l)
 
 void AssetsManager::LoadPatch(const std::string &sPatchName)
 {
-	std::vector<uint8_t> lump = m_pWADLoader->GetLumpNamed(sPatchName);
+	std::vector<uint8_t> lump = wadLoader->GetLumpNamed(sPatchName);
 	if (!lump.size()) return;
 
 	WADPatchHeader PatchHeader;

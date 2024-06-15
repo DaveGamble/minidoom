@@ -67,14 +67,14 @@ bool WADLoader::OpenAndLoad()
 
 bool WADLoader::ReadDirectories()
 {
+	struct Header { char WADType[4] {}; uint32_t DirectoryCount, DirectoryOffset; };
     Header header;
-    m_Reader.ReadHeaderData(m_pWADData.get(), header);
-
-    Directory directory;
+	memcpy(&header, m_pWADData.get(), sizeof(header));
 
     for (unsigned int i = 0; i < header.DirectoryCount; ++i)
     {
-        m_Reader.ReadDirectoryData(m_pWADData.get() + header.DirectoryOffset + i * 16, directory);
+		Directory directory;
+		memcpy(&directory, m_pWADData.get() + header.DirectoryOffset + i * 16, 16);
         m_WADDirectories.push_back(directory);
     }
 
@@ -173,55 +173,30 @@ int WADLoader::FindLumpByName(const string &LumpName)
 bool WADLoader::ReadMapVertexes(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eVERTEXES;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "VERTEXES") != 0)
-    {
-        return false;
-    }
-
-    int iVertexSizeInBytes = sizeof(Vertex);
-    int iVertexesCount = m_WADDirectories[iMapIndex].LumpSize / iVertexSizeInBytes;
-
-    Vertex vertex;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "VERTEXES") != 0) return false;
+    int iVertexesCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(Vertex);
     for (int i = 0; i < iVertexesCount; ++i)
     {
-        m_Reader.ReadVertexData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iVertexSizeInBytes, vertex);
+		Vertex vertex;
+		memcpy(&vertex, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(vertex), sizeof(vertex));
         pMap->AddVertex(vertex);
     }
-
     return true;
 }
 
 bool WADLoader::ReadMapSectors(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eSECTORS;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SECTORS") != 0)
-    {
-        return false;
-    }
-
-    int iSectorSizeInBytes = sizeof(WADSector);
-    int iSectorsCount = m_WADDirectories[iMapIndex].LumpSize / iSectorSizeInBytes;
-
-    WADSector sector;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SECTORS") != 0) return false;
+    int iSectorsCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(WADSector);
     for (int i = 0; i < iSectorsCount; ++i)
     {
-        m_Reader.ReadSectorData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iSectorSizeInBytes, sector);
+		WADSector sector;
+		memcpy(&sector, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(sector), sizeof(sector));
         pMap->AddSector(sector);
     }
 
@@ -231,26 +206,14 @@ bool WADLoader::ReadMapSectors(Map *pMap)
 bool WADLoader::ReadMapSidedefs(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eSIDEDDEFS;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SIDEDEFS") != 0)
-    {
-        return false;
-    }
-
-    int iSidedefSizeInBytes = sizeof(WADSidedef);
-    int iSidedefsCount = m_WADDirectories[iMapIndex].LumpSize / iSidedefSizeInBytes;
-
-    WADSidedef sidedef;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SIDEDEFS") != 0) return false;
+    int iSidedefsCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(WADSidedef);
     for (int i = 0; i < iSidedefsCount; ++i)
     {
-        m_Reader.ReadSidedefData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iSidedefSizeInBytes, sidedef);
+		WADSidedef sidedef;
+		memcpy(&sidedef, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(sidedef), sizeof(sidedef));
         pMap->AddSidedef(sidedef);
     }
 
@@ -260,149 +223,81 @@ bool WADLoader::ReadMapSidedefs(Map *pMap)
 bool WADLoader::ReadMapLinedefs(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
-    iMapIndex += EMAPLUMPSINDEX::eLINEDEFS;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "LINEDEFS") != 0)
-    {
-        return false;
-    }
-
-    int iLinedefSizeInBytes = sizeof(WADLinedef);
-    int iLinedefCount = m_WADDirectories[iMapIndex].LumpSize / iLinedefSizeInBytes;
-
-    WADLinedef linedef;
+    if (iMapIndex == -1) return false;
+	iMapIndex += EMAPLUMPSINDEX::eLINEDEFS;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "LINEDEFS") != 0) return false;
+    int iLinedefCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(WADLinedef);
     for (int i = 0; i < iLinedefCount; ++i)
     {
-        m_Reader.ReadLinedefData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iLinedefSizeInBytes, linedef);
+		WADLinedef linedef;
+		memcpy(&linedef, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(linedef), sizeof(linedef));
         pMap->AddLinedef(linedef);
     }
-
     return true;
 }
 
 bool WADLoader::ReadMapThings(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eTHINGS;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "THINGS") != 0)
-    {
-        return false;
-    }
-
-
-    int iThingsSizeInBytes = sizeof(Thing);
-    int iThingsCount = m_WADDirectories[iMapIndex].LumpSize / iThingsSizeInBytes;
-
-    Thing thing;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "THINGS") != 0) return false;
+    int iThingsCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(Thing);
     for (int i = 0; i < iThingsCount; ++i)
     {
-        m_Reader.ReadThingData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iThingsSizeInBytes, thing);
+		Thing thing;
+		memcpy(&thing, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(thing), sizeof(thing));
         (pMap->GetThings())->AddThing(thing);
     }
-
     return true;
 }
 
 bool WADLoader::ReadMapNodes(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eNODES;
 
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "NODES") != 0)
-    {
-        return false;
-    }
-
-    int iNodesSizeInBytes = sizeof(Node);
-    int iNodesCount = m_WADDirectories[iMapIndex].LumpSize / iNodesSizeInBytes;
-
-    Node node;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "NODES") != 0) return false;
+    int iNodesCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(Node);
     for (int i = 0; i < iNodesCount; ++i)
     {
-        m_Reader.ReadNodeData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iNodesSizeInBytes, node);
-
+		Node node;
+		memcpy(&node, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(node), sizeof(node));
         pMap->AddNode(node);
     }
-
     return true;
 }
 
 bool WADLoader::ReadMapSubsectors(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eSSECTORS;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SSECTORS") != 0)
-    {
-        return false;
-    }
-
-    int iSubsectorsSizeInBytes = sizeof(Subsector);
-    int iSubsectorsCount = m_WADDirectories[iMapIndex].LumpSize / iSubsectorsSizeInBytes;
-
-    Subsector subsector;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SSECTORS") != 0) return false;
+    int iSubsectorsCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(Subsector);
     for (int i = 0; i < iSubsectorsCount; ++i)
     {
-        m_Reader.ReadSubsectorData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iSubsectorsSizeInBytes, subsector);
-
+		Subsector subsector;
+		memcpy(&subsector, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(subsector), sizeof(subsector));
         pMap->AddSubsector(subsector);
     }
-
     return true;
 }
 
 bool WADLoader::ReadMapSegs(Map *pMap)
 {
     int iMapIndex = FindMapIndex(pMap);
-
-    if (iMapIndex == -1)
-    {
-        return false;
-    }
-
+    if (iMapIndex == -1) return false;
     iMapIndex += EMAPLUMPSINDEX::eSEAGS;
-
-    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SEGS") != 0)
-    {
-        return false;
-    }
-
-    int iSegsSizeInBytes = sizeof(WADSeg);
-    int iSegsCount = m_WADDirectories[iMapIndex].LumpSize / iSegsSizeInBytes;
-
-    WADSeg seg;
+    if (strcmp(m_WADDirectories[iMapIndex].LumpName, "SEGS") != 0) return false;
+    int iSegsCount = m_WADDirectories[iMapIndex].LumpSize / sizeof(WADSeg);
     for (int i = 0; i < iSegsCount; ++i)
     {
-        m_Reader.ReadSegData(m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * iSegsSizeInBytes, seg);
-
+		WADSeg seg;
+		memcpy(&seg, m_pWADData.get() + m_WADDirectories[iMapIndex].LumpOffset + i * sizeof(seg), sizeof(seg));
         pMap->AddSeg(seg);
     }
-
     return true;
 }
 
@@ -411,18 +306,13 @@ bool WADLoader::LoadPalette(DisplayManager *pDisplayManager)
     std::cout << "Info: Loading PLAYPAL (Color Palettes)" << endl;
     int iPlaypalIndex = FindLumpByName("PLAYPAL");
 
-    if (strcmp(m_WADDirectories[iPlaypalIndex].LumpName, "PLAYPAL") != 0)
-    {
-        return false;
-    }
-
-    WADPalette palette;
+    if (strcmp(m_WADDirectories[iPlaypalIndex].LumpName, "PLAYPAL") != 0) return false;
     for (int i = 0; i < 14; ++i)
     {
-        m_Reader.ReadPalette(m_pWADData.get() + m_WADDirectories[iPlaypalIndex].LumpOffset + (i * 3 * 256 ), palette);
+		WADPalette palette;
+		memcpy(&palette, m_pWADData.get() + m_WADDirectories[iPlaypalIndex].LumpOffset + (i * 768), sizeof(palette));
         pDisplayManager->AddColorPalette(palette);
     }
-    
     return true;
 }
 
@@ -503,7 +393,7 @@ bool WADLoader::LoadPNames()
     Name[8] = '\0';
     for (int i = 0; i < PNames.PNameCount; ++i)
     {
-        m_Reader.Read8Characters(m_pWADData.get() + PNames.PNameOffset, Name);
+		memcpy(Name, m_pWADData.get() + PNames.PNameOffset, 8);
         pAssetsManager->AddPName(Name);
         PNames.PNameOffset += 8;
     }

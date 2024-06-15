@@ -24,7 +24,7 @@ protected:
     WADLoader m_WADLoader;
     std::unique_ptr<Map> m_pMap;
     std::unique_ptr<Player> m_pPlayer;
-    std::unique_ptr<Things> m_pThings;
+    Things m_Things;
     std::unique_ptr<DisplayManager> m_pDisplayManager;
     std::unique_ptr<ViewRenderer> m_pViewRenderer;
 };

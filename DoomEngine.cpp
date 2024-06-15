@@ -10,9 +10,8 @@ DoomEngine::DoomEngine() : m_WADLoader("DOOM.WAD")
 
     // Delay object creation to this point so renderer is inistilized correctly
     m_pViewRenderer = std::unique_ptr<ViewRenderer> (new ViewRenderer());
-    m_pThings = std::unique_ptr<Things>(new Things());
     m_pPlayer = std::unique_ptr<Player>(new Player(m_pViewRenderer.get(), 1));
-    m_pMap = std::unique_ptr<Map>(new Map(m_pViewRenderer.get(), "E1M1", m_pPlayer.get(), m_pThings.get()));
+    m_pMap = std::unique_ptr<Map>(new Map(m_pViewRenderer.get(), "E1M1", m_pPlayer.get(), &m_Things));
    
 	m_WADLoader.LoadPalette(m_pDisplayManager.get());
 	m_WADLoader.LoadMapData(m_pMap.get());

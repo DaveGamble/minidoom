@@ -122,13 +122,7 @@ bool WADLoader::ReadMapVertexes(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "VERTEXES");
 	if (!l.ptr) return false;
-    int iVertexesCount = l.size / sizeof(Vertex);
-    for (int i = 0; i < iVertexesCount; ++i)
-    {
-		Vertex vertex;
-		memcpy(&vertex, l.ptr + i * sizeof(vertex), sizeof(vertex));
-        pMap->AddVertex(vertex);
-    }
+    for (int i = 0; i < l.size; i += sizeof(Vertex)) pMap->AddVertex(*(Vertex*)(l.ptr + i));
     return true;
 }
 
@@ -136,14 +130,7 @@ bool WADLoader::ReadMapSectors(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "SECTORS");
     if (!l.ptr) return false;
-    int iSectorsCount = l.size / sizeof(WADSector);
-    for (int i = 0; i < iSectorsCount; ++i)
-    {
-		WADSector sector;
-		memcpy(&sector, l.ptr + i * sizeof(sector), sizeof(sector));
-        pMap->AddSector(sector);
-    }
-
+	for (int i = 0; i < l.size; i += sizeof(WADSector)) pMap->AddSector(*(WADSector*)(l.ptr + i));
     return true;
 }
 
@@ -151,14 +138,7 @@ bool WADLoader::ReadMapSidedefs(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "SIDEDEFS");
     if (!l.ptr) return false;
-    int iSidedefsCount = l.size / sizeof(WADSidedef);
-    for (int i = 0; i < iSidedefsCount; ++i)
-    {
-		WADSidedef sidedef;
-		memcpy(&sidedef, l.ptr + i * sizeof(sidedef), sizeof(sidedef));
-        pMap->AddSidedef(sidedef);
-    }
-
+	for (int i = 0; i < l.size; i += sizeof(WADSidedef)) pMap->AddSidedef(*(WADSidedef*)(l.ptr + i));
     return true;
 }
 
@@ -166,13 +146,7 @@ bool WADLoader::ReadMapLinedefs(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "LINEDEFS");
     if (!l.ptr) return false;
-    int iLinedefCount = l.size / sizeof(WADLinedef);
-    for (int i = 0; i < iLinedefCount; ++i)
-    {
-		WADLinedef linedef;
-		memcpy(&linedef, l.ptr + i * sizeof(linedef), sizeof(linedef));
-        pMap->AddLinedef(linedef);
-    }
+	for (int i = 0; i < l.size; i += sizeof(WADLinedef)) pMap->AddLinedef(*(WADLinedef*)(l.ptr + i));
     return true;
 }
 
@@ -180,13 +154,7 @@ bool WADLoader::ReadMapThings(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "THINGS");
     if (!l.ptr) return false;
-    int iThingsCount = l.size / sizeof(Thing);
-    for (int i = 0; i < iThingsCount; ++i)
-    {
-		Thing thing;
-		memcpy(&thing, l.ptr + i * sizeof(thing), sizeof(thing));
-        (pMap->GetThings())->AddThing(thing);
-    }
+	for (int i = 0; i < l.size; i += sizeof(Thing)) pMap->GetThings()->AddThing(*(Thing*)(l.ptr + i));
     return true;
 }
 
@@ -194,13 +162,7 @@ bool WADLoader::ReadMapNodes(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "NODES");
 	if (!l.ptr) return false;
-    int iNodesCount = l.size / sizeof(Node);
-    for (int i = 0; i < iNodesCount; ++i)
-    {
-		Node node;
-		memcpy(&node, l.ptr + i * sizeof(node), sizeof(node));
-        pMap->AddNode(node);
-    }
+	for (int i = 0; i < l.size; i += sizeof(Node)) pMap->AddNode(*(Node*)(l.ptr + i));
     return true;
 }
 
@@ -208,13 +170,7 @@ bool WADLoader::ReadMapSubsectors(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "SSECTORS");
 	if (!l.ptr) return false;
-    int iSubsectorsCount = l.size / sizeof(Subsector);
-    for (int i = 0; i < iSubsectorsCount; ++i)
-    {
-		Subsector subsector;
-		memcpy(&subsector, l.ptr + i * sizeof(subsector), sizeof(subsector));
-        pMap->AddSubsector(subsector);
-    }
+	for (int i = 0; i < l.size; i += sizeof(Subsector)) pMap->AddSubsector(*(Subsector*)(l.ptr + i));
     return true;
 }
 
@@ -222,13 +178,7 @@ bool WADLoader::ReadMapSegs(Map *pMap)
 {
 	lump l = FindMapLump(pMap, "SEGS");
 	if (!l.ptr) return false;
-    int iSegsCount = l.size / sizeof(WADSeg);
-    for (int i = 0; i < iSegsCount; ++i)
-    {
-		WADSeg seg;
-		memcpy(&seg, l.ptr + i * sizeof(seg), sizeof(seg));
-        pMap->AddSeg(seg);
-    }
+	for (int i = 0; i < l.size; i += sizeof(WADSeg)) pMap->AddSeg(*(WADSeg*)(l.ptr + i));
     return true;
 }
 

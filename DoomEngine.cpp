@@ -56,17 +56,15 @@ bool DoomEngine::Tick()
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
-
-	m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
-	m_Player.Render(pScreenBuffer, m_iRenderWidth);
-
+	{
+		m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
+		m_Player.Render(pScreenBuffer, m_iRenderWidth);
+	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);
 	SDL_UpdateTexture(m_pTexture, nullptr, m_pRGBBuffer->pixels, m_pRGBBuffer->pitch);
 	SDL_RenderCopy(m_pRenderer, m_pTexture, nullptr, nullptr);
 	SDL_RenderPresent(m_pRenderer);
-
-	// Delay
-	SDL_Delay(16); // 1000/60, as int. how many miliseconds per frame
+	SDL_Delay(16); // wait 1000/60, as int. how many miliseconds per frame
 	return m_bIsOver;
 }

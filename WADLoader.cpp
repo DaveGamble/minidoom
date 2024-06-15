@@ -4,7 +4,7 @@
 #include "DisplayManager.h"
 
 
-int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset)
+int WADLoader::FindLumpByName(const std::string &LumpName, size_t offset) const
 {
 	for (size_t i = offset; i < m_WADDirectories.size(); ++i) if (m_WADDirectories[i].LumpName == LumpName) return (int)i;
 	return -1;
@@ -55,14 +55,6 @@ bool WADLoader::LoadMapData(Map *pMap)
     return true;
 }
 
-
-bool WADLoader::LoadPalette(DisplayManager *pDisplayManager)
-{
-    int iPlaypalIndex = FindLumpByName("PLAYPAL");
-	if (iPlaypalIndex == -1) return false;
-    for (int i = 0; i < 14; ++i) pDisplayManager->AddColorPalette(*(WADPalette*)(m_pWADData.get() + m_WADDirectories[iPlaypalIndex].LumpOffset + (i * 768)));
-    return true;
-}
 
 bool WADLoader::LoadPatch(const std::string &sPatchName)
 {

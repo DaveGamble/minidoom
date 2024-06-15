@@ -5,19 +5,13 @@ DoomEngine::DoomEngine()
 , m_Player(&m_ViewRenderer, 1)
 , m_Map(&m_ViewRenderer, "E1M1", &m_Player, &m_Things)
 {
-	//Initialize SDL
+	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
 	m_pWindow = SDL_CreateWindow("DIY DOOM", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_iRenderWidth * 3, m_iRenderHeight * 3, SDL_WINDOW_SHOWN);
 	m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, 0);
-	uint32_t PixelFormat = SDL_GetWindowPixelFormat(m_pWindow);
 	m_pScreenBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 8, 0, 0, 0, 0);
-	SDL_FillRect(m_pScreenBuffer, NULL, 0);
-	int bpp; uint32_t Rmask, Gmask, Bmask, Amask; SDL_PixelFormatEnumToMasks(PixelFormat, &bpp, &Rmask, &Gmask, &Bmask, &Amask);
-	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, Rmask, Gmask, Bmask, Amask);
-	SDL_FillRect(m_pRGBBuffer, NULL, 0);
+	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);
 	m_pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
-	
-    AssetsManager::GetInstance()->Init(&m_WADLoader);
 	const uint8_t *palette = m_WADLoader.GetPalette();
 	for (int i = 0; i < 256; ++i)
 	{
@@ -26,6 +20,9 @@ DoomEngine::DoomEngine()
 		m_ColorPallette[i].b = palette[i * 3 + 2];
 		m_ColorPallette[i].a = 255;
 	}
+	// SDL
+
+	AssetsManager::GetInstance()->Init(&m_WADLoader);
 	m_WADLoader.LoadMapData(&m_Map);
     m_ViewRenderer.Init(&m_Map, &m_Player);
     m_Player.Init((m_Map.GetThings())->GetThingByID(m_Player.GetID()));

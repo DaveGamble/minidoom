@@ -8,8 +8,8 @@
 enum EMAPLUMPSINDEX { eName, eTHINGS, eLINEDEFS, eSIDEDDEFS, eVERTEXES, eSEAGS, eSSECTORS, eNODES, eSECTORS, eREJECT, eBLOCKMAP, eCOUNT };
 enum ELINEDEFFLAGS { eBLOCKING = 0, eBLOCKMONSTERS = 1, eTWOSIDED = 2, eDONTPEGTOP = 4, eDONTPEGBOTTOM = 8, eSECRET = 16, eSOUNDBLOCK = 32, eDONTDRAW = 64, eDRAW = 128 };
 
-struct Header { char WADType[5]; uint32_t DirectoryCount, DirectoryOffset; };
-struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[9]; };
+struct Header { char WADType[4] {}; uint32_t DirectoryCount, DirectoryOffset; };
+struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[9] {}; };
 struct Thing { int16_t XPosition, YPosition; uint16_t Angle, Type, Flags; };
 struct Vertex { int16_t XPosition, YPosition; };
 struct WADSector { int16_t FloorHeight, CeilingHeight; char FloorTexture[8], CeilingTexture[8]; uint16_t Lightlevel, Type, Tag; };

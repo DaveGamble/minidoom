@@ -22,11 +22,7 @@ WADLoader::WADLoader(const std::string& filename)
 
 	struct Header { char WADType[4]; uint32_t DirectoryCount, DirectoryOffset; } *header = (Header*)m_pWADData.get();
 	for (unsigned int i = 0; i < header->DirectoryCount; ++i)
-	{
-		Directory directory;
-		memcpy(&directory, m_pWADData.get() + header->DirectoryOffset + i * 16, 16);
-		m_WADDirectories.push_back(directory);
-	}
+		m_WADDirectories.push_back(*(Directory*)(m_pWADData.get() + header->DirectoryOffset + i * 16));
 }
 
 bool WADLoader::LoadMapData(Map *pMap)

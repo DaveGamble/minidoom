@@ -8,7 +8,7 @@
 
 // enum ELINEDEFFLAGS { eBLOCKING = 0, eBLOCKMONSTERS = 1, eTWOSIDED = 2, eDONTPEGTOP = 4, eDONTPEGBOTTOM = 8, eSECRET = 16, eSOUNDBLOCK = 32, eDONTDRAW = 64, eDRAW = 128 }; // Unused for now
 
-struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[9] {}; };
+struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[8] {}; };
 struct Thing { int16_t XPosition, YPosition; uint16_t Angle, Type, Flags; };
 struct Vertex { int16_t XPosition, YPosition; };
 struct WADSector { int16_t FloorHeight, CeilingHeight; char FloorTexture[8], CeilingTexture[8]; uint16_t Lightlevel, Type, Tag; };

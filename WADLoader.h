@@ -12,18 +12,19 @@
 class WADLoader
 {
 public:
-    WADLoader();
-    void SetWADFilePath(const std::string &sWADFilePath);
-    bool LoadWADToMemory();
+	WADLoader() {}
+	~WADLoader() {}
+	void SetWADFilePath(const std::string &sWADFilePath) {  m_sWADFilePath = sWADFilePath; }
+	bool LoadWADToMemory() { return OpenAndLoad() && ReadDirectories(); }
     bool LoadMapData(Map *pMap);
     bool LoadPalette(DisplayManager *pDisplayManager);
     bool LoadPatch(const std::string &sPatchName);
     bool LoadTextures(const std::string &sTextureName);
     bool LoadPNames();
     
-    ~WADLoader();
 
 protected:
+	struct lump {const uint8_t *ptr {nullptr}; size_t size {0};};
     bool OpenAndLoad();
     bool ReadDirectories();
     bool ReadMapVertexes(Map *pMap);
@@ -36,8 +37,8 @@ protected:
     bool ReadMapSegs(Map *pMap);
 
     int FindMapIndex(Map *pMap);
-
-    int FindLumpByName(const std::string &LumpName);
+	lump FindMapLump(Map *pMap, const std::string& lumpName);
+    int FindLumpByName(const std::string &LumpName, size_t start = 0);
 
     std::string m_sWADFilePath;
     std::ifstream m_WADFile;

@@ -37,7 +37,7 @@ bool Texture::Initialize(AssetsManager *assets)
     for (int i = 0; i < m_TexturePatches.size(); ++i)
     {
         //Lookup patch
-        Patch *pPatch = assets->GetPatch(assets->GetPName(m_TexturePatches[i].PNameIndex));
+        Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
 
         int iXStart = m_TexturePatches[i].XOffset;
         int iMaxWidth = iXStart + pPatch->GetWidth();
@@ -90,7 +90,7 @@ bool Texture::Compose(AssetsManager *assets)
     for (int i = 0; i < m_TexturePatches.size(); ++i)
     {
         //Lookup patch
-        Patch *pPatch = assets->GetPatch(assets->GetPName(m_TexturePatches[i].PNameIndex));
+        Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
 
         int iXStart = m_TexturePatches[i].XOffset;
         int iMaxWidth = iXStart + pPatch->GetWidth();
@@ -139,7 +139,7 @@ void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScree
 {
     if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
     {
-//        Patch *pPatch = pAssetsManager->GetPatch(pAssetsManager->GetPName(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].PNameIndex));
+//        Patch *pPatch = pAssetsManager->GetPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].PNameIndex);
         
 //        pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], iXScreenLocation, iYScreenLocation, m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].YOffset);
     }

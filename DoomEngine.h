@@ -25,6 +25,6 @@ protected:
     std::unique_ptr<Map> m_pMap;
     std::unique_ptr<Player> m_pPlayer;
     Things m_Things;
-    std::unique_ptr<DisplayManager> m_pDisplayManager;
+    DisplayManager m_DisplayManager;
     std::unique_ptr<ViewRenderer> m_pViewRenderer;
 };

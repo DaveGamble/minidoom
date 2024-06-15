@@ -1,19 +1,16 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine() : m_WADLoader("DOOM.WAD")
+DoomEngine::DoomEngine() : m_WADLoader("DOOM.WAD"), m_DisplayManager(m_iRenderWidth, m_iRenderHeight, "DIY DOOM")
 {
     // Load WAD 
     AssetsManager::GetInstance()->Init(&m_WADLoader);
-
-    m_pDisplayManager = std::unique_ptr < DisplayManager>(new DisplayManager(m_iRenderWidth, m_iRenderHeight));
-    m_pDisplayManager->Init("DIY DOOM");
 
     // Delay object creation to this point so renderer is inistilized correctly
     m_pViewRenderer = std::unique_ptr<ViewRenderer> (new ViewRenderer());
     m_pPlayer = std::unique_ptr<Player>(new Player(m_pViewRenderer.get(), 1));
     m_pMap = std::unique_ptr<Map>(new Map(m_pViewRenderer.get(), "E1M1", m_pPlayer.get(), &m_Things));
    
-	m_WADLoader.LoadPalette(m_pDisplayManager.get());
+	m_WADLoader.LoadPalette(&m_DisplayManager);
 	m_WADLoader.LoadMapData(m_pMap.get());
 
     m_pViewRenderer->Init(m_pMap.get(), m_pPlayer.get());
@@ -45,11 +42,11 @@ void DoomEngine::Tick()
 	m_pPlayer->Think(m_pMap->GetPlayerSubSectorHieght());
 	
 	// Render
-	uint8_t *pScreenBuffer = m_pDisplayManager->GetScreenBuffer();
-	m_pDisplayManager->InitFrame();
+	uint8_t *pScreenBuffer = m_DisplayManager.GetScreenBuffer();
+	m_DisplayManager.InitFrame();
 	m_pViewRenderer->Render(pScreenBuffer, m_iRenderWidth);
 	m_pPlayer->Render(pScreenBuffer, m_iRenderWidth);
-	m_pDisplayManager->Render();
+	m_DisplayManager.Render();
 	
 	// Delay
 	SDL_Delay(16); // 1000/60, as int. how many miliseconds per frame

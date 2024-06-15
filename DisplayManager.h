@@ -8,7 +8,7 @@
 class DisplayManager
 {
 public:
-    DisplayManager(int m_iWindowWidth, int iWindowHeight);
+    DisplayManager(int m_iWindowWidth, int iWindowHeight, const std::string &sWindowTitle);
     ~DisplayManager();
 
     void InitFrame();
@@ -16,7 +16,6 @@ public:
     void AddColorPalette(WADPalette &palette);
     
     uint8_t * GetScreenBuffer();
-    SDL_Renderer* Init(const std::string &sWindowTitle);
     
 
 protected:

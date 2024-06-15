@@ -9,7 +9,7 @@
 #include <SDL.h>
 
 #include "DataTypes.h"
-#include "Angle.h"
+#include "Angle.hpp"
 
 class Map;
 class Player;

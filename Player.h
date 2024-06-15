@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Angle.h"
+#include "Angle.hpp"
 #include "DataTypes.h"
 #include "ViewRenderer.h"
 #include "Weapon.h"

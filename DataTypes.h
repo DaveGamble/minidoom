@@ -3,7 +3,7 @@
 #include <SDL.h>
 
 #include <cstdint>
-#include "Angle.h"
+#include "Angle.hpp"
 
 // Subsector Identifier is the 16th bit which
 // indicate if the node ID is a subsector.

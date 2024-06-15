@@ -1,10 +1,10 @@
 #include <iostream>
 
-#include "Game.h"
+#include "DoomEngine.h"
 
 int main(int argc, char* argv[])
 {
-    Game game;
+    DoomEngine game;
     game.Init();
 
     while (!game.IsOver())

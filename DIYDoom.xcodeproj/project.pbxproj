@@ -18,7 +18,6 @@
 		55FEA4D92C1DBCC800F9DCAC /* Things.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C32C1DBCC800F9DCAC /* Things.cpp */; };
 		55FEA4DA2C1DBCC800F9DCAC /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C42C1DBCC800F9DCAC /* Map.cpp */; };
 		55FEA4DB2C1DBCC800F9DCAC /* Texture.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */; };
-		55FEA4DC2C1DBCC800F9DCAC /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C92C1DBCC800F9DCAC /* Game.cpp */; };
 		55FEA4DD2C1DBCC800F9DCAC /* DisplayManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */; };
 		55FEA6082C1DBDE500F9DCAC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F92C1DBDC200F9DCAC /* AudioToolbox.framework */; };
 		55FEA6092C1DBDE500F9DCAC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5EE2C1DBDC200F9DCAC /* IOKit.framework */; };
@@ -55,7 +54,6 @@
 		55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoomEngine.h; sourceTree = SOURCE_ROOT; };
-		55FEA4702C1DBCC800F9DCAC /* Game.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Game.h; sourceTree = SOURCE_ROOT; };
 		55FEA4722C1DBCC800F9DCAC /* Things.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Things.h; sourceTree = SOURCE_ROOT; };
 		55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewRenderer.h; sourceTree = SOURCE_ROOT; };
 		55FEA4742C1DBCC800F9DCAC /* DisplayManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DisplayManager.h; sourceTree = SOURCE_ROOT; };
@@ -141,7 +139,6 @@
 		55FEA4C62C1DBCC800F9DCAC /* Weapon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Weapon.h; sourceTree = SOURCE_ROOT; };
 		55FEA4C72C1DBCC800F9DCAC /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = SOURCE_ROOT; };
 		55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = SOURCE_ROOT; };
-		55FEA4C92C1DBCC800F9DCAC /* Game.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Game.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataTypes.h; sourceTree = SOURCE_ROOT; };
 		55FEA4CC2C1DBCC800F9DCAC /* DisplayManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DisplayManager.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WADLoader.h; sourceTree = SOURCE_ROOT; };
@@ -218,8 +215,6 @@
 				55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */,
 				55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */,
 				55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */,
-				55FEA4C92C1DBCC800F9DCAC /* Game.cpp */,
-				55FEA4702C1DBCC800F9DCAC /* Game.h */,
 				55FEA4C42C1DBCC800F9DCAC /* Map.cpp */,
 				55FEA4BE2C1DBCC800F9DCAC /* Map.h */,
 				55FEA4752C1DBCC800F9DCAC /* Patch.cpp */,
@@ -405,7 +400,6 @@
 				55FEA4D62C1DBCC800F9DCAC /* Weapon.cpp in Sources */,
 				55FEA4CF2C1DBCC800F9DCAC /* DIYDoom.cpp in Sources */,
 				55FEA4D82C1DBCC800F9DCAC /* WADLoader.cpp in Sources */,
-				55FEA4DC2C1DBCC800F9DCAC /* Game.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

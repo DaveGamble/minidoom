@@ -35,13 +35,32 @@ void DoomEngine::Render()
     m_pDisplayManager->Render();
 }
 
-
-void DoomEngine::UpdateKeyStatus(const Uint8* KeyStates)
+void DoomEngine::ProcessInput()
 {
-    if (KeyStates[SDL_SCANCODE_UP]) m_pPlayer->MoveForward();
-    if (KeyStates[SDL_SCANCODE_DOWN]) m_pPlayer->MoveLeftward();
-    if (KeyStates[SDL_SCANCODE_LEFT]) m_pPlayer->RotateLeft();
-    if (KeyStates[SDL_SCANCODE_RIGHT]) m_pPlayer->RotateRight();
-    if (KeyStates[SDL_SCANCODE_Z]) m_pPlayer->Fly();
-    if (KeyStates[SDL_SCANCODE_X]) m_pPlayer->Sink();
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
+	{
+		switch (event.type)
+		{
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_ESCAPE) Quit();
+				break;
+				
+			case SDL_KEYUP:
+				break;
+				
+			case SDL_QUIT:
+				Quit();
+				break;
+		}
+	}
+	
+	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
+	if (KeyStates[SDL_SCANCODE_UP]) m_pPlayer->MoveForward();
+	if (KeyStates[SDL_SCANCODE_DOWN]) m_pPlayer->MoveLeftward();
+	if (KeyStates[SDL_SCANCODE_LEFT]) m_pPlayer->RotateLeft();
+	if (KeyStates[SDL_SCANCODE_RIGHT]) m_pPlayer->RotateRight();
+	if (KeyStates[SDL_SCANCODE_Z]) m_pPlayer->Fly();
+	if (KeyStates[SDL_SCANCODE_X]) m_pPlayer->Sink();
+
 }

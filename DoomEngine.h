@@ -18,18 +18,17 @@ public:
 	~DoomEngine() {}
 
     void Render();
-	void KeyPressed(SDL_Event &event) { if (event.key.keysym.sym == SDLK_ESCAPE) Quit(); }
-    void UpdateKeyStatus(const Uint8* KeyStates);
-	void KeyReleased(SDL_Event &event) {}
 	void Quit() { m_bIsOver = true; }
 	void Update() { m_pPlayer->Think(m_pMap->GetPlayerSubSectorHieght()); }
 
 	bool IsOver() const { return m_bIsOver; }
     bool Init();
 
+	void ProcessInput();
+	void Delay() {SDL_Delay(16);} // 1000/60, as int. how many miliseconds per frame
+	
 	int GetRenderWidth() const { return m_iRenderWidth; }
 	int GetRenderHeight() const { return m_iRenderHeight; }
-	int GetTimePerFrame() const { return 16; }	// 1000/60, as int. how many miliseconds per frame
 
 	std::string GetWADFileName() const { return "DOOM.WAD"; }
 	std::string GetAppName() const { return "DIYDOOM"; }

@@ -7,14 +7,12 @@
 class Patch
 {
 public:
-	Patch(WADPatchHeader &p);
+	Patch(const uint8_t *ptr);
 	~Patch();
 
     void Initialize(WADPatchHeader &PatchHeader);
-	void AppendPatchColumn(PatchColumnData &PatchColumn) { m_PatchData.push_back(PatchColumn); }
     void Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation);
     void RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iXScreenLocation, int iYScreenLocation, int iMaxHeight, int iYOffset);
-	void AppendColumnStartIndex() { m_ColumnIndex.push_back((int)m_PatchData.size()); }
     void ComposeColumn(uint8_t *m_pOverLapColumnData, int m_iHeight, int &iPatchColumnIndex, int iColumnOffsetIndex, int iYOrigin);
 
 	int GetHeight() const { return m_iHeight; }

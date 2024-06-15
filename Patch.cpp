@@ -13,12 +13,39 @@ Patch::~Patch()
     }
 }
 
-Patch::Patch(WADPatchHeader &PatchHeader)
+Patch::Patch(const uint8_t *ptr)
 {
-    m_iWidth = PatchHeader.Width;
-    m_iHeight = PatchHeader.Height;
-    m_iXOffset = PatchHeader.LeftOffset;
-    m_iYOffset = PatchHeader.TopOffset;
+	WADPatchHeader *PatchHeader = (WADPatchHeader*)ptr;
+	m_iWidth = PatchHeader->Width;
+	m_iHeight = PatchHeader->Height;
+	m_iXOffset = PatchHeader->LeftOffset;
+	m_iYOffset = PatchHeader->TopOffset;
+
+	uint32_t *pColumnOffsets = (uint32_t*)(ptr + 8);
+
+	for (int i = 0; i < m_iWidth; ++i)
+	{
+		int Offset = pColumnOffsets[i];
+		m_ColumnIndex.push_back((int)m_PatchData.size());
+		PatchColumnData PatchColumn;
+		do
+		{
+			PatchColumn.TopDelta = ptr[Offset++];
+			if (PatchColumn.TopDelta != 0xFF)
+			{
+				PatchColumn.Length = ptr[Offset++];
+				PatchColumn.PaddingPre = ptr[Offset++];
+				PatchColumn.pColumnData = new uint8_t[PatchColumn.Length];
+				memcpy(PatchColumn.pColumnData, ptr + Offset, PatchColumn.Length);
+				Offset += PatchColumn.Length;
+				PatchColumn.PaddingPost = ptr[Offset++];
+			}
+			m_PatchData.push_back(PatchColumn);
+		} while (PatchColumn.TopDelta != 0xFF);
+	}
+	
+	
+	
 }
 
 void Patch::Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation)

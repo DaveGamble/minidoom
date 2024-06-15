@@ -40,36 +40,5 @@ void AssetsManager::LoadPatch(const std::string &sPatchName)
 {
 	std::vector<uint8_t> lump = wadLoader->GetLumpNamed(sPatchName);
 	if (!lump.size()) return;
-
-	WADPatchHeader PatchHeader;
-	const uint8_t *ptr = lump.data();
-	memcpy(&PatchHeader, ptr, 8);
-	PatchHeader.pColumnOffsets = new uint32_t[PatchHeader.Width];
-	memcpy(PatchHeader.pColumnOffsets, ptr + 8, PatchHeader.Width * sizeof(uint32_t));
-
-	m_PatchesCache[sPatchName] = std::unique_ptr<Patch> (new Patch(PatchHeader));
-	Patch *pPatch = m_PatchesCache[sPatchName].get();
-
-	PatchColumnData PatchColumn;
-
-	for (int i = 0; i < PatchHeader.Width; ++i)
-	{
-		int Offset = PatchHeader.pColumnOffsets[i];
-		pPatch->AppendColumnStartIndex();
-		do
-		{
-			PatchColumn.TopDelta = ptr[Offset++];
-			if (PatchColumn.TopDelta != 0xFF)
-			{
-				PatchColumn.Length = ptr[Offset++];
-				PatchColumn.PaddingPre = ptr[Offset++];
-				// TODO: use smart pointer
-				PatchColumn.pColumnData = new uint8_t[PatchColumn.Length];
-				memcpy(PatchColumn.pColumnData, ptr + Offset, PatchColumn.Length);
-				Offset += PatchColumn.Length;
-				PatchColumn.PaddingPost = ptr[Offset++];
-			}
-			pPatch->AppendPatchColumn(PatchColumn);
-		} while (PatchColumn.TopDelta != 0xFF);
-	}
+	m_PatchesCache[sPatchName] = std::unique_ptr<Patch>(new Patch(lump.data()));
 }

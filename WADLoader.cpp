@@ -477,7 +477,7 @@ bool WADLoader::LoadTextures(const std::string &sTextureName)
     WADTextureData TextureData;
     for (int i = 0; i < TextureHeader.TexturesCount; ++i)
     {
-        m_Reader.ReadTextureData(m_pWADData.get(), m_WADDirectories[iTextureIndex].LumpOffset + TextureHeader.pTexturesDataOffset[i], TextureData);
+        m_Reader.ReadTextureData(m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset + TextureHeader.pTexturesDataOffset[i], TextureData);
         pAssetsManager->AddTexture(TextureData);
         delete[] TextureData.pTexturePatch;
         TextureData.pTexturePatch = nullptr;

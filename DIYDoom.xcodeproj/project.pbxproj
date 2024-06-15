@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		55FEA4CE2C1DBCC800F9DCAC /* WADReader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA46B2C1DBCC800F9DCAC /* WADReader.cpp */; };
 		55FEA4CF2C1DBCC800F9DCAC /* DIYDoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */; };
 		55FEA4D02C1DBCC800F9DCAC /* DoomEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */; };
 		55FEA4D22C1DBCC800F9DCAC /* Patch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4752C1DBCC800F9DCAC /* Patch.cpp */; };
@@ -53,7 +52,6 @@
 /* Begin PBXFileReference section */
 		55FEA4602C1DBCB400F9DCAC /* DIYDoom */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DIYDoom; sourceTree = BUILT_PRODUCTS_DIR; };
 		55FEA46A2C1DBCC800F9DCAC /* Patch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Patch.h; sourceTree = SOURCE_ROOT; };
-		55FEA46B2C1DBCC800F9DCAC /* WADReader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WADReader.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46C2C1DBCC800F9DCAC /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoomEngine.h; sourceTree = SOURCE_ROOT; };
@@ -237,7 +235,6 @@
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */,
 				55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */,
-				55FEA46B2C1DBCC800F9DCAC /* WADReader.cpp */,
 				55FEA4CB2C1DBCC800F9DCAC /* WADReader.h */,
 				55FEA4BF2C1DBCC800F9DCAC /* Weapon.cpp */,
 				55FEA4C62C1DBCC800F9DCAC /* Weapon.h */,
@@ -408,7 +405,6 @@
 				55FEA4DD2C1DBCC800F9DCAC /* DisplayManager.cpp in Sources */,
 				55FEA4D52C1DBCC800F9DCAC /* AssetsManager.cpp in Sources */,
 				55FEA4D62C1DBCC800F9DCAC /* Weapon.cpp in Sources */,
-				55FEA4CE2C1DBCC800F9DCAC /* WADReader.cpp in Sources */,
 				55FEA4CF2C1DBCC800F9DCAC /* DIYDoom.cpp in Sources */,
 				55FEA4D82C1DBCC800F9DCAC /* WADLoader.cpp in Sources */,
 				55FEA4DC2C1DBCC800F9DCAC /* Game.cpp in Sources */,

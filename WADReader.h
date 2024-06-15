@@ -40,13 +40,28 @@ public:
 		textureheader.pTexturesDataOffset = new uint32_t[textureheader.TexturesCount];
 		memcpy(textureheader.pTexturesDataOffset, pWADData + 4, textureheader.TexturesCount * sizeof(uint32_t));	// <-- How is this +4 correct???
 	}
-    void ReadTextureData(const uint8_t *pWADData, int offset, WADTextureData &texture);
-	void ReadTexturePatch(const uint8_t *pWADData, WADTexturePatch &texturepatch) { memcpy(&texturepatch, pWADData, sizeof(texturepatch)); }
+    void ReadTextureData(const uint8_t *pWADData, WADTextureData &texture)
+	{
+		memcpy(texture.TextureName, pWADData, 8);
+		texture.TextureName[8] = '\0';
+		memcpy(&texture.Flags, pWADData + 8, 14);
+		texture.pTexturePatch = new WADTexturePatch[texture.PatchCount];
+		memcpy(texture.pTexturePatch, pWADData + 22, texture.PatchCount * 10);
+	}
 	void Read8Characters(const uint8_t *pWADData, char *pName) { memcpy(pName, pWADData, 8); }
 
-    int ReadPatchColumn(const uint8_t *pWADData, int offset, PatchColumnData &patch);
-    
-protected:
-	uint16_t Read2Bytes(const uint8_t *pWADData, int offset) { uint16_t ReadValue; memcpy(&ReadValue, pWADData + offset, sizeof(uint16_t)); return ReadValue; }
-	uint32_t Read4Bytes(const uint8_t *pWADData, int offset) { uint32_t ReadValue; memcpy(&ReadValue, pWADData + offset, sizeof(uint32_t)); return ReadValue; }
+    int ReadPatchColumn(const uint8_t *pWADData, int offset, PatchColumnData &patch)
+	{
+		patch.TopDelta = pWADData[offset++];
+		if (patch.TopDelta == 0xFF) return offset;
+		patch.Length = pWADData[offset++];
+		patch.PaddingPre = pWADData[offset++];
+		// TODO: use smart pointer
+		patch.pColumnData = new uint8_t[patch.Length];
+		memcpy(patch.pColumnData, pWADData + offset, patch.Length);
+		offset += patch.Length;
+		patch.PaddingPost = pWADData[offset++];
+		return offset;
+	}
+
 };

@@ -100,20 +100,16 @@ bool WADLoader::LoadMapData(Map *pMap)
 WADLoader::lump WADLoader::FindMapLump(Map *pMap, const std::string& lumpName)
 {
 	WADLoader::lump l;
-	int f = FindLumpByName(lumpName, FindMapIndex(pMap));
+	int li = pMap->GetLumpIndex();
+	if (li <= -1) pMap->SetLumpIndex(li = FindLumpByName(pMap->GetName()));
+	
+	int f = FindLumpByName(lumpName, li);
 	if (f != -1)
 	{
 		l.ptr = m_pWADData.get() + m_WADDirectories[f].LumpOffset;
 		l.size = m_WADDirectories[f].LumpSize;
 	}
 	return l;
-}
-
-int WADLoader::FindMapIndex(Map *pMap)
-{
-    if (pMap->GetLumpIndex() > -1) return pMap->GetLumpIndex();
-    pMap->SetLumpIndex(FindLumpByName(pMap->GetName()));
-    return pMap->GetLumpIndex();
 }
 
 int WADLoader::FindLumpByName(const string &LumpName, size_t offset)

@@ -36,7 +36,6 @@ protected:
     bool ReadMapSidedefs(Map *pMap);
     bool ReadMapSegs(Map *pMap);
 
-    int FindMapIndex(Map *pMap);
 	lump FindMapLump(Map *pMap, const std::string& lumpName);
     int FindLumpByName(const std::string &LumpName, size_t start = 0);
 

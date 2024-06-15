@@ -1,8 +1,6 @@
 #pragma once
-#include <SDL.h>
-#include <string>
-#include <vector>
 #include <memory>
+#include <vector>
 
 #include "DataTypes.h"
 

@@ -6,7 +6,9 @@ using namespace std;
 
 Texture::Texture(WADTextureData &TextureData) : m_IsComposed(false), m_iOverLapSize(0), m_pOverLapColumnData(nullptr)
 {
-    m_sName = TextureData.TextureName;
+	char name[9] {};
+	memcpy(name, TextureData.TextureName, 8);
+    m_sName = name;
     //m_Flags = TextureData.Flags;
     m_iWidth = TextureData.Width;
     m_iHeight = TextureData.Height;

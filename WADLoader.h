@@ -12,7 +12,6 @@ public:
     bool LoadMapData(class Map *pMap);
 	std::vector<uint8_t> GetLumpNamed(const std::string& name) const;
     bool LoadPatch(const std::string &sPatchName, class AssetsManager *assets);
-    bool LoadTextures(const std::string &sTextureName, class AssetsManager *assets);
     
 
 protected:

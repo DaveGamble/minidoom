@@ -103,34 +103,3 @@ bool WADLoader::LoadPatch(const std::string &sPatchName, AssetsManager *assets)
 
     return true;
 }
-
-bool WADLoader::LoadTextures(const std::string &sTextureName, AssetsManager *assets)
-{
-    int iTextureIndex = FindLumpByName(sTextureName);
-	if (iTextureIndex < 0) return false;
-
-    WADTextureHeader TextureHeader;
-	const uint8_t *ptr = m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset;
-	memcpy(&TextureHeader, ptr, 8);
-	TextureHeader.pTexturesDataOffset = new uint32_t[TextureHeader.TexturesCount];
-	memcpy(TextureHeader.pTexturesDataOffset, ptr + 4, TextureHeader.TexturesCount * sizeof(uint32_t));	// <-- How is this +4 correct???
-
-	WADTextureData TextureData;
-    for (int i = 0; i < TextureHeader.TexturesCount; ++i)
-    {
-		ptr = m_pWADData.get() + m_WADDirectories[iTextureIndex].LumpOffset + TextureHeader.pTexturesDataOffset[i];
-		memcpy(TextureData.TextureName, ptr, 8);
-		TextureData.TextureName[8] = '\0';
-		memcpy(&TextureData.Flags, ptr + 8, 14);
-		TextureData.pTexturePatch = new WADTexturePatch[TextureData.PatchCount];
-		memcpy(TextureData.pTexturePatch, ptr + 22, TextureData.PatchCount * 10);
-        assets->AddTexture(TextureData);
-        delete[] TextureData.pTexturePatch;
-        TextureData.pTexturePatch = nullptr;
-    }
-
-    delete[] TextureHeader.pTexturesDataOffset;
-    TextureHeader.pTexturesDataOffset = nullptr;
-    return true;
-}
-

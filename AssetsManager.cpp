@@ -18,7 +18,18 @@ AssetsManager::AssetsManager(WADLoader *l) : m_pWADLoader(l)
 	const char *toload[2] = {"TEXTURE1", "TEXTURE2"};
 	for (int i = 0; i < 2; i++)
 	{
-		m_pWADLoader->LoadTextures(toload[i], this);
+		std::vector<uint8_t> data = l->GetLumpNamed(toload[i]);
+		if (!data.size()) continue;
 
+		const int32_t *asint = (const int32_t*)data.data();
+		int32_t numTextures = asint[0];
+		WADTextureData TextureData;
+		for (int i = 0; i < numTextures; ++i)
+		{
+			const uint8_t *ptr = data.data() + asint[i + 1];
+			memcpy(TextureData.TextureName, ptr, 22);
+			TextureData.pTexturePatch = (WADTexturePatch*)(ptr + 22);
+			m_TexturesCache[TextureData.TextureName] = std::unique_ptr<Texture>(new Texture(TextureData));
+		}
 	}
 }

@@ -22,7 +22,6 @@ public:
 	}
 	Patch* GetPatch(const std::string &sPatchName) { if (m_PatchesCache.count(sPatchName) <= 0) LoadPatch(sPatchName); return m_PatchesCache[sPatchName].get(); }
 
-    void AddTexture(WADTextureData &TextureData) { m_TexturesCache[TextureData.TextureName] = std::unique_ptr<Texture>(new Texture(TextureData)); }
     Texture* GetTexture(const std::string &sTextureName)
 	{
 		if (!m_TexturesCache.count(sTextureName)) return nullptr;

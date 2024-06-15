@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "AssetsManager.h"
 #include <math.h>
 
 Player::Player(ViewRenderer *pViewRenderer, int iID) : m_pViewRenderer(pViewRenderer), m_iPlayerID(iID), m_FOV(90), m_iRotationSpeed(4), m_iMoveSpeed(4), m_EyeLevel(41)
@@ -12,7 +13,7 @@ Player::~Player()
 
 void Player::Init(Thing thing)
 {
-	m_pWeapon = std::unique_ptr<Weapon>(new Weapon("PISGA0"));
+	m_pWeapon = AssetsManager::GetInstance()->GetPatch("PISGA0");
     SetXPosition(thing.XPosition);
     SetYPosition(thing.YPosition);
     SetAngle(thing.Angle);
@@ -179,5 +180,5 @@ void Player::Think(int iSubSectorHieght)
 
 void Player::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 {
-    m_pWeapon->Render(pScreenBuffer, iBufferPitch);
+	m_pWeapon->Render(pScreenBuffer, iBufferPitch, -m_pWeapon->GetXOffset(), -m_pWeapon->GetYOffset());
 }

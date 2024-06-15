@@ -3,7 +3,7 @@
 #include "Angle.hpp"
 #include "DataTypes.h"
 #include "ViewRenderer.h"
-#include "Weapon.h"
+#include "Patch.h"
 
 class Player
 {
@@ -52,5 +52,5 @@ protected:
     Angle m_Angle;
     Angle m_HalfFOV;
     ViewRenderer *m_pViewRenderer;
-    std::unique_ptr <Weapon> m_pWeapon;
+	Patch *m_pWeapon;
 };

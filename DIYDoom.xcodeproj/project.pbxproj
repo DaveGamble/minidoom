@@ -12,7 +12,6 @@
 		55FEA4D22C1DBCC800F9DCAC /* Patch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4752C1DBCC800F9DCAC /* Patch.cpp */; };
 		55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */; };
 		55FEA4D52C1DBCC800F9DCAC /* AssetsManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */; };
-		55FEA4D62C1DBCC800F9DCAC /* Weapon.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4BF2C1DBCC800F9DCAC /* Weapon.cpp */; };
 		55FEA4D72C1DBCC800F9DCAC /* Player.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C02C1DBCC800F9DCAC /* Player.cpp */; };
 		55FEA4D82C1DBCC800F9DCAC /* WADLoader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */; };
 		55FEA4D92C1DBCC800F9DCAC /* Things.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4C32C1DBCC800F9DCAC /* Things.cpp */; };
@@ -127,14 +126,12 @@
 		55FEA4BB2C1DBCC800F9DCAC /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };
 		55FEA4BD2C1DBCC800F9DCAC /* AssetsManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AssetsManager.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4BE2C1DBCC800F9DCAC /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map.h; sourceTree = SOURCE_ROOT; };
-		55FEA4BF2C1DBCC800F9DCAC /* Weapon.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Weapon.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C02C1DBCC800F9DCAC /* Player.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Player.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = WADLoader.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C22C1DBCC800F9DCAC /* AssetsManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AssetsManager.h; sourceTree = SOURCE_ROOT; };
 		55FEA4C32C1DBCC800F9DCAC /* Things.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Things.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C42C1DBCC800F9DCAC /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Angle.hpp; sourceTree = SOURCE_ROOT; };
-		55FEA4C62C1DBCC800F9DCAC /* Weapon.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Weapon.h; sourceTree = SOURCE_ROOT; };
 		55FEA4C72C1DBCC800F9DCAC /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = SOURCE_ROOT; };
 		55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CA2C1DBCC800F9DCAC /* DataTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DataTypes.h; sourceTree = SOURCE_ROOT; };
@@ -224,8 +221,6 @@
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */,
 				55FEA4C12C1DBCC800F9DCAC /* WADLoader.cpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.h */,
-				55FEA4BF2C1DBCC800F9DCAC /* Weapon.cpp */,
-				55FEA4C62C1DBCC800F9DCAC /* Weapon.h */,
 			);
 			path = DIYDoom;
 			sourceTree = "<group>";
@@ -392,7 +387,6 @@
 				55FEA4DB2C1DBCC800F9DCAC /* Texture.cpp in Sources */,
 				55FEA4DA2C1DBCC800F9DCAC /* Map.cpp in Sources */,
 				55FEA4D52C1DBCC800F9DCAC /* AssetsManager.cpp in Sources */,
-				55FEA4D62C1DBCC800F9DCAC /* Weapon.cpp in Sources */,
 				55FEA4D82C1DBCC800F9DCAC /* WADLoader.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

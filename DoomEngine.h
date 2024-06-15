@@ -14,25 +14,10 @@
 class DoomEngine
 {
 public:
-	DoomEngine() {}
+	DoomEngine();
 	~DoomEngine() {}
-
-    void Render();
-	void Quit() { m_bIsOver = true; }
-	void Update() { m_pPlayer->Think(m_pMap->GetPlayerSubSectorHieght()); }
-
 	bool IsOver() const { return m_bIsOver; }
-    bool Init();
-
-	void ProcessInput();
-	void Delay() {SDL_Delay(16);} // 1000/60, as int. how many miliseconds per frame
-	
-	int GetRenderWidth() const { return m_iRenderWidth; }
-	int GetRenderHeight() const { return m_iRenderHeight; }
-
-	std::string GetWADFileName() const { return "DOOM.WAD"; }
-	std::string GetAppName() const { return "DIYDOOM"; }
-
+	void Tick();
 protected:
 	int m_iRenderWidth {320}, m_iRenderHeight {200};
 	bool m_bIsOver {false};

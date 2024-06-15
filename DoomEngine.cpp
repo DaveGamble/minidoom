@@ -1,14 +1,14 @@
 #include "DoomEngine.h"
 
-bool DoomEngine::Init()
+DoomEngine::DoomEngine()
 {
     // Load WAD 
-	m_WADLoader.SetWADFilePath(GetWADFileName());
+	m_WADLoader.SetWADFilePath("DOOM.WAD");
 	m_WADLoader.LoadWADToMemory();
     AssetsManager::GetInstance()->Init(&m_WADLoader);
 
     m_pDisplayManager = std::unique_ptr < DisplayManager>(new DisplayManager(m_iRenderWidth, m_iRenderHeight));
-    m_pDisplayManager->Init(GetAppName());
+    m_pDisplayManager->Init("DIY DOOM");
 
     // Delay object creation to this point so renderer is inistilized correctly
     m_pViewRenderer = std::unique_ptr<ViewRenderer> (new ViewRenderer());
@@ -22,36 +22,17 @@ bool DoomEngine::Init()
     m_pViewRenderer->Init(m_pMap.get(), m_pPlayer.get());
     m_pPlayer->Init((m_pMap->GetThings())->GetThingByID(m_pPlayer->GetID()));
     m_pMap->Init();
-
-    return true;
 }
 
-void DoomEngine::Render()
-{
-    uint8_t *pScreenBuffer = m_pDisplayManager->GetScreenBuffer();
-    m_pDisplayManager->InitFrame();
-    m_pViewRenderer->Render(pScreenBuffer, m_iRenderWidth);
-    m_pPlayer->Render(pScreenBuffer, m_iRenderWidth);
-    m_pDisplayManager->Render();
-}
-
-void DoomEngine::ProcessInput()
+void DoomEngine::Tick()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
 		{
-			case SDL_KEYDOWN:
-				if (event.key.keysym.sym == SDLK_ESCAPE) Quit();
-				break;
-				
-			case SDL_KEYUP:
-				break;
-				
-			case SDL_QUIT:
-				Quit();
-				break;
+			case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) m_bIsOver = true;	break;
+			case SDL_QUIT:		m_bIsOver = true;	break;
 		}
 	}
 	
@@ -62,5 +43,17 @@ void DoomEngine::ProcessInput()
 	if (KeyStates[SDL_SCANCODE_RIGHT]) m_pPlayer->RotateRight();
 	if (KeyStates[SDL_SCANCODE_Z]) m_pPlayer->Fly();
 	if (KeyStates[SDL_SCANCODE_X]) m_pPlayer->Sink();
-
+	
+	// Update
+	m_pPlayer->Think(m_pMap->GetPlayerSubSectorHieght());
+	
+	// Render
+	uint8_t *pScreenBuffer = m_pDisplayManager->GetScreenBuffer();
+	m_pDisplayManager->InitFrame();
+	m_pViewRenderer->Render(pScreenBuffer, m_iRenderWidth);
+	m_pPlayer->Render(pScreenBuffer, m_iRenderWidth);
+	m_pDisplayManager->Render();
+	
+	// Delay
+	SDL_Delay(16); // 1000/60, as int. how many miliseconds per frame
 }

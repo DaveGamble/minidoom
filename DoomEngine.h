@@ -16,8 +16,7 @@ class DoomEngine
 public:
 	DoomEngine();
 	~DoomEngine() {}
-	bool IsOver() const { return m_bIsOver; }
-	void Tick();
+	bool Tick();
 protected:
 	int m_iRenderWidth {320}, m_iRenderHeight {200};
 	bool m_bIsOver {false};

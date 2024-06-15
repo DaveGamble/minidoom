@@ -10,7 +10,6 @@ DoomEngine::DoomEngine()
     AssetsManager::GetInstance()->Init(&m_WADLoader);
 
     // Delay object creation to this point so renderer is inistilized correctly
-   
 	m_WADLoader.LoadPalette(&m_DisplayManager);
 	m_WADLoader.LoadMapData(&m_Map);
 
@@ -19,7 +18,7 @@ DoomEngine::DoomEngine()
     m_Map.Init();
 }
 
-void DoomEngine::Tick()
+bool DoomEngine::Tick()
 {
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -51,4 +50,5 @@ void DoomEngine::Tick()
 	
 	// Delay
 	SDL_Delay(16); // 1000/60, as int. how many miliseconds per frame
+	return m_bIsOver;
 }

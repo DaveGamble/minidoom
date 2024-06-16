@@ -41,6 +41,10 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 
 void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer)
 {
+	auto AngleToScreen = [&](Angle angle) {
+		return m_iDistancePlayerToScreen + round(tanf((90 - angle.GetValue()) * PI / 180.0f) * m_HalfScreenWidth);
+	};
+
     int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
     if (V1XScreen == V2XScreen) return; // Skip same pixel wall
     if (!seg.pLeftSector) ClipSolidWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle); // Handle solid walls
@@ -239,10 +243,15 @@ void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
 {
 	for (int iXCurrent = RenderData.V1XScreen; iXCurrent <= RenderData.V2XScreen; iXCurrent++)
     {
-        int CurrentCeilingEnd = RenderData.CeilingEnd;
-        int CurrentFloorStart = RenderData.FloorStart;
+        int CurrentCeilingEnd = std::max(RenderData.CeilingEnd, m_CeilingClipHeight[iXCurrent] + 1.f);
+        int CurrentFloorStart = std::min(RenderData.FloorStart, m_FloorClipHeight[iXCurrent] - 1.f);
 
-        if (!ValidateRange(RenderData, iXCurrent, CurrentCeilingEnd, CurrentFloorStart)) continue;
+		if (CurrentCeilingEnd > CurrentFloorStart)
+		{
+			RenderData.CeilingEnd += RenderData.CeilingStep;
+			RenderData.FloorStart += RenderData.FloorStep;
+			continue;
+		}
 
         if (RenderData.pSeg->pLeftSector)
         {
@@ -308,29 +317,6 @@ void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData,
     }
     else if (RenderData.UpdateCeiling)
         m_CeilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
-}
-
-bool ViewRenderer::ValidateRange(ViewRenderer::SegmentRenderData & RenderData, int &iXCurrent, int &CurrentCeilingEnd, int &CurrentFloorStart)
-{
-    if (CurrentCeilingEnd < m_CeilingClipHeight[iXCurrent] + 1)
-        CurrentCeilingEnd = m_CeilingClipHeight[iXCurrent] + 1;
-
-    if (CurrentFloorStart >= m_FloorClipHeight[iXCurrent])
-        CurrentFloorStart = m_FloorClipHeight[iXCurrent] - 1;
-
-    if (CurrentCeilingEnd > CurrentFloorStart)
-    {
-        RenderData.CeilingEnd += RenderData.CeilingStep;
-        RenderData.FloorStart += RenderData.FloorStep;
-        ++iXCurrent;
-        return false;
-    }
-    return true;
-}
-
-int ViewRenderer::AngleToScreen(Angle angle)
-{
-	return m_iDistancePlayerToScreen + round(tanf((90 - angle.GetValue()) * PI / 180.0f) * m_HalfScreenWidth);
 }
 
 uint8_t ViewRenderer::GetSectionColor(const std::string &TextureName)

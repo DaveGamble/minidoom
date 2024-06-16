@@ -81,11 +81,7 @@ protected:
 
 	uint8_t GetSectionColor(const std::string &TextureName);
 
-    bool ValidateRange(ViewRenderer::SegmentRenderData &RenderData, int &iXCurrent, int &CurrentCeilingEnd, int &CurrentFloorStart);
-
     float GetScaleFactor(int VXScreen, Angle NormalAngle, float NormalDistance);
-
-    int AngleToScreen(Angle angle);
 
 	Map *m_pMap;
 	Player *m_pPlayer;

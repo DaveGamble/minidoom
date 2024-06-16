@@ -23,7 +23,7 @@ Texture::Texture(const uint8_t *ptr, WADLoader *_wad) : wad(_wad)
 
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
-		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].pnameIndex);
+		Patch *pPatch = wad->getPatch(m_TexturePatches[i].pnameIndex);
 		int iXStart = m_TexturePatches[i].dx;
 		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
@@ -47,7 +47,7 @@ Texture::Texture(const uint8_t *ptr, WADLoader *_wad) : wad(_wad)
 	m_pOverLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[m_iOverLapSize]);
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
-		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].pnameIndex);
+		Patch *pPatch = wad->getPatch(m_TexturePatches[i].pnameIndex);
 		int iXStart = m_TexturePatches[i].dx;
 		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
@@ -67,7 +67,7 @@ void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScree
 	pScreenBuffer += iBufferPitch * iYScreenLocation + iXScreenLocation;
     if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
     {
-        Patch *pPatch = wad->GetPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].pnameIndex);
+        Patch *pPatch = wad->getPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].pnameIndex);
         pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].dy);
     }
     else

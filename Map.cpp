@@ -3,12 +3,12 @@
 Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *wad)
 : m_pPlayer(pPlayer), m_pThings(pThings), m_pViewRenderer(pViewRenderer)
 {
-	int li = wad->FindLumpByName(sName);
+	int li = wad->findLumpByName(sName);
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;
 	size_t size;
 	auto seek = [&](const std::string& name) {
-		data = wad->GetLumpNamed(name, li);
+		data = wad->getLumpNamed(name, li);
 		ptr = data.data();
 		size = data.size();
 		return ptr;
@@ -24,7 +24,7 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 		char floorname[9] {}, ceilname[9] {};
 		memcpy(floorname, ws->floorTexture, 8);
 		memcpy(ceilname, ws->ceilingTexture, 8);
-		m_Sectors.push_back({ws->fh, ws->ch, wad->GetTexture(floorname), wad->GetTexture(ceilname), ws->lightlevel, ws->type, ws->tag});
+		m_Sectors.push_back({ws->fh, ws->ch, wad->getTexture(floorname), wad->getTexture(ceilname), ws->lightlevel, ws->type, ws->tag});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
@@ -35,7 +35,7 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 		memcpy(uname, ws->upperTexture, 8);
 		memcpy(lname, ws->lowerTexture, 8);
 		memcpy(mname, ws->middleTexture, 8);
-		m_Sidedefs.push_back({ws->dx, ws->dy, wad->GetTexture(uname), wad->GetTexture(mname), wad->GetTexture(lname), m_Sectors.data() + ws->sector});
+		m_Sidedefs.push_back({ws->dx, ws->dy, wad->getTexture(uname), wad->getTexture(mname), wad->getTexture(lname), m_Sectors.data() + ws->sector});
 	}
 
 	struct WADLinedef { uint16_t start, end, flags, type, sectorTag, rSidedef, lSidedef; }; // Sidedef 0xFFFF means there is no sidedef
@@ -67,7 +67,7 @@ void Map::RenderBSPNodes(int iNodeID)
 {
     if (!(iNodeID & SUBSECTORIDENTIFIER)) // Masking all the bits exipt the last one to check if this is a subsector
 	{
-		if (IsPointOnLeftSide(m_pPlayer->GetXPosition(), m_pPlayer->GetYPosition(), iNodeID))
+		if (IsPointOnLeftSide(m_pPlayer->getX(), m_pPlayer->getY(), iNodeID))
 		{
 			RenderBSPNodes(m_Nodes[iNodeID].lChild);
 			RenderBSPNodes(m_Nodes[iNodeID].rChild);
@@ -83,8 +83,8 @@ void Map::RenderBSPNodes(int iNodeID)
 	Subsector &subsector = m_Subsector[iNodeID & (~SUBSECTORIDENTIFIER)];
 	
 	constexpr int m_FOV = 90;
-	Angle m_HalfFOV = 45, m_Angle = m_pPlayer->GetAngle();
-	int px = m_pPlayer->GetXPosition(), py = m_pPlayer->GetYPosition();
+	Angle m_HalfFOV = 45, m_Angle = m_pPlayer->getAngle();
+	int px = m_pPlayer->getX(), py = m_pPlayer->getY();
 	for (int i = 0; i < subsector.numSegs; i++)
 	{
 		Seg &seg = m_Segs[subsector.firstSeg + i];

@@ -95,7 +95,7 @@ void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1
 void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
 {
 	auto GetScaleFactor = [&](int VXScreen, Angle SegToNormalAngle, float DistanceToNormal) {
-		Angle SkewAngle = m_ScreenXToAngle[VXScreen] + m_pPlayer->GetAngle() - SegToNormalAngle;
+		Angle SkewAngle = m_ScreenXToAngle[VXScreen] + m_pPlayer->getAngle() - SegToNormalAngle;
 		return std::clamp((m_iDistancePlayerToScreen * SkewAngle.cos()) / (DistanceToNormal * m_ScreenXToAngle[VXScreen].cos()), 0.00390625f, 64.0f);
 	};
 
@@ -151,7 +151,8 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	RenderData.V1Angle = V1Angle;
 	RenderData.V2Angle = V2Angle;
 
-    RenderData.DistanceToV1 = m_pPlayer->DistanceToPoint(seg.start);
+	float px = m_pPlayer->getX(), py = m_pPlayer->getY();     // Calculate the distance between the player an the vertex.
+	RenderData.DistanceToV1 = sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
     RenderData.DistanceToNormal = SegToPlayerAngle.sin() * RenderData.DistanceToV1;
 
     RenderData.V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, RenderData.DistanceToNormal);
@@ -159,8 +160,8 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
     RenderData.Steps = (RenderData.V2ScaleFactor - RenderData.V1ScaleFactor) / (V2XScreen - V1XScreen);
 
-    RenderData.RightSectorCeiling = seg.rSector->ceilingHeight - m_pPlayer->GetZPosition();
-    RenderData.RightSectorFloor = seg.rSector->floorHeight - m_pPlayer->GetZPosition();
+    RenderData.RightSectorCeiling = seg.rSector->ceilingHeight - m_pPlayer->getZ();
+    RenderData.RightSectorFloor = seg.rSector->floorHeight - m_pPlayer->getZ();
 
     RenderData.CeilingStep = -(RenderData.RightSectorCeiling * RenderData.Steps);
     RenderData.CeilingEnd = round(m_HalfScreenHeight - (RenderData.RightSectorCeiling * RenderData.V1ScaleFactor));
@@ -172,8 +173,8 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
     if (seg.lSector)
     {
-        RenderData.LeftSectorCeiling = seg.lSector->ceilingHeight - m_pPlayer->GetZPosition();
-        RenderData.LeftSectorFloor = seg.lSector->floorHeight - m_pPlayer->GetZPosition();
+        RenderData.LeftSectorCeiling = seg.lSector->ceilingHeight - m_pPlayer->getZ();
+        RenderData.LeftSectorFloor = seg.lSector->floorHeight - m_pPlayer->getZ();
 
 		if (!RenderData.pSeg->lSector)
 		{
@@ -187,9 +188,9 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
 		if (RenderData.pSeg->lSector->ceilingHeight <= RenderData.pSeg->rSector->floorHeight || RenderData.pSeg->lSector->floorHeight >= RenderData.pSeg->rSector->ceilingHeight) // closed door
 			RenderData.UpdateCeiling = RenderData.UpdateFloor = true;
-		if (RenderData.pSeg->rSector->ceilingHeight <= m_pPlayer->GetZPosition()) // below view plane
+		if (RenderData.pSeg->rSector->ceilingHeight <= m_pPlayer->getZ()) // below view plane
 			RenderData.UpdateCeiling = false;
-		if (RenderData.pSeg->rSector->floorHeight >= m_pPlayer->GetZPosition()) // above view plane
+		if (RenderData.pSeg->rSector->floorHeight >= m_pPlayer->getZ()) // above view plane
 			RenderData.UpdateFloor = false;
 
         if (RenderData.LeftSectorCeiling < RenderData.RightSectorCeiling)

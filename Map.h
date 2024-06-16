@@ -17,7 +17,7 @@ public:
 		int iSubsectorID = (int)(m_Nodes.size() - 1);
 		while (!(iSubsectorID & SUBSECTORIDENTIFIER))
 		{
-			if (IsPointOnLeftSide(m_pPlayer->GetXPosition(), m_pPlayer->GetYPosition(), iSubsectorID))
+			if (IsPointOnLeftSide(m_pPlayer->getX(), m_pPlayer->getY(), iSubsectorID))
 				iSubsectorID = m_Nodes[iSubsectorID].lChild;
 			else
 				iSubsectorID = m_Nodes[iSubsectorID].rChild;

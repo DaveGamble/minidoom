@@ -21,7 +21,7 @@ public:
 		numLumps = ((const uint32_t*)data)[1];
 		dirs = (const Directory*)(data + ((const uint32_t*)data)[2]);
 
-		std::vector<uint8_t> lump = GetLumpNamed("PNAMES");
+		std::vector<uint8_t> lump = getLumpNamed("PNAMES");
 		
 		int32_t count = *(int32_t*)lump.data();
 		char Name[9] {};
@@ -34,7 +34,7 @@ public:
 		const char *toload[2] = {"TEXTURE1", "TEXTURE2"};
 		for (int i = 0; i < 2; i++)
 		{
-			std::vector<uint8_t> data = GetLumpNamed(toload[i]);
+			std::vector<uint8_t> data = getLumpNamed(toload[i]);
 			if (!data.size()) continue;
 			
 			const int32_t *asint = (const int32_t*)data.data();
@@ -49,28 +49,28 @@ public:
 
 	~WADLoader() { delete[] data; }
 
-	std::vector<uint8_t> GetLumpNamed(const std::string& name, size_t after = 0) const
+	std::vector<uint8_t> getLumpNamed(const std::string& name, size_t after = 0) const
 	{
-		int id = FindLumpByName(name, after);
+		int id = findLumpByName(name, after);
 		return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].lumpOffset, data + dirs[id].lumpOffset + dirs[id].lumpSize);
 	}
-	int FindLumpByName(const std::string &LumpName, size_t after = 0) const
+	int findLumpByName(const std::string &LumpName, size_t after = 0) const
 	{
 		for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, LumpName.c_str(), 8)) return (int)i;
 		return -1;
 	}
 	
-	Patch* GetPatch(const std::string &name)
+	Patch* getPatch(const std::string &name)
 	{
 		if (!patches.count(name))
 		{
-			std::vector<uint8_t> lump = GetLumpNamed(name);
+			std::vector<uint8_t> lump = getLumpNamed(name);
 			if (lump.size()) patches[name] = std::unique_ptr<Patch>(new Patch(lump.data()));
 		}
 		return patches[name].get();
 	}
-	Patch* GetPatch(int index) { return GetPatch(pnames[index]); }
-	Texture* GetTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
+	Patch* getPatch(int index) { return getPatch(pnames[index]); }
+	Texture* getTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
 
 protected:
 	uint8_t *data {nullptr};

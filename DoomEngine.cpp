@@ -13,11 +13,11 @@ DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);
 	m_pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	std::vector<uint8_t> palette = m_WADLoader.GetLumpNamed("PLAYPAL");
+	std::vector<uint8_t> palette = m_WADLoader.getLumpNamed("PLAYPAL");
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
-    m_Player.Init((m_Map.GetThings())->GetID(m_Player.GetID()), &m_WADLoader);
+    m_Player.init((m_Map.GetThings())->GetID(m_Player.getID()), &m_WADLoader);
 }
 
 DoomEngine::~DoomEngine()
@@ -34,24 +34,24 @@ bool DoomEngine::Tick()
 	{
 		switch (event.type)
 		{
-			case SDL_MOUSEMOTION:	m_Player.RotateBy(-0.1*event.motion.xrel);	break;
+			case SDL_MOUSEMOTION:	m_Player.rotateBy(-0.1*event.motion.xrel);	break;
 			case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) m_bIsOver = true;	break;
 			case SDL_QUIT:		m_bIsOver = true;	break;
 		}
 	}
 	
 	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
-	if (KeyStates[SDL_SCANCODE_W]) m_Player.MoveForward();
-	if (KeyStates[SDL_SCANCODE_A]) m_Player.MoveLeftward();
-	if (KeyStates[SDL_SCANCODE_D]) m_Player.MoveRightward();
-	if (KeyStates[SDL_SCANCODE_S]) m_Player.MoveBackward();
-	if (KeyStates[SDL_SCANCODE_Q]) m_Player.RotateLeft();
-	if (KeyStates[SDL_SCANCODE_E]) m_Player.RotateRight();
-	if (KeyStates[SDL_SCANCODE_Z]) m_Player.Fly();
-	if (KeyStates[SDL_SCANCODE_X]) m_Player.Sink();
+	if (KeyStates[SDL_SCANCODE_W]) m_Player.moveForward();
+	if (KeyStates[SDL_SCANCODE_A]) m_Player.strafeLeft();
+	if (KeyStates[SDL_SCANCODE_D]) m_Player.strafeRight();
+	if (KeyStates[SDL_SCANCODE_S]) m_Player.moveBackward();
+	if (KeyStates[SDL_SCANCODE_Q]) m_Player.rotateLeft();
+	if (KeyStates[SDL_SCANCODE_E]) m_Player.rotateRight();
+	if (KeyStates[SDL_SCANCODE_Z]) m_Player.fly();
+	if (KeyStates[SDL_SCANCODE_X]) m_Player.sink();
 	
 	// Update
-	m_Player.Think(m_Map.GetPlayerSubSectorHeight());
+	m_Player.think(m_Map.GetPlayerSubSectorHeight());
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;

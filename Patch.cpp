@@ -41,28 +41,42 @@ Patch::~Patch()
 
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale) const
 {
-	const float iscale = 1.0 / scale;
 	buf += rowlen * screeny + screenx;
-	for (int x = 0; x < width * scale; x++, buf++)
-		for (int column = columnIndices[floor(x * iscale)]; patchColumnData[column].topDelta != 0xFF; column++)
+	int tox = 0;
+	for (int x = 0; x < width; x++)
+	{
+		while (tox < (x + 1) * scale)
 		{
-			int off = floor(scale * patchColumnData[column].topDelta) * rowlen;
-			uint8_t *from = patchColumnData[column].columnData;
-			for (int y = 0; y < patchColumnData[column].length * scale; y++, off += rowlen)
-				buf[off] = from[(int)floor(y * iscale)];
+			for (int column = columnIndices[x]; patchColumnData[column].topDelta != 0xFF; column++)
+			{
+				int off = floor(scale * patchColumnData[column].topDelta) * rowlen + tox;
+				uint8_t *from = patchColumnData[column].columnData;
+				int to = 0;
+				for (int y = 0; y < patchColumnData[column].length; y++)
+				{
+					uint8_t f = from[y];
+					while (to < (y + 1) * scale) buf[off + (to++) * rowlen] = f;
+				}
+			}
+			tox++;
 		}
+	}
 }
 
 void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale) const
 {
-	const float iscale = 1.0 / scale;
-    int y = (yOffset < 0) ? yOffset * -iscale : 0;
+    int y = (yOffset < 0) ? -yOffset : 0;
     while (patchColumnData[firstColumn].topDelta != 0xFF && maxHeight > 0)
     {
 		int run = std::clamp(patchColumnData[firstColumn].length - y, 0, maxHeight);
 		int start = rowlen * floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
 		const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-		for (int i = 0; i < run * scale; i++) buf[start + i * rowlen] = from[(int)floor(iscale * i)];
+		int to = 0;
+		for (int i = 0; i < run; i++)
+		{
+			uint8_t f = from[i];
+			while (to < (i + 1) * scale) buf[start + (to++) * rowlen] = f;
+		}
 		maxHeight -= run;
         ++firstColumn;
         y = 0;

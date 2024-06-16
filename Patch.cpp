@@ -75,17 +75,14 @@ void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, 
     }
 }
 
-void Patch::ComposeColumn(uint8_t *pOverLapColumnData, int iHeight, int &iPatchColumnIndex, int iColumnOffsetIndex, int iYOrigin)
+void Patch::ComposeColumn(uint8_t *pOverLapColumnData, int iHeight, int &iPatchColumnIndex, int iYOrigin)
 {
     while (m_PatchData[iPatchColumnIndex].TopDelta != 0xFF)
     {
         int iYPosition = iYOrigin + m_PatchData[iPatchColumnIndex].TopDelta, iMaxRun = m_PatchData[iPatchColumnIndex].Length;
-
         if (iYPosition < 0) { iMaxRun += iYPosition; iYPosition = 0; }
-        if (iYPosition + iMaxRun > iHeight) iMaxRun = iHeight - iYPosition;
-
-        for (int iYIndex = 0; iYIndex < iMaxRun; ++iYIndex)
-            pOverLapColumnData[iColumnOffsetIndex + iYPosition + iYIndex] = m_PatchData[iPatchColumnIndex].pColumnData[iYIndex];
+        if (iMaxRun > iHeight - iYPosition) iMaxRun = iHeight - iYPosition;
+		if (iMaxRun > 0) memcpy(pOverLapColumnData + iYPosition, m_PatchData[iPatchColumnIndex].pColumnData, iMaxRun);
         ++iPatchColumnIndex;
     }
 }

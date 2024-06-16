@@ -116,7 +116,7 @@ bool Texture::Compose(AssetsManager *assets)
             if (m_ColumnPatch[iXIndex] < 0)
             {
                 int iPatchColumnIndex = pPatch->GetColumnDataIndex(iXIndex - iXStart);
-                pPatch->ComposeColumn(m_pOverLapColumnData.get(), m_iHeight, iPatchColumnIndex, m_ColumnIndex[iXIndex], m_TexturePatches[i].YOffset);
+                pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, iPatchColumnIndex, m_TexturePatches[i].YOffset);
             }
 
             ++iXIndex;

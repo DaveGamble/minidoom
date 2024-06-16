@@ -39,7 +39,7 @@ Seg::Seg(const WADSeg &wadseg, const std::vector<Linedef>& linedefs, const std::
 {
 	start = vertices[wadseg.StartVertexID];
 	end = vertices[wadseg.EndVertexID];
-	SlopeAngle = ((float)(wadseg.SlopeAngle << 16) * 8.38190317e-8);	// 8.38190317e-8 is to convert from Binary angles (BAMS) to float
+	SlopeAngle = wadseg.SlopeAngle * 360.0 / 65536.0;
 	pLinedef = &linedefs[wadseg.LinedefID];
 	Direction = wadseg.Direction;
 	Offset = (float)(wadseg.Offset << 16) / (float)(1 << 16);

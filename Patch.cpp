@@ -22,7 +22,6 @@ Patch::Patch(const uint8_t *ptr)
 	m_iYOffset = PatchHeader->TopOffset;
 
 	uint32_t *pColumnOffsets = (uint32_t*)(ptr + 8);
-
 	for (int i = 0; i < m_iWidth; ++i)
 	{
 		int Offset = pColumnOffsets[i];
@@ -43,19 +42,18 @@ Patch::Patch(const uint8_t *ptr)
 			m_PatchData.push_back(PatchColumn);
 		} while (PatchColumn.TopDelta != 0xFF);
 	}
-	
-	
-	
 }
 
 void Patch::Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation)
 {
-    int iXIndex = 0;
+	int offset = iBufferPitch * iYScreenLocation + iXScreenLocation;
     for (size_t iPatchColumnIndex = 0; iPatchColumnIndex < m_PatchData.size(); iPatchColumnIndex++)
     {
-        if (m_PatchData[iPatchColumnIndex].TopDelta == 0xFF) { ++iXIndex; continue; }
-        for (int iYIndex = 0; iYIndex < m_PatchData[iPatchColumnIndex].Length; ++iYIndex)
-            pScreenBuffer[iBufferPitch * (iYScreenLocation + m_PatchData[iPatchColumnIndex].TopDelta + iYIndex) + (iXScreenLocation + iXIndex)] = m_PatchData[iPatchColumnIndex].pColumnData[iYIndex];
+		int off = offset + m_PatchData[iPatchColumnIndex].TopDelta * iBufferPitch;
+        if (m_PatchData[iPatchColumnIndex].TopDelta == 0xFF) offset++;
+		else
+			for (int y = 0; y < m_PatchData[iPatchColumnIndex].Length; y++, off += iBufferPitch)
+				pScreenBuffer[off] = m_PatchData[iPatchColumnIndex].pColumnData[y];
     }
 }
 

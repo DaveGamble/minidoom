@@ -74,7 +74,7 @@ void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, 
     }
 }
 
-void Patch::ComposeColumn(uint8_t *pOverLapColumnData, int iHeight, int &iPatchColumnIndex, int iYOrigin)
+void Patch::ComposeColumn(uint8_t *pOverLapColumnData, int iHeight, int iPatchColumnIndex, int iYOrigin)
 {
     while (m_PatchData[iPatchColumnIndex].TopDelta != 0xFF)
     {

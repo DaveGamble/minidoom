@@ -19,13 +19,8 @@ Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
 		Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
-
 		int iXStart = m_TexturePatches[i].XOffset;
-		int iMaxWidth = iXStart + pPatch->GetWidth();
-		int iXIndex = iXStart;
-		if (iXStart < 0) iXIndex = 0;
-		if (iMaxWidth > m_iWidth) iMaxWidth = m_iWidth; //Does this patch extend outside the Texture?
-
+		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth(), iXIndex = (iXStart > 0) ? iXStart : 0;
 		while (iXIndex < iMaxWidth)
 		{
 			m_ColumnPatchCount[iXIndex]++;
@@ -52,20 +47,12 @@ Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
 		Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
-
 		int iXStart = m_TexturePatches[i].XOffset;
-		int iMaxWidth = iXStart + pPatch->GetWidth();
-		int iXIndex = iXStart;
-		if (iXStart < 0) iXIndex = 0;
-		if (iMaxWidth > m_iWidth) iMaxWidth = m_iWidth; //Does this patch extend outside the Texture?
-
+		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth(), iXIndex = (iXStart > 0) ? iXStart : 0;
 		while (iXIndex < iMaxWidth)
 		{
 			if (m_ColumnPatch[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
-			{
-				int iPatchColumnIndex = pPatch->GetColumnDataIndex(iXIndex - iXStart);
-				pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, iPatchColumnIndex, m_TexturePatches[i].YOffset);
-			}
+				pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->GetColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].YOffset);
 			++iXIndex;
 		}
 	}

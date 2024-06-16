@@ -23,7 +23,9 @@ public:
 		}
 	}
     void MoveForward() { m_XPosition += m_Angle.GetCosValue() * m_iMoveSpeed; m_YPosition += m_Angle.GetSinValue() * m_iMoveSpeed; }
-    void MoveLeftward() { m_XPosition -= m_Angle.GetCosValue() * m_iMoveSpeed; m_YPosition -= m_Angle.GetSinValue() * m_iMoveSpeed; }
+	void MoveBackward() { m_XPosition -= m_Angle.GetCosValue() * m_iMoveSpeed; m_YPosition -= m_Angle.GetSinValue() * m_iMoveSpeed; }
+    void MoveLeftward() { m_XPosition -= m_Angle.GetSinValue() * m_iMoveSpeed; m_YPosition += m_Angle.GetCosValue() * m_iMoveSpeed; }
+	void MoveRightward() { m_XPosition += m_Angle.GetSinValue() * m_iMoveSpeed; m_YPosition -= m_Angle.GetCosValue() * m_iMoveSpeed; }
 	void RotateLeft() { m_Angle += (0.1875f * m_iRotationSpeed); }
 	void RotateRight() { m_Angle -= (0.1875f * m_iRotationSpeed); }
 	void Fly() { m_ZPosition += 1; }

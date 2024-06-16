@@ -40,10 +40,12 @@ bool DoomEngine::Tick()
 	}
 	
 	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
-	if (KeyStates[SDL_SCANCODE_UP]) m_Player.MoveForward();
-	if (KeyStates[SDL_SCANCODE_DOWN]) m_Player.MoveLeftward();
-	if (KeyStates[SDL_SCANCODE_LEFT]) m_Player.RotateLeft();
-	if (KeyStates[SDL_SCANCODE_RIGHT]) m_Player.RotateRight();
+	if (KeyStates[SDL_SCANCODE_W]) m_Player.MoveForward();
+	if (KeyStates[SDL_SCANCODE_A]) m_Player.MoveLeftward();
+	if (KeyStates[SDL_SCANCODE_D]) m_Player.MoveRightward();
+	if (KeyStates[SDL_SCANCODE_S]) m_Player.MoveBackward();
+	if (KeyStates[SDL_SCANCODE_Q]) m_Player.RotateLeft();
+	if (KeyStates[SDL_SCANCODE_E]) m_Player.RotateRight();
 	if (KeyStates[SDL_SCANCODE_Z]) m_Player.Fly();
 	if (KeyStates[SDL_SCANCODE_X]) m_Player.Sink();
 	

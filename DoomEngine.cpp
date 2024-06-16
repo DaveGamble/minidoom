@@ -1,9 +1,9 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine()
-: m_WADLoader("DOOM.WAD")
+DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
+: m_WADLoader(wad)
 , assets(&m_WADLoader)
-, m_Map(&m_ViewRenderer, "E1M1", &m_Player, &m_Things, &m_WADLoader)
+, m_Map(&m_ViewRenderer, mapName, &m_Player, &m_Things, &m_WADLoader)
 {
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);

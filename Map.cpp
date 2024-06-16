@@ -88,8 +88,8 @@ void Map::RenderBSPNodes(int iNodeID)
 	for (int i = 0; i < subsector.numSegs; i++)
 	{
 		Seg &seg = m_Segs[subsector.firstSeg + i];
-		Angle V1Angle = Angle(atan2f(seg.start.y - py, seg.start.x - px) * 180.0f / PI);
-		Angle V2Angle = Angle(atan2f(seg.end.y - py, seg.end.x - px) * 180.0f / PI);
+		Angle V1Angle = Angle(atan2f(seg.start.y - py, seg.start.x - px) * 180.0f / M_PI);
+		Angle V2Angle = Angle(atan2f(seg.end.y - py, seg.end.x - px) * 180.0f / M_PI);
 		Angle V1ToV2Span = V1Angle - V2Angle;
 
 		if (V1ToV2Span >= 180) continue;

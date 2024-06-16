@@ -12,10 +12,10 @@ ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int rend
 , m_iRenderYSize(renderYSize)
 , m_HalfScreenWidth(renderXSize / 2)
 , m_HalfScreenHeight(renderYSize / 2)
-, m_iDistancePlayerToScreen(m_HalfScreenWidth / tan(90 * 0.5 * PI / 180))	// 90 here is FOV
+, m_iDistancePlayerToScreen(m_HalfScreenWidth / tan(90 * 0.5 * M_PI / 180))	// 90 here is FOV
 {
 	for (int i = 0; i <= m_iRenderXSize; ++i)
-		m_ScreenXToAngle[i] = atan((m_HalfScreenWidth - i) / (float)m_iDistancePlayerToScreen) * 180 / PI;
+		m_ScreenXToAngle[i] = atan((m_HalfScreenWidth - i) / (float)m_iDistancePlayerToScreen) * 180 / M_PI;
 
 	m_CeilingClipHeight.resize(m_iRenderXSize);
 	m_FloorClipHeight.resize(m_iRenderXSize);
@@ -38,7 +38,7 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer)
 {
 	auto AngleToScreen = [&](Angle angle) {
-		return m_iDistancePlayerToScreen + round(tanf((90 - angle.GetValue()) * PI / 180.0f) * m_HalfScreenWidth);
+		return m_iDistancePlayerToScreen + round(tanf((90 - angle.get()) * M_PI / 180.0f) * m_HalfScreenWidth);
 	};
 
     int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
@@ -96,7 +96,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 {
 	auto GetScaleFactor = [&](int VXScreen, Angle SegToNormalAngle, float DistanceToNormal) {
 		Angle SkewAngle = m_ScreenXToAngle[VXScreen] + m_pPlayer->GetAngle() - SegToNormalAngle;
-		return std::clamp((m_iDistancePlayerToScreen * SkewAngle.GetCosValue()) / (DistanceToNormal * m_ScreenXToAngle[VXScreen].GetCosValue()), 0.00390625f, 64.0f);
+		return std::clamp((m_iDistancePlayerToScreen * SkewAngle.cos()) / (DistanceToNormal * m_ScreenXToAngle[VXScreen].cos()), 0.00390625f, 64.0f);
 	};
 
     // Calculate the distance to the first edge of the wall
@@ -141,8 +141,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
     SegmentRenderData RenderData { 0 };
     Angle SegToNormalAngle = Angle(seg.slopeAngle) + Angle90;
 
-    //Angle NomalToV1Angle = abs(SegToNormalAngle.GetSignedValue() - V1Angle.GetSignedValue());
-    Angle NomalToV1Angle = SegToNormalAngle.GetValue() - V1Angle.GetValue();
+    Angle NomalToV1Angle = SegToNormalAngle.get() - V1Angle.get();
 
     // Normal angle is 90 degree to wall
     Angle SegToPlayerAngle = Angle90 - NomalToV1Angle;
@@ -153,7 +152,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	RenderData.V2Angle = V2Angle;
 
     RenderData.DistanceToV1 = m_pPlayer->DistanceToPoint(seg.start);
-    RenderData.DistanceToNormal = SegToPlayerAngle.GetSinValue() * RenderData.DistanceToV1;
+    RenderData.DistanceToNormal = SegToPlayerAngle.sin() * RenderData.DistanceToV1;
 
     RenderData.V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, RenderData.DistanceToNormal);
     RenderData.V2ScaleFactor = GetScaleFactor(V2XScreen, SegToNormalAngle, RenderData.DistanceToNormal);

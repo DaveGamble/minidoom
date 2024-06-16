@@ -19,10 +19,10 @@ public:
 			a = thing->angle;
 		}
 	}
-    void MoveForward() { x += a.GetCosValue() * moveSpeed; y += a.GetSinValue() * moveSpeed; }
-	void MoveBackward() { x -= a.GetCosValue() * moveSpeed; y -= a.GetSinValue() * moveSpeed; }
-    void MoveLeftward() { x -= a.GetSinValue() * moveSpeed; y += a.GetCosValue() * moveSpeed; }
-	void MoveRightward() { x += a.GetSinValue() * moveSpeed; y -= a.GetCosValue() * moveSpeed; }
+    void MoveForward() { x += a.cos() * moveSpeed; y += a.sin() * moveSpeed; }
+	void MoveBackward() { x -= a.cos() * moveSpeed; y -= a.sin() * moveSpeed; }
+    void MoveLeftward() { x -= a.sin() * moveSpeed; y += a.cos() * moveSpeed; }
+	void MoveRightward() { x += a.sin() * moveSpeed; y -= a.cos() * moveSpeed; }
 	void RotateBy(float dt) { a += (dt * rotateSpeed); }
 	void RotateLeft() { a += (0.1875f * rotateSpeed); }
 	void RotateRight() { a -= (0.1875f * rotateSpeed); }

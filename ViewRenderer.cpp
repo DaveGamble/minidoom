@@ -182,12 +182,9 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
         }
     }
 
-	auto DrawTexture = [&](const Texture *texture, int x, int from, int to) {
-		if (!texture) return;
-
-		int width = texture->getWidth();
-		float scale = (to - from) / (float)texture->getHeight();
-		texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, 0, scale);
+	auto DrawTexture = [&](const Texture *texture, int x, int from, int to, float u) {
+		if (!texture || to < from) return;
+		texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, texture->getWidth() * u, (to - from) / (float)texture->getHeight());
 	};
 	
 	for (int x = V1XScreen; x <= V2XScreen; x++)
@@ -201,6 +198,8 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 			FloorStart += FloorStep;
 			continue;
 		}
+		
+		float u = (x - V1XScreen) / (float)(1 + V2XScreen - V1XScreen);
 
         if (seg.lSector)
         {
@@ -208,8 +207,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 			{
 				int upper = std::min(floorClipHeight[x] - 1.f, iUpperHeight);
 				iUpperHeight += UpperHeightStep;
-				if (upper >= CurrentCeilingEnd)
-					DrawTexture(seg.linedef->rSidedef->uppertexture, x, CurrentCeilingEnd, upper);
+				DrawTexture(seg.linedef->rSidedef->uppertexture, x, CurrentCeilingEnd, upper, u);
 				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			}
 			else if (UpdateCeiling)
@@ -219,8 +217,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 			{
 				int lower = std::max(iLowerHeight, ceilingClipHeight[x] + 1.f);
 				iLowerHeight += LowerHeightStep;
-				if (lower <= CurrentFloorStart)
-					DrawTexture(seg.linedef->rSidedef->lowertexture, x, lower, CurrentFloorStart);
+				DrawTexture(seg.linedef->rSidedef->lowertexture, x, lower, CurrentFloorStart, u);
 				floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 			}
 			else if (UpdateFloor)
@@ -228,10 +225,9 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 		}
         else
 		{
-			DrawTexture(seg.linedef->rSidedef->middletexture, x, CurrentCeilingEnd, CurrentFloorStart);
+			DrawTexture(seg.linedef->rSidedef->middletexture, x, CurrentCeilingEnd, CurrentFloorStart, u);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
-
 		}
         CeilingEnd += CeilingStep;
         FloorStart += FloorStep;

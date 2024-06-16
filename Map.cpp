@@ -14,40 +14,48 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 		return ptr;
 	};
 	
-	std::vector<Vertex> m_Vertexes;
-	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) m_Vertexes.push_back(*(Vertex*)(ptr + i));
+	std::vector<Vertex> vertices;
+	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) vertices.push_back(*(Vertex*)(ptr + i));
+
+	struct WADSector { int16_t fh, ch; char floorTexture[8], ceilingTexture[8]; uint16_t lightlevel, type, tag; };
 	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector))
 	{
-		WADSector *wadsector = (WADSector*)(ptr + i);
+		WADSector *ws = (WADSector*)(ptr + i);
 		char floorname[9] {}, ceilname[9] {};
-		memcpy(floorname, wadsector->FloorTexture, 8);
-		memcpy(ceilname, wadsector->CeilingTexture, 8);
-		m_Sectors.push_back({wadsector->FloorHeight, wadsector->CeilingHeight, wad->GetTexture(floorname), wad->GetTexture(ceilname), wadsector->Lightlevel, wadsector->Type, wadsector->Tag});
+		memcpy(floorname, ws->floorTexture, 8);
+		memcpy(ceilname, ws->ceilingTexture, 8);
+		m_Sectors.push_back({ws->fh, ws->ch, wad->GetTexture(floorname), wad->GetTexture(ceilname), ws->lightlevel, ws->type, ws->tag});
 	}
+
+	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
 	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef))
 	{
-		WADSidedef *wadsidedef = (WADSidedef*)(ptr + i);
+		WADSidedef *ws = (WADSidedef*)(ptr + i);
 		char uname[9] {}, lname[9] {}, mname[9] {};
-		memcpy(uname, wadsidedef->UpperTexture, 8);
-		memcpy(lname, wadsidedef->LowerTexture, 8);
-		memcpy(mname, wadsidedef->MiddleTexture, 8);
-		m_Sidedefs.push_back({wadsidedef->XOffset, wadsidedef->YOffset, wad->GetTexture(uname), wad->GetTexture(mname), wad->GetTexture(lname), m_Sectors.data() + wadsidedef->SectorID});
+		memcpy(uname, ws->upperTexture, 8);
+		memcpy(lname, ws->lowerTexture, 8);
+		memcpy(mname, ws->middleTexture, 8);
+		m_Sidedefs.push_back({ws->dx, ws->dy, wad->GetTexture(uname), wad->GetTexture(mname), wad->GetTexture(lname), m_Sectors.data() + ws->sector});
 	}
+
+	struct WADLinedef { uint16_t start, end, flags, type, sectorTag, rSidedef, lSidedef; }; // Sidedef 0xFFFF means there is no sidedef
 	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef))
 	{
-		WADLinedef *wadlinedef = (WADLinedef*)(ptr + i);
-		m_Linedefs.push_back({m_Vertexes[wadlinedef->StartVertexID], m_Vertexes[wadlinedef->EndVertexID], wadlinedef->Flags, wadlinedef->LineType, wadlinedef->SectorTag,
-			(wadlinedef->RightSidedef == 0xFFFF) ? nullptr : m_Sidedefs.data() + wadlinedef->RightSidedef,
-			(wadlinedef->LeftSidedef == 0xFFFF) ? nullptr : m_Sidedefs.data() + wadlinedef->LeftSidedef
+		WADLinedef *wl = (WADLinedef*)(ptr + i);
+		m_Linedefs.push_back({vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
+			(wl->rSidedef == 0xFFFF) ? nullptr : m_Sidedefs.data() + wl->rSidedef,
+			(wl->lSidedef == 0xFFFF) ? nullptr : m_Sidedefs.data() + wl->lSidedef
 		});
 	}
+
+	struct WADSeg { uint16_t start, end, slopeAngle, linedef, dir, offset; }; // Direction: 0 same as linedef, 1 opposite of linedef Offset: distance along linedef to start of seg
 	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg))
 	{
-		WADSeg *wadseg = (WADSeg*)(ptr + i);
-		const Linedef *pLinedef = &m_Linedefs[wadseg->LinedefID];
-		const Sidedef *pRightSidedef = wadseg->Direction ? pLinedef->pLeftSidedef : pLinedef->pRightSidedef;
-		const Sidedef *pLeftSidedef = wadseg->Direction ? pLinedef->pRightSidedef : pLinedef->pLeftSidedef;
-		m_Segs.push_back({m_Vertexes[wadseg->StartVertexID], m_Vertexes[wadseg->EndVertexID], wadseg->SlopeAngle * 360.f / 65536.f, pLinedef, wadseg->Direction, wadseg->Offset / 65536.f,
+		WADSeg *ws = (WADSeg*)(ptr + i);
+		const Linedef *pLinedef = &m_Linedefs[ws->linedef];
+		const Sidedef *pRightSidedef = ws->dir ? pLinedef->pLeftSidedef : pLinedef->pRightSidedef;
+		const Sidedef *pLeftSidedef = ws->dir ? pLinedef->pRightSidedef : pLinedef->pLeftSidedef;
+		m_Segs.push_back({vertices[ws->start], vertices[ws->end], ws->slopeAngle * 360.f / 65536.f, pLinedef, ws->dir, ws->offset / 65536.f,
 			(pRightSidedef) ? pRightSidedef->pSector : nullptr, (pLeftSidedef) ? pLeftSidedef->pSector : nullptr});
 	}
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) m_pThings->AddThing(*(Thing*)(ptr + i));

@@ -48,7 +48,7 @@ bool DoomEngine::Tick()
 	if (KeyStates[SDL_SCANCODE_X]) m_Player.Sink();
 	
 	// Update
-	m_Player.Think(m_Map.GetPlayerSubSectorHieght());
+	m_Player.Think(m_Map.GetPlayerSubSectorHeight());
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;

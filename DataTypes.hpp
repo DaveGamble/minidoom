@@ -18,10 +18,10 @@ struct Sidedef { Sidedef(const WADSidedef &from, const std::vector<Sector> &sect
 struct WADLinedef { uint16_t StartVertexID, EndVertexID, Flags, LineType, SectorTag, RightSidedef, LeftSidedef; }; // Sidedef 0xFFFF means there is no sidedef
 struct Linedef { Linedef(const WADLinedef &from, const std::vector<Sidedef> & sidedefs, const std::vector<Vertex> &vertices); Vertex pStartVertex, pEndVertex; uint16_t Flags, LineType, SectorTag; const Sidedef *pRightSidedef, *pLeftSidedef; };
 struct WADSeg { uint16_t StartVertexID, EndVertexID, SlopeAngle, LinedefID, Direction, Offset; }; // Direction: 0 same as linedef, 1 opposite of linedef Offset: distance along linedef to start of seg
-struct Seg { Vertex pStartVertex, pEndVertex; Angle SlopeAngle; const Linedef *pLinedef; uint16_t Direction, Offset; const Sector *pRightSector, *pLeftSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
+struct Seg { Seg(const WADSeg &from, const std::vector<Linedef>& linedefs, const std::vector<Vertex> &vertices); Vertex pStartVertex, pEndVertex; Angle SlopeAngle; const Linedef *pLinedef; uint16_t Direction, Offset; const Sector *pRightSector, *pLeftSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
 struct Subsector { uint16_t SegCount, FirstSegID; };
 struct Node {
-    int16_t XPartition, YPartition, ChangeXPartition, ChangeYPartition, RightBoxTop, RightBoxBottom, RightBoxLeft, RightBoxRight, LeftBoxTop, LeftBoxBottom, LeftBoxLeft, LeftBoxRight;
+    int16_t x, y, dx, dy, RightBoxTop, RightBoxBottom, RightBoxLeft, RightBoxRight, LeftBoxTop, LeftBoxBottom, LeftBoxLeft, LeftBoxRight;
     uint16_t RightChildID, LeftChildID;
 };
 struct WADPatchHeader { uint16_t Width, Height; int16_t LeftOffset, TopOffset; uint32_t *pColumnOffsets; };

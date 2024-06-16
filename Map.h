@@ -16,30 +16,35 @@ public:
 
 	void Render3DView() { RenderBSPNodes((int)m_Nodes.size() - 1); }
 
-    int GetPlayerSubSectorHieght();
+    int GetPlayerSubSectorHeight()
+	{
+		int iSubsectorID = (int)(m_Nodes.size() - 1);
+		while (!(iSubsectorID & SUBSECTORIDENTIFIER))
+		{
+			if (IsPointOnLeftSide(m_pPlayer->GetXPosition(), m_pPlayer->GetYPosition(), iSubsectorID))
+				iSubsectorID = m_Nodes[iSubsectorID].LeftChildID;
+			else
+				iSubsectorID = m_Nodes[iSubsectorID].RightChildID;
+		}
+		return m_Segs[m_Subsector[iSubsectorID & (~SUBSECTORIDENTIFIER)].FirstSegID].pRightSector->FloorHeight;
+	}
+
 	Things* GetThings() { return m_pThings; }
 
 protected:
-    void BuildLinedef();
-    void BuildSeg();
     void RenderBSPNodes(int iNodeID);
-    void RenderSubsector(int iSubsectorID);
 
-    bool IsPointOnLeftSide(int XPosition, int YPosition, int iNodeID);
+    bool IsPointOnLeftSide(int XPosition, int YPosition, int iNodeID) const
+	{
+		return ((((XPosition - m_Nodes[iNodeID].x) * m_Nodes[iNodeID].dy) - ((YPosition - m_Nodes[iNodeID].y) * m_Nodes[iNodeID].dx)) <= 0);
+	}
 
-    std::vector<Vertex> m_Vertexes;
     std::vector<Sector> m_Sectors;
     std::vector<Sidedef> m_Sidedefs;
     std::vector<Linedef> m_Linedefs;
     std::vector<Seg> m_Segs;
     std::vector<Subsector> m_Subsector;
     std::vector<Node> m_Nodes;
-
-
-    std::vector<WADSidedef> m_pSidedefs;
-    std::vector<WADLinedef> m_pLinedefs;
-    std::vector<WADSeg> m_pSegs;
-
     Player *m_pPlayer;
     Things *m_pThings;
     ViewRenderer *m_pViewRenderer;

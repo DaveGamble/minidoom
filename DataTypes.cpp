@@ -36,3 +36,28 @@ Linedef::Linedef(const WADLinedef &wadlinedef, const std::vector<Sidedef> &sided
 	pRightSidedef = (wadlinedef.RightSidedef == 0xFFFF) ? nullptr : &sidedefs[wadlinedef.RightSidedef];
 	pLeftSidedef = (wadlinedef.LeftSidedef == 0xFFFF) ? nullptr : &sidedefs[wadlinedef.LeftSidedef];
 }
+
+Seg::Seg(const WADSeg &wadseg, const std::vector<Linedef>& linedefs, const std::vector<Vertex> &vertices)
+{
+	pStartVertex = vertices[wadseg.StartVertexID];
+	pEndVertex = vertices[wadseg.EndVertexID];
+	SlopeAngle = ((float)(wadseg.SlopeAngle << 16) * 8.38190317e-8);	// 8.38190317e-8 is to convert from Binary angles (BAMS) to float
+	pLinedef = &linedefs[wadseg.LinedefID];
+	Direction = wadseg.Direction;
+	Offset = (float)(wadseg.Offset << 16) / (float)(1 << 16);
+
+	const Sidedef *pRightSidedef;
+	const Sidedef *pLeftSidedef;
+	if (Direction)
+	{
+		pRightSidedef = pLinedef->pLeftSidedef;
+		pLeftSidedef = pLinedef->pRightSidedef;
+	}
+	else
+	{
+		pRightSidedef = pLinedef->pRightSidedef;
+		pLeftSidedef = pLinedef->pLeftSidedef;
+	}
+	pRightSector = (pRightSidedef) ? pRightSidedef->pSector : nullptr;
+	pLeftSector = (pLeftSidedef) ? pLeftSidedef->pSector : nullptr;
+}

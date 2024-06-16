@@ -10,26 +10,28 @@
 
 struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[8] {}; };
 struct Thing { int16_t XPosition, YPosition; uint16_t Angle, Type, Flags; };
-struct Vertex { int16_t x, y; };
 struct WADSector { int16_t FloorHeight, CeilingHeight; char FloorTexture[8], CeilingTexture[8]; uint16_t Lightlevel, Type, Tag; };
-struct Sector { Sector(const WADSector& from); int16_t FloorHeight, CeilingHeight; char FloorTexture[9], CeilingTexture[9]; uint16_t Lightlevel, Type, Tag; };
 struct WADSidedef { int16_t XOffset, YOffset; char UpperTexture[8], LowerTexture[8], MiddleTexture[8]; uint16_t SectorID; };
-struct Sidedef { Sidedef(const WADSidedef &from, const std::vector<Sector> &sectors); int16_t XOffset, YOffset; char UpperTexture[9], LowerTexture[9], MiddleTexture[9]; const Sector *pSector; };
 struct WADLinedef { uint16_t StartVertexID, EndVertexID, Flags, LineType, SectorTag, RightSidedef, LeftSidedef; }; // Sidedef 0xFFFF means there is no sidedef
-struct Linedef { Linedef(const WADLinedef &from, const std::vector<Sidedef> & sidedefs, const std::vector<Vertex> &vertices); Vertex pStartVertex, pEndVertex; uint16_t Flags, LineType, SectorTag; const Sidedef *pRightSidedef, *pLeftSidedef; };
 struct WADSeg { uint16_t StartVertexID, EndVertexID, SlopeAngle, LinedefID, Direction, Offset; }; // Direction: 0 same as linedef, 1 opposite of linedef Offset: distance along linedef to start of seg
+struct WADPatchHeader { uint16_t Width, Height; int16_t LeftOffset, TopOffset; uint32_t *pColumnOffsets; };
+struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
+struct WADTexturePatch { int16_t XOffset, YOffset; uint16_t PNameIndex, StepDir, ColorMap; }; // StepDir, ColorMap Unused values.
+struct WADTextureData { char TextureName[8]; uint32_t Flags; uint16_t Width, Height; uint32_t ColumnDirectory; uint16_t PatchCount; WADTexturePatch *pTexturePatch; };// ColumnDirectory Unused value.
+struct WADPalette { uint8_t bytes[768]; };
+
+
+class Texture;
+struct Vertex { int16_t x, y; };
+struct Sector { Sector(const WADSector& from, class WADLoader *wad); int16_t FloorHeight, CeilingHeight; const Texture *floortexture, *ceilingtexture; uint16_t Lightlevel, Type, Tag; };
+struct Sidedef { Sidedef(const WADSidedef &from, const std::vector<Sector> &sectors, class WADLoader *wad); int16_t XOffset, YOffset; const Texture *uppertexture, *middletexture, *lowertexture; const Sector *pSector; };
+struct Linedef { Linedef(const WADLinedef &from, const std::vector<Sidedef> & sidedefs, const std::vector<Vertex> &vertices); Vertex pStartVertex, pEndVertex; uint16_t Flags, LineType, SectorTag; const Sidedef *pRightSidedef, *pLeftSidedef; };
 struct Seg { Seg(const WADSeg &from, const std::vector<Linedef>& linedefs, const std::vector<Vertex> &vertices); Vertex start, end; Angle SlopeAngle; const Linedef *pLinedef; uint16_t Direction, Offset; const Sector *pRightSector, *pLeftSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
 struct Subsector { uint16_t SegCount, FirstSegID; };
 struct Node {
     int16_t x, y, dx, dy, RightBoxTop, RightBoxBottom, RightBoxLeft, RightBoxRight, LeftBoxTop, LeftBoxBottom, LeftBoxLeft, LeftBoxRight;
     uint16_t RightChildID, LeftChildID;
 };
-struct WADPatchHeader { uint16_t Width, Height; int16_t LeftOffset, TopOffset; uint32_t *pColumnOffsets; };
-struct PatchColumnData { uint8_t TopDelta, Length, PaddingPre, *pColumnData, PaddingPost; };
-struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
-struct WADTexturePatch { int16_t XOffset, YOffset; uint16_t PNameIndex, StepDir, ColorMap; }; // StepDir, ColorMap Unused values.
-struct WADTextureData { char TextureName[8]; uint32_t Flags; uint16_t Width, Height; uint32_t ColumnDirectory; uint16_t PatchCount; WADTexturePatch *pTexturePatch; };// ColumnDirectory Unused value.
-struct WADPalette { uint8_t bytes[768]; };
 
 class Things
 {

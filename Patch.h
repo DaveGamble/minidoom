@@ -23,6 +23,7 @@ public:
 
 protected:
 	int m_iHeight {0}, m_iWidth {0}, m_iXOffset {0}, m_iYOffset {0};
+	struct PatchColumnData { uint8_t TopDelta, Length, PaddingPre, *pColumnData, PaddingPost; } PatchColumn;
 
     std::vector<PatchColumnData> m_PatchData;
     std::vector<int> m_ColumnIndex;

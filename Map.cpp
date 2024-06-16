@@ -20,8 +20,8 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 	
 	std::vector<Vertex> m_Vertexes;
 	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) m_Vertexes.push_back(*(Vertex*)(ptr + i));
-	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) m_Sectors.push_back(*(WADSector*)(ptr + i));
-	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) m_Sidedefs.push_back(Sidedef(*(WADSidedef*)(ptr + i), m_Sectors));
+	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) m_Sectors.push_back(Sector(*(WADSector*)(ptr + i), wad));
+	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) m_Sidedefs.push_back(Sidedef(*(WADSidedef*)(ptr + i), m_Sectors, wad));
 	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) m_Linedefs.push_back(Linedef(*(WADLinedef*)(ptr + i), m_Sidedefs, m_Vertexes));
 	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg)) m_Segs.push_back(Seg(*(WADSeg*)(ptr + i), m_Linedefs, m_Vertexes));
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) m_pThings->AddThing(*(Thing*)(ptr + i));

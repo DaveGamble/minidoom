@@ -7,7 +7,6 @@
 #include "Map.h"
 #include "Texture.h"
 #include "Player.hpp"
-#include "AssetsManager.hpp"
 
 ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int renderYSize)
 : m_pMap(pMap)
@@ -175,9 +174,9 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
         }
     }
 
-	auto GetSectionColor = [&](const std::string &TextureName) {
-		if (!m_WallColor.count(TextureName)) m_WallColor[TextureName] = rand() & 255;
-		return m_WallColor[TextureName];
+	auto GetSectionColor = [&](const Texture *texture) {
+		if (!m_WallColor.count(texture)) m_WallColor[texture] = rand() & 255;
+		return m_WallColor[texture];
 	};
 	auto DrawVerticalLine = [&](int iX, int iStartY, int iEndY, uint8_t color) {
 		for (; iStartY < iEndY; iStartY++) m_pScreenBuffer[m_iBufferPitch * iStartY + iX] = color;
@@ -202,7 +201,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 				int iUpperHeight = std::min(m_FloorClipHeight[iXCurrent] - 1.f, RenderData.iUpperHeight);
 				RenderData.iUpperHeight += RenderData.UpperHeightStep;
 				if (iUpperHeight >= CurrentCeilingEnd)
-					DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->UpperTexture));
+					DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->uppertexture));
 				m_CeilingClipHeight[iXCurrent] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
 			}
 			else if (RenderData.UpdateCeiling)
@@ -213,7 +212,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 				int iLowerHeight = std::max(RenderData.iLowerHeight, m_CeilingClipHeight[iXCurrent] + 1.f);
 				RenderData.iLowerHeight += RenderData.LowerHeightStep;
 				if (iLowerHeight <= CurrentFloorStart)
-					DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->LowerTexture));
+					DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->lowertexture));
 				m_FloorClipHeight[iXCurrent] = std::min(CurrentFloorStart + 1, iLowerHeight);
 			}
 			else if (RenderData.UpdateFloor)
@@ -221,7 +220,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 		}
         else
 		{
-			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->MiddleTexture));
+			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->middletexture));
 			m_CeilingClipHeight[iXCurrent] = m_iRenderYSize;
 			m_FloorClipHeight[iXCurrent] = -1;
 

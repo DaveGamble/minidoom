@@ -8,7 +8,6 @@
 #include "Player.hpp"
 #include "WADLoader.hpp"
 #include "ViewRenderer.h"
-#include "AssetsManager.hpp"
 
 class DoomEngine
 {
@@ -28,7 +27,6 @@ protected:
 	// SDL
 	
 	WADLoader m_WADLoader;
-	AssetsManager assets;
 	ViewRenderer m_ViewRenderer;
 	Things m_Things;
 	Player m_Player;

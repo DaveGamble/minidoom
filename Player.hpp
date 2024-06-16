@@ -2,7 +2,7 @@
 
 #include "Angle.hpp"
 #include "DataTypes.hpp"
-#include "AssetsManager.hpp"
+#include "WADLoader.hpp"
 #include "ViewRenderer.h"
 #include "Patch.h"
 
@@ -12,9 +12,9 @@ public:
 	Player(int iID = 1) : m_iPlayerID(iID) {}
 	~Player() {}
 
-    void Init(Thing *thing, AssetsManager *assets)
+    void Init(Thing *thing, WADLoader *wad)
 	{
-		m_pWeapon = assets->GetPatch("PISGA0");
+		m_pWeapon = wad->GetPatch("PISGA0");
 		if (thing)
 		{
 			m_XPosition = thing->XPosition;

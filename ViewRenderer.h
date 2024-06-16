@@ -77,7 +77,7 @@ protected:
     std::list<SolidSegmentRange> m_SolidWallRanges;
     std::vector<int> m_FloorClipHeight;
     std::vector<int> m_CeilingClipHeight;
-    std::map<std::string, uint8_t> m_WallColor;
+    std::map<const Texture*, uint8_t> m_WallColor;
     std::map<int, Angle> m_ScreenXToAngle;
 
 	uint8_t *m_pScreenBuffer;

@@ -1,10 +1,10 @@
 #include "Texture.h"
-#include "AssetsManager.hpp"
+#include "WADLoader.hpp"
 
 #include <string>
 using namespace std;
 
-Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_assets)
+Texture::Texture(WADTextureData &TextureData, WADLoader *_wad) : wad(_wad)
 {
 	m_iWidth = TextureData.Width;
 	m_iHeight = TextureData.Height;
@@ -18,7 +18,7 @@ Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_
 
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
-		Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
+		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].PNameIndex);
 		int iXStart = m_TexturePatches[i].XOffset;
 		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
@@ -42,7 +42,7 @@ Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_
 	m_pOverLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[m_iOverLapSize]);
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
-		Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
+		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].PNameIndex);
 		int iXStart = m_TexturePatches[i].XOffset;
 		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
@@ -62,7 +62,7 @@ void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScree
 	pScreenBuffer += iBufferPitch * iYScreenLocation + iXScreenLocation;
     if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
     {
-        Patch *pPatch = assets->GetPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].PNameIndex);
+        Patch *pPatch = wad->GetPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].PNameIndex);
         pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].YOffset);
     }
     else

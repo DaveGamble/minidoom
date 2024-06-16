@@ -1,28 +1,26 @@
 #include "DataTypes.hpp"
+#include "WADLoader.hpp"
 
-Sector::Sector(const WADSector& wadsector)
+Sector::Sector(const WADSector& wadsector, WADLoader *wad)
 {
+	char name[9] {};
 	FloorHeight = wadsector.FloorHeight;
 	CeilingHeight = wadsector.CeilingHeight;
-	strncpy(FloorTexture, wadsector.FloorTexture, 8);
-	FloorTexture[8] = '\0';
-	strncpy(CeilingTexture, wadsector.CeilingTexture, 8);
-	CeilingTexture[8] = '\0';
+	memcpy(name, wadsector.FloorTexture, 8);	floortexture = wad->GetTexture(name);
+	memcpy(name, wadsector.CeilingTexture, 8);	ceilingtexture = wad->GetTexture(name);
 	Lightlevel = wadsector.Lightlevel;
 	Type = wadsector.Type;
 	Tag = wadsector.Tag;
 }
 
-Sidedef::Sidedef(const WADSidedef& wadsidedef, const std::vector<Sector> &sectors)
+Sidedef::Sidedef(const WADSidedef& wadsidedef, const std::vector<Sector> &sectors, WADLoader *wad)
 {
+	char name[9] {};
 	XOffset = wadsidedef.XOffset;
 	YOffset = wadsidedef.YOffset;
-	strncpy(UpperTexture, wadsidedef.UpperTexture, 8);
-	UpperTexture[8] = '\0';
-	strncpy(LowerTexture, wadsidedef.LowerTexture, 8);
-	LowerTexture[8] = '\0';
-	strncpy(MiddleTexture, wadsidedef.MiddleTexture, 8);
-	MiddleTexture[8] = '\0';
+	memcpy(name, wadsidedef.UpperTexture, 8); uppertexture = wad->GetTexture(name);
+	memcpy(name, wadsidedef.LowerTexture, 8); lowertexture = wad->GetTexture(name);
+	memcpy(name, wadsidedef.MiddleTexture, 8); middletexture = wad->GetTexture(name);
 	pSector = &sectors[wadsidedef.SectorID];
 }
 

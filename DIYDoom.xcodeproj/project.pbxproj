@@ -122,7 +122,6 @@
 		55FEA4BA2C1DBCC800F9DCAC /* SDL_vulkan.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_vulkan.h; sourceTree = "<group>"; };
 		55FEA4BB2C1DBCC800F9DCAC /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };
 		55FEA4BE2C1DBCC800F9DCAC /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map.h; sourceTree = SOURCE_ROOT; };
-		55FEA4C22C1DBCC800F9DCAC /* AssetsManager.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = AssetsManager.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C42C1DBCC800F9DCAC /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Angle.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C72C1DBCC800F9DCAC /* Player.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Player.hpp; sourceTree = SOURCE_ROOT; };
@@ -198,7 +197,6 @@
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.hpp */,
 				55E6BDF42C1E718C00FA2E64 /* DataTypes.cpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.hpp */,
-				55FEA4C22C1DBCC800F9DCAC /* AssetsManager.hpp */,
 				55FEA4C72C1DBCC800F9DCAC /* Player.hpp */,
 				55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */,
 				55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */,

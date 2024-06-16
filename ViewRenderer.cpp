@@ -29,28 +29,13 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 {
 	m_pScreenBuffer = pScreenBuffer;
 	m_iBufferPitch = iBufferPitch;
+	m_SolidWallRanges.clear();
+	m_SolidWallRanges.push_back({INT_MIN, -1});
+	m_SolidWallRanges.push_back({m_iRenderXSize, INT_MAX});
+	std::fill(m_CeilingClipHeight.begin(), m_CeilingClipHeight.end(), -1);
+	std::fill(m_FloorClipHeight.begin(), m_FloorClipHeight.end(), m_iRenderYSize);
 
-    InitFrame();
 	m_pMap->Render3DView();
-}
-
-void ViewRenderer::InitFrame()
-{
-    m_SolidWallRanges.clear();
-
-    SolidSegmentRange WallLeftSide;
-    SolidSegmentRange WallRightSide;
-
-    WallLeftSide.XStart = INT_MIN;
-    WallLeftSide.XEnd = -1;
-    m_SolidWallRanges.push_back(WallLeftSide);
-
-    WallRightSide.XStart = m_iRenderXSize;
-    WallRightSide.XEnd = INT_MAX;
-    m_SolidWallRanges.push_back(WallRightSide);
-
-    std::fill(m_CeilingClipHeight.begin(), m_CeilingClipHeight.end(), -1);
-    std::fill(m_FloorClipHeight.begin(), m_FloorClipHeight.end(), m_iRenderYSize);
 }
 
 void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer)

@@ -21,7 +21,6 @@ public:
 	~ViewRenderer() {}
     void Render(uint8_t *pScreenBuffer, int iBufferPitch);
     void AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer);
-    void InitFrame();
 
 protected:
     struct SolidSegmentRange

@@ -14,20 +14,20 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 	for (int i = 0; i < textureData->patchCount; ++i)
 		texturePatches.push_back({texturePatch[i].dx, texturePatch[i].dy, texturePatch[i].stepDir, texturePatch[i].colorMap, wad->getPatch(texturePatch[i].pnameIndex)});
 
-	numPatchesPerColumn.resize(width, 0);
+	std::vector<int> numPatchesPerColumn(width, 0);
 	columnIndices.resize(width, 0);
 	columnPatches.resize(width, 0);
+	columnYOffsets.resize(width, 0);
 
 	for (int i = 0; i < texturePatches.size(); ++i)
 	{
-		const Patch *pPatch =texturePatches[i].patch;
-		int iXStart = texturePatches[i].dx;
-		int iMaxWidth = (iXStart + pPatch->getWidth()) > width ? width : iXStart + pPatch->getWidth();
-		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
+		const Patch *patch =texturePatches[i].patch;
+		for (int x = std::max(texturePatches[i].dx, (int16_t)0); x < std::min(width, texturePatches[i].dx + patch->getWidth()); x++)
 		{
-			numPatchesPerColumn[iXIndex]++;
-			columnPatches[iXIndex] = i/*pPatch*/;
-			columnIndices[iXIndex] = pPatch->getColumnDataIndex(iXIndex - iXStart);
+			numPatchesPerColumn[x]++;
+			columnPatches[x] = patch;
+			columnYOffsets[x] = texturePatches[i].dy;
+			columnIndices[x] = patch->getColumnDataIndex(x - texturePatches[i].dx);
 		}
 	}
 
@@ -35,7 +35,7 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 	{
 		if (numPatchesPerColumn[i] > 1)	// Is the column covered by more than one patch?
 		{
-			columnPatches[i] = -1;
+			columnPatches[i] = 0;
 			columnIndices[i] = overlap;
 			overlap += height;
 		}
@@ -44,12 +44,10 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 	overlapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[overlap]);
 	for (int i = 0; i < texturePatches.size(); ++i)
 	{
-		const Patch *pPatch = texturePatches[i].patch;
-		int iXStart = texturePatches[i].dx;
-		int iMaxWidth = (iXStart + pPatch->getWidth()) > width ? width : iXStart + pPatch->getWidth();
-		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
-			if (columnPatches[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
-				pPatch->composeColumn(overlapColumnData.get() + columnIndices[iXIndex], height, pPatch->getColumnDataIndex(iXIndex - iXStart), texturePatches[i].dy);
+		const Patch *patch = texturePatches[i].patch;
+		for (int x = std::max(texturePatches[i].dx, (int16_t)0); x < std::min(width, texturePatches[i].dx + patch->getWidth()); x++)
+			if (!columnPatches[x]) // Does this column have more than one patch? if yes compose it, else skip it
+				patch->composeColumn(overlapColumnData.get() + columnIndices[x], height, patch->getColumnDataIndex(x - texturePatches[i].dx), texturePatches[i].dy);
 	}
 }
 
@@ -61,8 +59,6 @@ void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny)
 
 void Texture::renderColumn(uint8_t *buf, int rowlen, int column)
 {
-    if (columnPatches[column] > -1 )
-		texturePatches[columnPatches[column]].patch->renderColumn(buf, rowlen, columnIndices[column], height, texturePatches[columnPatches[column]].dy);
-    else
-        for (int y = 0; y < height; y++, buf += rowlen) *buf = overlapColumnData[columnIndices[column] + y];
+    if (columnPatches[column]) columnPatches[column]->renderColumn(buf, rowlen, columnIndices[column], height, columnYOffsets[column]);
+    else for (int y = 0; y < height; y++, buf += rowlen) *buf = overlapColumnData[columnIndices[column] + y];
 }

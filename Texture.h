@@ -12,7 +12,8 @@ public:
 protected:
     int width, height, overlap {0};
 
-    std::vector<int> numPatchesPerColumn, columnIndices, columnPatches;
+    std::vector<int> columnIndices, columnYOffsets;
+	std::vector<const Patch*> columnPatches;
 	struct TexturePatch { int16_t dx, dy; uint16_t stepDir, colorMap; const Patch *patch; }; // StepDir, ColorMap Unused values.
 	std::vector<TexturePatch> texturePatches;
     std::unique_ptr<uint8_t[]> overlapColumnData;

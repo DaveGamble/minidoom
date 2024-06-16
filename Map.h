@@ -14,31 +14,16 @@ public:
     Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *w);
 	~Map() {}
 
-    void AddVertex(Vertex &v);
-    void AddLinedef(WADLinedef &l);
-    void AddNode(Node &node);
-    void AddSubsector(Subsector &subsector);
-    void AddSeg(WADSeg &seg);
-    void AddSidedef(WADSidedef &sidedef);
-    void AddSector(WADSector &sector);
-    void Render3DView();
-    void SetLumpIndex(int iIndex);
+	void Render3DView() { RenderBSPNodes(m_Nodes.size() - 1); }
 
     int GetPlayerSubSectorHieght();
-    int GetXMin();
-    int GetXMax();
-    int GetYMin();
-    int GetYMax();
-    int GetLumpIndex();
-
-    Things* GetThings();
+	Things* GetThings() { return m_pThings; }
 
 protected:
     void BuildSectors();
     void BuildSidedefs();
     void BuildLinedef();
     void BuildSeg();
-    void RenderBSPNodes();
     void RenderBSPNodes(int iNodeID);
     void RenderSubsector(int iSubsectorID);
 
@@ -57,8 +42,6 @@ protected:
     std::vector<WADSidedef> m_pSidedefs;
     std::vector<WADLinedef> m_pLinedefs;
     std::vector<WADSeg> m_pSegs;
-
-	int m_XMin {INT_MAX}, m_XMax {INT_MIN}, m_YMin {INT_MAX}, m_YMax {INT_MIN}, m_iLumpIndex {-1};
 
     Player *m_pPlayer;
     Things *m_pThings;

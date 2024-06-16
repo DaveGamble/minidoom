@@ -18,15 +18,15 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 		return ptr;
 	};
 	
-	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) AddVertex(*(Vertex*)(ptr + i));
-	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) AddSector(*(WADSector*)(ptr + i));
-	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) AddSidedef(*(WADSidedef*)(ptr + i));
-	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) AddLinedef(*(WADLinedef*)(ptr + i));
-	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg)) AddSeg(*(WADSeg*)(ptr + i));
-	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) GetThings()->AddThing(*(Thing*)(ptr + i));
-	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) AddNode(*(Node*)(ptr + i));
-	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) AddSubsector(*(Subsector*)(ptr + i));
-	
+	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) m_Vertexes.push_back(*(Vertex*)(ptr + i));
+	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) m_pSectors.push_back(*(WADSector*)(ptr + i));
+	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) m_pSidedefs.push_back(*(WADSidedef*)(ptr + i));
+	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) m_pLinedefs.push_back(*(WADLinedef*)(ptr + i));
+	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg)) m_pSegs.push_back(*(WADSeg*)(ptr + i));
+	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) m_pThings->AddThing(*(Thing*)(ptr + i));
+	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) m_Nodes.push_back(*(Node*)(ptr + i));
+	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) m_Subsector.push_back(*(Subsector*)(ptr + i));
+
 	BuildSectors();
 	BuildSidedefs();
 	BuildLinedef();
@@ -168,89 +168,6 @@ void Map::BuildSeg()
 	m_pSegs.clear();
 }
 
-void Map::AddVertex(Vertex &v)
-{
-    m_Vertexes.push_back(v);
-
-    if (m_XMin > v.XPosition)
-    {
-        m_XMin = v.XPosition;
-    }
-    else if (m_XMax < v.XPosition)
-    {
-        m_XMax = v.XPosition;
-    }
-
-    if (m_YMin > v.YPosition)
-    {
-        m_YMin = v.YPosition;
-    }
-    else if (m_YMax < v.YPosition)
-    {
-        m_YMax = v.YPosition;
-    }
-}
-
-void Map::AddSidedef(WADSidedef &sidedef)
-{
-    m_pSidedefs.push_back(sidedef);
-}
-
-void Map::AddSector(WADSector &sector)
-{
-    m_pSectors.push_back(sector);
-}
-
-int Map::GetXMin()
-{
-    return m_XMin;
-}
-
-int Map::GetXMax()
-{
-    return m_XMax;
-}
-
-int Map::GetYMin()
-{
-    return m_YMin;
-}
-
-int Map::GetYMax()
-{
-    return m_YMax;
-}
-
-void Map::AddLinedef(WADLinedef &l)
-{
-    m_pLinedefs.push_back(l);
-}
-
-void Map::AddNode(Node &node)
-{
-    m_Nodes.push_back(node);
-}
-
-void Map::AddSubsector(Subsector &subsector)
-{
-    m_Subsector.push_back(subsector);
-}
-
-void Map::AddSeg(WADSeg &seg)
-{
-    m_pSegs.push_back(seg);
-}
-
-void Map::Render3DView()
-{
-    RenderBSPNodes();
-}
-
-void Map::RenderBSPNodes()
-{
-    RenderBSPNodes(m_Nodes.size() - 1);
-}
-
 void Map::RenderBSPNodes(int iNodeID)
 {
     // Masking all the bits exipt the last one
@@ -296,21 +213,6 @@ bool Map::IsPointOnLeftSide(int XPosition, int YPosition, int iNodeID)
     int dy = YPosition - m_Nodes[iNodeID].YPartition;
 
     return (((dx * m_Nodes[iNodeID].ChangeYPartition) - (dy * m_Nodes[iNodeID].ChangeXPartition)) <= 0);
-}
-
-void Map::SetLumpIndex(int iIndex)
-{
-    m_iLumpIndex = iIndex;
-}
-
-int Map::GetLumpIndex()
-{
-    return m_iLumpIndex;
-}
-
-Things* Map::GetThings()
-{
-    return m_pThings;
 }
 
 int Map::GetPlayerSubSectorHieght()

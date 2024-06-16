@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		55E6BDF32C1E2B3600FA2E64 /* DIYDoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */; };
-		55E6BDF52C1E718C00FA2E64 /* DataTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55E6BDF42C1E718C00FA2E64 /* DataTypes.cpp */; };
 		55FEA4D02C1DBCC800F9DCAC /* DoomEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */; };
 		55FEA4D22C1DBCC800F9DCAC /* Patch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4752C1DBCC800F9DCAC /* Patch.cpp */; };
 		55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */; };
@@ -45,7 +44,6 @@
 
 /* Begin PBXFileReference section */
 		55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
-		55E6BDF42C1E718C00FA2E64 /* DataTypes.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DataTypes.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4602C1DBCB400F9DCAC /* DIYDoom */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DIYDoom; sourceTree = BUILT_PRODUCTS_DIR; };
 		55FEA46A2C1DBCC800F9DCAC /* Patch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Patch.h; sourceTree = SOURCE_ROOT; };
 		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
@@ -194,7 +192,6 @@
 				55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */,
 				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
 				55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */,
-				55E6BDF42C1E718C00FA2E64 /* DataTypes.cpp */,
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.hpp */,
 				55FEA4C72C1DBCC800F9DCAC /* Player.hpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.hpp */,
@@ -369,7 +366,6 @@
 				55E6BDF32C1E2B3600FA2E64 /* DIYDoom.cpp in Sources */,
 				55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */,
 				55FEA4D22C1DBCC800F9DCAC /* Patch.cpp in Sources */,
-				55E6BDF52C1E718C00FA2E64 /* DataTypes.cpp in Sources */,
 				55FEA4DB2C1DBCC800F9DCAC /* Texture.cpp in Sources */,
 				55FEA4DA2C1DBCC800F9DCAC /* Map.cpp in Sources */,
 			);

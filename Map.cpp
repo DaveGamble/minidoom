@@ -16,10 +16,40 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 	
 	std::vector<Vertex> m_Vertexes;
 	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) m_Vertexes.push_back(*(Vertex*)(ptr + i));
-	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) m_Sectors.push_back(Sector(*(WADSector*)(ptr + i), wad));
-	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) m_Sidedefs.push_back(Sidedef(*(WADSidedef*)(ptr + i), m_Sectors, wad));
-	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) m_Linedefs.push_back(Linedef(*(WADLinedef*)(ptr + i), m_Sidedefs, m_Vertexes));
-	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg)) m_Segs.push_back(Seg(*(WADSeg*)(ptr + i), m_Linedefs, m_Vertexes));
+	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector))
+	{
+		WADSector *wadsector = (WADSector*)(ptr + i);
+		char floorname[9] {}, ceilname[9] {};
+		memcpy(floorname, wadsector->FloorTexture, 8);
+		memcpy(ceilname, wadsector->CeilingTexture, 8);
+		m_Sectors.push_back({wadsector->FloorHeight, wadsector->CeilingHeight, wad->GetTexture(floorname), wad->GetTexture(ceilname), wadsector->Lightlevel, wadsector->Type, wadsector->Tag});
+	}
+	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef))
+	{
+		WADSidedef *wadsidedef = (WADSidedef*)(ptr + i);
+		char uname[9] {}, lname[9] {}, mname[9] {};
+		memcpy(uname, wadsidedef->UpperTexture, 8);
+		memcpy(lname, wadsidedef->LowerTexture, 8);
+		memcpy(mname, wadsidedef->MiddleTexture, 8);
+		m_Sidedefs.push_back({wadsidedef->XOffset, wadsidedef->YOffset, wad->GetTexture(uname), wad->GetTexture(mname), wad->GetTexture(lname), m_Sectors.data() + wadsidedef->SectorID});
+	}
+	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef))
+	{
+		WADLinedef *wadlinedef = (WADLinedef*)(ptr + i);
+		m_Linedefs.push_back({m_Vertexes[wadlinedef->StartVertexID], m_Vertexes[wadlinedef->EndVertexID], wadlinedef->Flags, wadlinedef->LineType, wadlinedef->SectorTag,
+			(wadlinedef->RightSidedef == 0xFFFF) ? nullptr : m_Sidedefs.data() + wadlinedef->RightSidedef,
+			(wadlinedef->LeftSidedef == 0xFFFF) ? nullptr : m_Sidedefs.data() + wadlinedef->LeftSidedef
+		});
+	}
+	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg))
+	{
+		WADSeg *wadseg = (WADSeg*)(ptr + i);
+		const Linedef *pLinedef = &m_Linedefs[wadseg->LinedefID];
+		const Sidedef *pRightSidedef = wadseg->Direction ? pLinedef->pLeftSidedef : pLinedef->pRightSidedef;
+		const Sidedef *pLeftSidedef = wadseg->Direction ? pLinedef->pRightSidedef : pLinedef->pLeftSidedef;
+		m_Segs.push_back({m_Vertexes[wadseg->StartVertexID], m_Vertexes[wadseg->EndVertexID], wadseg->SlopeAngle * 360.f / 65536.f, pLinedef, wadseg->Direction, wadseg->Offset / 65536.f,
+			(pRightSidedef) ? pRightSidedef->pSector : nullptr, (pLeftSidedef) ? pLeftSidedef->pSector : nullptr});
+	}
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) m_pThings->AddThing(*(Thing*)(ptr + i));
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) m_Nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) m_Subsector.push_back(*(Subsector*)(ptr + i));

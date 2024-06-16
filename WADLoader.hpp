@@ -51,7 +51,7 @@ public:
 	}
 
 	~WADLoader() { delete[] data; }
-    bool LoadMapData(class Map *pMap) const;
+
 	std::vector<uint8_t> GetLumpNamed(const std::string& name, size_t after = 0) const
 	{
 		int id = FindLumpByName(name, after);

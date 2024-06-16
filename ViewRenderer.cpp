@@ -330,13 +330,7 @@ bool ViewRenderer::ValidateRange(ViewRenderer::SegmentRenderData & RenderData, i
 
 int ViewRenderer::AngleToScreen(Angle angle)
 {
-    if (angle > 90)
-    {
-        angle -= 90;
-        return m_iDistancePlayerToScreen - round(angle.GetTanValue() * m_HalfScreenWidth);
-    }
-	angle = 90 - angle.GetValue();
-	return round(angle.GetTanValue() * m_HalfScreenWidth) + m_iDistancePlayerToScreen;
+	return m_iDistancePlayerToScreen + round(tanf((90 - angle.GetValue()) * PI / 180.0f) * m_HalfScreenWidth);
 }
 
 uint8_t ViewRenderer::GetSectionColor(const std::string &TextureName)

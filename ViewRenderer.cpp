@@ -121,27 +121,24 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		return a - 360 * floor(a / 360);
 	};
 
-	auto GetScaleFactor = [&](int VXScreen, float SegToNormalAngle, float DistanceToNormal) {
-		float SkewAngle = amod(screenXToAngle[VXScreen] + player->getAngle() - SegToNormalAngle);
-		return std::clamp((distancePlayerToScreen * cosf(M_PI * SkewAngle / 180)) / (DistanceToNormal * cosf(M_PI * screenXToAngle[VXScreen] / 180)), 0.00390625f, 64.0f);
-	};
 
     // Calculate the distance to the first edge of the wall
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
 	float SegToNormalAngle = amod(seg.slopeAngle + 90);
-    float NomalToV1Angle = amod(SegToNormalAngle - V1Angle);
-
-    // Normal angle is 90 degree to wall
-    float SegToPlayerAngle = amod(90 - NomalToV1Angle);
+    float SegToPlayerAngle = amod(V1Angle - seg.slopeAngle);
 
 	float px = player->getX(), py = player->getY();     // Calculate the distance between the player an the vertex.
-	float DistanceToV1 = sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
-    float DistanceToNormal = sin(M_PI * SegToPlayerAngle / 180) * DistanceToV1;
+	float DistanceToNormal = sin(M_PI * SegToPlayerAngle / 180) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
-    float V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, DistanceToNormal);
-    float V2ScaleFactor = GetScaleFactor(V2XScreen, SegToNormalAngle, DistanceToNormal);
+	auto GetScaleFactor = [&](int VXScreen) {
+		float SkewAngle = amod(screenXToAngle[VXScreen] + player->getAngle() - SegToNormalAngle);
+		return std::clamp((distancePlayerToScreen * cosf(M_PI * SkewAngle / 180)) / (DistanceToNormal * cosf(M_PI * screenXToAngle[VXScreen] / 180)), 0.00390625f, 64.0f);
+	};
+
+    float V1ScaleFactor = GetScaleFactor(V1XScreen);
+    float V2ScaleFactor = GetScaleFactor(V2XScreen);
 
     float Steps = (V2ScaleFactor - V1ScaleFactor) / (V2XScreen - V1XScreen);
 

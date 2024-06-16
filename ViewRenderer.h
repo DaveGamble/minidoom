@@ -17,7 +17,7 @@ class Player;
 class ViewRenderer
 {
 public:
-    ViewRenderer(Map *pMap, Player *pPlayer);
+    ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int renderYSize);
 	~ViewRenderer() {}
     void Render(uint8_t *pScreenBuffer, int iBufferPitch);
     void AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer);
@@ -88,23 +88,18 @@ protected:
 
     int AngleToScreen(Angle angle);
 
-    int m_iRenderXSize;
-    int m_iRenderYSize;
-    int m_iDistancePlayerToScreen;
-    int m_HalfScreenWidth;
-    int m_HalfScreenHeight;
+	Map *m_pMap;
+	Player *m_pPlayer;
+    int m_iRenderXSize, m_iRenderYSize, m_HalfScreenWidth, m_HalfScreenHeight, m_iDistancePlayerToScreen;
 
     SDL_Color GetWallColor(std::string textureName);
 
-    Map *m_pMap;
-    Player *m_pPlayer;
 
     std::list<SolidSegmentRange> m_SolidWallRanges;
     std::vector<int> m_FloorClipHeight;
     std::vector<int> m_CeilingClipHeight;
     std::map<std::string, uint8_t> m_WallColor;
     std::map<int, Angle> m_ScreenXToAngle;
-    bool m_UseClassicDoomScreenToAngle;
 
 	uint8_t *m_pScreenBuffer;
 	int m_iBufferPitch;

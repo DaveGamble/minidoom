@@ -17,7 +17,7 @@ public:
 	~DoomEngine();
 	bool Tick();
 protected:
-	int m_iRenderWidth {320}, m_iRenderHeight {200};
+	int m_iRenderWidth {960}, m_iRenderHeight {600};
 	bool m_bIsOver {false};
 	// SDL
 	SDL_Surface *m_pScreenBuffer {nullptr}, *m_pRGBBuffer {nullptr};

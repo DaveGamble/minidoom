@@ -4,11 +4,11 @@ DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 : m_WADLoader(wad)
 , assets(&m_WADLoader)
 , m_Map(&m_ViewRenderer, mapName, &m_Player, &m_Things, &m_WADLoader)
-, m_ViewRenderer(&m_Map, &m_Player)
+, m_ViewRenderer(&m_Map, &m_Player, m_iRenderWidth, m_iRenderHeight)
 {
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
-	m_pWindow = SDL_CreateWindow("DIY DOOM", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_iRenderWidth * 3, m_iRenderHeight * 3, SDL_WINDOW_SHOWN);
+	m_pWindow = SDL_CreateWindow("DIY DOOM", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_iRenderWidth, m_iRenderHeight, SDL_WINDOW_SHOWN);
 	m_pRenderer = SDL_CreateRenderer(m_pWindow, -1, 0);
 	m_pScreenBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 8, 0, 0, 0, 0);
 	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);

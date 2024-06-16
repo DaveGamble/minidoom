@@ -5,7 +5,7 @@
 #include <memory>
 
 #include "Map.h"
-#include "Player.h"
+#include "Player.hpp"
 #include "WADLoader.hpp"
 #include "ViewRenderer.h"
 #include "AssetsManager.hpp"

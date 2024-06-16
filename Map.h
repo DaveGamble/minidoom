@@ -4,7 +4,7 @@
 #include <string>
 
 #include "DataTypes.hpp"
-#include "Player.h"
+#include "Player.hpp"
 #include "ViewRenderer.h"
 #include "WADLoader.hpp"
 

@@ -24,8 +24,8 @@ public:
     void MoveLeftward() { x -= a.sin() * moveSpeed; y += a.cos() * moveSpeed; }
 	void MoveRightward() { x += a.sin() * moveSpeed; y -= a.cos() * moveSpeed; }
 	void RotateBy(float dt) { a += (dt * rotateSpeed); }
-	void RotateLeft() { a += (0.1875f * rotateSpeed); }
-	void RotateRight() { a -= (0.1875f * rotateSpeed); }
+	void RotateLeft() { RotateBy(0.1875f); }
+	void RotateRight() { RotateBy(-0.1875f); }
 	void Fly() { z += 1; }
 	void Sink() { z -= 1; }
 	void Think(int subsectorHeight) { z = subsectorHeight + 41; }

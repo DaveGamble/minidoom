@@ -33,13 +33,13 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 	}
 }
 
-void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale)
+void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale) const
 {
 	buf += rowlen * screeny + screenx;
 	for (int column = 0, tox = 0; column < width; ++column) while (tox < (column + 1) * scale) {renderColumn(buf + tox, rowlen, column, scale); tox++;}
 }
 
-void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale)
+void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale) const
 {
 	if (columns[c].overlap.size())
 	{

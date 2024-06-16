@@ -4,55 +4,64 @@
 
 using namespace std;
 
-Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings) : m_sName(sName), m_XMin(INT_MAX), m_XMax(INT_MIN), m_YMin(INT_MAX), m_YMax(INT_MIN), m_iLumpIndex(-1), m_pPlayer(pPlayer), m_pThings(pThings), m_pViewRenderer(pViewRenderer)
+Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *wad)
+: m_pPlayer(pPlayer), m_pThings(pThings), m_pViewRenderer(pViewRenderer)
 {
-    m_pSectors = new std::vector<WADSector>();
-    m_pSidedefs = new std::vector<WADSidedef>();
-    m_pLinedefs = new std::vector<WADLinedef>();
-    m_pSegs = new std::vector<WADSeg>();
-}
+	int li = wad->FindLumpByName(sName);
+	std::vector<uint8_t> data;
+	const uint8_t *ptr;
+	size_t size;
+	auto seek = [&](const std::string& name) {
+		data = wad->GetLumpNamed(name, li);
+		ptr = data.data();
+		size = data.size();
+		return ptr;
+	};
+	
+	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) AddVertex(*(Vertex*)(ptr + i));
+	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) AddSector(*(WADSector*)(ptr + i));
+	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) AddSidedef(*(WADSidedef*)(ptr + i));
+	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) AddLinedef(*(WADLinedef*)(ptr + i));
+	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg)) AddSeg(*(WADSeg*)(ptr + i));
+	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) GetThings()->AddThing(*(Thing*)(ptr + i));
+	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) AddNode(*(Node*)(ptr + i));
+	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) AddSubsector(*(Subsector*)(ptr + i));
+	
+	BuildSectors();
+	BuildSidedefs();
+	BuildLinedef();
+	BuildSeg();
 
-Map::~Map()
-{
-}
-
-void Map::Init()
-{
-    BuildSectors();
-    BuildSidedefs();
-    BuildLinedef();
-    BuildSeg();
 }
 
 void Map::BuildSectors()
 {
-    WADSector wadsector;
-    Sector sector;
-    for (int i = 0; i < m_pSectors->size(); ++i)
-    {
-        wadsector = m_pSectors->at(i);
-        sector.FloorHeight = wadsector.FloorHeight;
-        sector.CeilingHeight = wadsector.CeilingHeight;
-        strncpy(sector.FloorTexture, wadsector.FloorTexture, 8);
-        sector.FloorTexture[8] = '\0';
-        strncpy(sector.CeilingTexture, wadsector.CeilingTexture, 8);
-        sector.CeilingTexture[8] = '\0';
-        sector.Lightlevel = wadsector.Lightlevel;
-        sector.Type = wadsector.Type;
-        sector.Tag = wadsector.Tag;
-        m_Sectors.push_back(sector);
-    }
-    delete m_pSectors;
-    m_pSectors = nullptr;
+	WADSector wadsector;
+	Sector sector;
+	for (int i = 0; i < m_pSectors.size(); ++i)
+	{
+		wadsector = m_pSectors[i];
+		sector.FloorHeight = wadsector.FloorHeight;
+		sector.CeilingHeight = wadsector.CeilingHeight;
+		strncpy(sector.FloorTexture, wadsector.FloorTexture, 8);
+		sector.FloorTexture[8] = '\0';
+		strncpy(sector.CeilingTexture, wadsector.CeilingTexture, 8);
+		sector.CeilingTexture[8] = '\0';
+		sector.Lightlevel = wadsector.Lightlevel;
+		sector.Type = wadsector.Type;
+		sector.Tag = wadsector.Tag;
+		m_Sectors.push_back(sector);
+	}
+	m_pSectors.clear();
 }
 
 void Map::BuildSidedefs()
 {
     WADSidedef wadsidedef;
     Sidedef sidedef;
-    for (int i = 0; i < m_pSidedefs->size(); ++i)
+    for (int i = 0; i < m_pSidedefs.size(); ++i)
     {
-        wadsidedef = m_pSidedefs->at(i);
+        wadsidedef = m_pSidedefs[i];
         sidedef.XOffset = wadsidedef.XOffset;
         sidedef.YOffset = wadsidedef.YOffset;
         strncpy(sidedef.UpperTexture, wadsidedef.UpperTexture, 8);
@@ -64,8 +73,7 @@ void Map::BuildSidedefs()
         sidedef.pSector = &m_Sectors[wadsidedef.SectorID];
         m_Sidedefs.push_back(sidedef);
     }
-    delete m_pSidedefs;
-    m_pSidedefs = nullptr;
+    m_pSidedefs.clear();
 }
 
 void Map::BuildLinedef()
@@ -73,9 +81,9 @@ void Map::BuildLinedef()
     WADLinedef wadlinedef;
     Linedef linedef;
 
-    for (int i = 0; i < m_pLinedefs->size(); ++i)
+    for (int i = 0; i < m_pLinedefs.size(); ++i)
     {
-        wadlinedef = m_pLinedefs->at(i);
+        wadlinedef = m_pLinedefs[i];
 
         linedef.pStartVertex = &m_Vertexes[wadlinedef.StartVertexID];
         linedef.pEndVertex = &m_Vertexes[wadlinedef.EndVertexID];
@@ -103,9 +111,7 @@ void Map::BuildLinedef()
 
         m_Linedefs.push_back(linedef);
     }
-
-    delete m_pLinedefs;
-    m_pLinedefs = nullptr;
+	m_pLinedefs.clear();
 }
 
 void Map::BuildSeg()
@@ -113,9 +119,9 @@ void Map::BuildSeg()
     WADSeg wadseg;
     Seg seg;
 
-    for (int i = 0; i < m_pSegs->size(); ++i)
+    for (int i = 0; i < m_pSegs.size(); ++i)
     {
-        wadseg = m_pSegs->at(i);
+		wadseg = m_pSegs[i];
 
         seg.pStartVertex = &m_Vertexes[wadseg.StartVertexID];
         seg.pEndVertex = &m_Vertexes[wadseg.EndVertexID];
@@ -159,9 +165,7 @@ void Map::BuildSeg()
 
         m_Segs.push_back(seg);
     }
-
-    delete m_pSegs;
-    m_pSegs = nullptr;
+	m_pSegs.clear();
 }
 
 void Map::AddVertex(Vertex &v)
@@ -189,12 +193,12 @@ void Map::AddVertex(Vertex &v)
 
 void Map::AddSidedef(WADSidedef &sidedef)
 {
-    m_pSidedefs->push_back(sidedef);
+    m_pSidedefs.push_back(sidedef);
 }
 
 void Map::AddSector(WADSector &sector)
 {
-    m_pSectors->push_back(sector);
+    m_pSectors.push_back(sector);
 }
 
 int Map::GetXMin()
@@ -219,7 +223,7 @@ int Map::GetYMax()
 
 void Map::AddLinedef(WADLinedef &l)
 {
-    m_pLinedefs->push_back(l);
+    m_pLinedefs.push_back(l);
 }
 
 void Map::AddNode(Node &node)
@@ -234,12 +238,7 @@ void Map::AddSubsector(Subsector &subsector)
 
 void Map::AddSeg(WADSeg &seg)
 {
-    m_pSegs->push_back(seg);
-}
-
-string Map::GetName()
-{
-    return m_sName;
+    m_pSegs.push_back(seg);
 }
 
 void Map::Render3DView()

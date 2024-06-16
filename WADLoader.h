@@ -6,7 +6,21 @@
 class WADLoader
 {
 public:
-	WADLoader(const std::string &sWADFilePath);
+	WADLoader(const std::string &filename)
+	{
+		FILE *f = fopen(filename.c_str(), "rb");
+		if (!f) return;
+		fseek(f, 0, SEEK_END);
+		size_t length = ftell(f);
+		fseek(f, 0, SEEK_SET);
+		data = new uint8_t[length];
+		fread(data, 1, length, f);
+		fclose(f);
+
+		numLumps = ((const uint32_t*)data)[1];
+		dirs = (const Directory*)(data + ((const uint32_t*)data)[2]);
+	}
+
 	~WADLoader() { delete[] data; }
     bool LoadMapData(class Map *pMap) const;
 	std::vector<uint8_t> GetLumpNamed(const std::string& name, size_t after = 0) const

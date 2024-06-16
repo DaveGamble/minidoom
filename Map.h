@@ -6,14 +6,14 @@
 #include "DataTypes.h"
 #include "Player.h"
 #include "ViewRenderer.h"
+#include "WADLoader.h"
 
 class Map
 {
 public:
-    Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings);
-    ~Map();
+    Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *w);
+	~Map() {}
 
-    std::string GetName();
     void AddVertex(Vertex &v);
     void AddLinedef(WADLinedef &l);
     void AddNode(Node &node);
@@ -23,7 +23,6 @@ public:
     void AddSector(WADSector &sector);
     void Render3DView();
     void SetLumpIndex(int iIndex);
-    void Init();
 
     int GetPlayerSubSectorHieght();
     int GetXMin();
@@ -45,8 +44,6 @@ protected:
 
     bool IsPointOnLeftSide(int XPosition, int YPosition, int iNodeID);
 
-    std::string m_sName;
-
     std::vector<Vertex> m_Vertexes;
     std::vector<Sector> m_Sectors;
     std::vector<Sidedef> m_Sidedefs;
@@ -56,16 +53,12 @@ protected:
     std::vector<Node> m_Nodes;
 
 
-    std::vector<WADSector> *m_pSectors;
-    std::vector<WADSidedef> *m_pSidedefs;
-    std::vector<WADLinedef> *m_pLinedefs;
-    std::vector<WADSeg> *m_pSegs;
+    std::vector<WADSector> m_pSectors;
+    std::vector<WADSidedef> m_pSidedefs;
+    std::vector<WADLinedef> m_pLinedefs;
+    std::vector<WADSeg> m_pSegs;
 
-    int m_XMin;
-    int m_XMax;
-    int m_YMin;
-    int m_YMax;
-    int m_iLumpIndex;
+	int m_XMin {INT_MAX}, m_XMax {INT_MIN}, m_YMin {INT_MAX}, m_YMax {INT_MIN}, m_iLumpIndex {-1};
 
     Player *m_pPlayer;
     Things *m_pThings;

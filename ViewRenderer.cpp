@@ -182,41 +182,8 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 	
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-		/*
-		 
-		Vertex V1 = seg.start, V2 = seg.end;
-		V1.x * (1-t) + V2.x * t = x
-		V1.y * (1-t) + V2.y * t = y
-		
-		 relative to user this is..
-		 V1.x * (1-t) + V2.x * t - px = x
-		 V1.y * (1-t) + V2.y * t - py = y
-
-		 Now I have a ray from the origin that intersects the screen plane at x.
-		 Screen is at distancePlayerToScreen from the origin, in the direction player->getAngle().
-		 Therefore my line is PERPENDICULAR to player->getAngle(). -45 would be 0, +45 would be renderWidth.
-		 So, we have screenXToAngle, so this is screenXToAngle[x] + player->getAngle().
-		 Now I just need an intersection such that
-		 theta = screenXToAngle[x] + player->getAngle
-		 x = N cos(theta) = V1.x * (1-t) + V2.x * t - px
-		 y = N sin(theta) = V1.y * (1-t) + V2.y * t - py
-		 ...with the caveat that I may have sin and cos wrong way around there, because that's orthodoxy not law.
-
-		 Let's divide them:
-		 (V1.y * (1-t) + V2.y * t - py) / (V1.x * (1-t) + V2.x * t - px)  =  tan(theta)
-		 let K = tan(theta) = tan(screenXToAngle[x] + player->getAngle()); (or 1/ this)
-		 (V1.y * (1-t) + V2.y * t - py) / (V1.x * (1-t) + V2.x * t - px) = K
-		 (V1.y * (1-t) + V2.y * t - py) = K (V1.x * (1-t) + V2.x * t - px)
-		 t is now the only unknown, which is what we wanted, so...
-		 V1.y  - t * V1.y + V2.y * t - py = K*V1.x - K*V1.x * t + K * V2.x * t - K*px
-		 t(-V1.y + V2.y + K*V1.x - K*V2.x) = -V1.y + py + K*V1.x - K*px
-		 t(V2.y-V1.y + K*(V1.x - V2.x)) = py - V1.y + K*(V1.x - px)
-
-		 so t = (py - V1.y + K*(V1.x - px) / (V2.y-V1.y + K*(V1.x - V2.x))
-		*/
-		float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
-		
-		float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99f);
+		const float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
+		const float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99999f);
 		
 		
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);

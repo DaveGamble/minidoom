@@ -12,6 +12,7 @@ DoomEngine::DoomEngine()
 	m_pScreenBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 8, 0, 0, 0, 0);
 	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);
 	m_pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
 	std::vector<uint8_t> palette = m_WADLoader.GetLumpNamed("PLAYPAL");
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
@@ -34,6 +35,7 @@ bool DoomEngine::Tick()
 	{
 		switch (event.type)
 		{
+			case SDL_MOUSEMOTION:	m_Player.RotateBy(-0.1*event.motion.xrel);	break;
 			case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) m_bIsOver = true;	break;
 			case SDL_QUIT:		m_bIsOver = true;	break;
 		}

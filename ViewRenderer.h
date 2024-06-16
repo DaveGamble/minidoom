@@ -65,23 +65,10 @@ protected:
 		Seg *pSeg;
     };
 
-	void DrawVerticalLine(int iX, int iStartY, int iEndY, uint8_t color);
-
     void ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void ClipPassWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
-    void CalculateWallHeight(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
-    void CeilingFloorUpdate(ViewRenderer::SegmentRenderData &RenderData);
-    void CalculateCeilingFloorHeight(Seg &seg, int VXScreen, float DistanceToV, float &CeilingVOnScreen, float &FloorVOnScreen);
-    void PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &DistanceToV1, bool IsLeftSide);
     void RenderSegment(SegmentRenderData &RenderData);
-    void DrawMiddleSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd, int CurrentFloorStart);
-    void DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentFloorStart);
-    void DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd);
-
-	uint8_t GetSectionColor(const std::string &TextureName);
-
-    float GetScaleFactor(int VXScreen, Angle NormalAngle, float NormalDistance);
 
 	Map *m_pMap;
 	Player *m_pPlayer;

@@ -53,10 +53,10 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 	{
 		WADSeg *ws = (WADSeg*)(ptr + i);
 		const Linedef *pLinedef = &m_Linedefs[ws->linedef];
-		const Sidedef *pRightSidedef = ws->dir ? pLinedef->pLeftSidedef : pLinedef->pRightSidedef;
-		const Sidedef *pLeftSidedef = ws->dir ? pLinedef->pRightSidedef : pLinedef->pLeftSidedef;
+		const Sidedef *pRightSidedef = ws->dir ? pLinedef->lSidedef : pLinedef->rSidedef;
+		const Sidedef *pLeftSidedef = ws->dir ? pLinedef->rSidedef : pLinedef->lSidedef;
 		m_Segs.push_back({vertices[ws->start], vertices[ws->end], ws->slopeAngle * 360.f / 65536.f, pLinedef, ws->dir, ws->offset / 65536.f,
-			(pRightSidedef) ? pRightSidedef->pSector : nullptr, (pLeftSidedef) ? pLeftSidedef->pSector : nullptr});
+			(pRightSidedef) ? pRightSidedef->sector : nullptr, (pLeftSidedef) ? pLeftSidedef->sector : nullptr});
 	}
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) m_pThings->AddThing(*(Thing*)(ptr + i));
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) m_Nodes.push_back(*(Node*)(ptr + i));
@@ -69,13 +69,13 @@ void Map::RenderBSPNodes(int iNodeID)
 	{
 		if (IsPointOnLeftSide(m_pPlayer->GetXPosition(), m_pPlayer->GetYPosition(), iNodeID))
 		{
-			RenderBSPNodes(m_Nodes[iNodeID].LeftChildID);
-			RenderBSPNodes(m_Nodes[iNodeID].RightChildID);
+			RenderBSPNodes(m_Nodes[iNodeID].lChild);
+			RenderBSPNodes(m_Nodes[iNodeID].rChild);
 		}
 		else
 		{
-			RenderBSPNodes(m_Nodes[iNodeID].RightChildID);
-			RenderBSPNodes(m_Nodes[iNodeID].LeftChildID);
+			RenderBSPNodes(m_Nodes[iNodeID].rChild);
+			RenderBSPNodes(m_Nodes[iNodeID].lChild);
 		}
 		return;
 	}
@@ -85,9 +85,9 @@ void Map::RenderBSPNodes(int iNodeID)
 	constexpr int m_FOV = 90;
 	Angle m_HalfFOV = 45, m_Angle = m_pPlayer->GetAngle();
 	int px = m_pPlayer->GetXPosition(), py = m_pPlayer->GetYPosition();
-	for (int i = 0; i < subsector.SegCount; i++)
+	for (int i = 0; i < subsector.numSegs; i++)
 	{
-		Seg &seg = m_Segs[subsector.FirstSegID + i];
+		Seg &seg = m_Segs[subsector.firstSeg + i];
 		Angle V1Angle = Angle(atan2f(seg.start.y - py, seg.start.x - px) * 180.0f / PI);
 		Angle V2Angle = Angle(atan2f(seg.end.y - py, seg.end.x - px) * 180.0f / PI);
 		Angle V1ToV2Span = V1Angle - V2Angle;

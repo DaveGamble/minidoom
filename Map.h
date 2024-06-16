@@ -18,11 +18,11 @@ public:
 		while (!(iSubsectorID & SUBSECTORIDENTIFIER))
 		{
 			if (IsPointOnLeftSide(m_pPlayer->GetXPosition(), m_pPlayer->GetYPosition(), iSubsectorID))
-				iSubsectorID = m_Nodes[iSubsectorID].LeftChildID;
+				iSubsectorID = m_Nodes[iSubsectorID].lChild;
 			else
-				iSubsectorID = m_Nodes[iSubsectorID].RightChildID;
+				iSubsectorID = m_Nodes[iSubsectorID].rChild;
 		}
-		return m_Segs[m_Subsector[iSubsectorID & (~SUBSECTORIDENTIFIER)].FirstSegID].pRightSector->FloorHeight;
+		return m_Segs[m_Subsector[iSubsectorID & (~SUBSECTORIDENTIFIER)].firstSeg].rSector->floorHeight;
 	}
 
 	Things* GetThings() { return m_pThings; }

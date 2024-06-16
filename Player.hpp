@@ -14,9 +14,9 @@ public:
 		m_pWeapon = wad->GetPatch("PISGA0");
 		if (thing)
 		{
-			m_XPosition = thing->XPosition;
-			m_YPosition = thing->YPosition;
-			m_Angle = thing->Angle;
+			m_XPosition = thing->x;
+			m_YPosition = thing->y;
+			m_Angle = thing->angle;
 		}
 	}
     void MoveForward() { m_XPosition += m_Angle.GetCosValue() * m_iMoveSpeed; m_YPosition += m_Angle.GetSinValue() * m_iMoveSpeed; }

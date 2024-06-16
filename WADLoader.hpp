@@ -43,9 +43,9 @@ public:
 			for (int i = 0; i < numTextures; ++i)
 			{
 				const uint8_t *ptr = data.data() + asint[i + 1];
-				memcpy(TextureData.TextureName, ptr, 22);
-				TextureData.pTexturePatch = (WADTexturePatch*)(ptr + 22);
-				m_TexturesCache[TextureData.TextureName] = std::unique_ptr<Texture>(new Texture(TextureData, this));
+				memcpy(TextureData.textureName, ptr, 22);
+				TextureData.texturePatch = (WADTexturePatch*)(ptr + 22);
+				m_TexturesCache[TextureData.textureName] = std::unique_ptr<Texture>(new Texture(TextureData, this));
 			}
 		}
 	}
@@ -55,11 +55,11 @@ public:
 	std::vector<uint8_t> GetLumpNamed(const std::string& name, size_t after = 0) const
 	{
 		int id = FindLumpByName(name, after);
-		return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].LumpOffset, data + dirs[id].LumpOffset + dirs[id].LumpSize);
+		return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].lumpOffset, data + dirs[id].lumpOffset + dirs[id].lumpSize);
 	}
 	int FindLumpByName(const std::string &LumpName, size_t after = 0) const
 	{
-		for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].LumpName, LumpName.c_str(), 8)) return (int)i;
+		for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, LumpName.c_str(), 8)) return (int)i;
 		return -1;
 	}
 	
@@ -68,6 +68,7 @@ public:
 	Texture* GetTexture(const std::string &sTextureName) { return m_TexturesCache[sTextureName].get(); }
 
 protected:
+	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8] {}; };
 	const Directory* dirs {nullptr};
 	size_t numLumps {0};
 	uint8_t *data {nullptr};

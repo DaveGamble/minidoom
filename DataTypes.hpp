@@ -7,10 +7,9 @@
 
 // enum ELINEDEFFLAGS { eBLOCKING = 0, eBLOCKMONSTERS = 1, eTWOSIDED = 2, eDONTPEGTOP = 4, eDONTPEGBOTTOM = 8, eSECRET = 16, eSOUNDBLOCK = 32, eDONTDRAW = 64, eDRAW = 128 }; // Unused for now
 
-struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[8] {}; };
-struct Thing { int16_t XPosition, YPosition; uint16_t Angle, Type, Flags; };
-struct WADTexturePatch { int16_t XOffset, YOffset; uint16_t PNameIndex, StepDir, ColorMap; }; // StepDir, ColorMap Unused values.
-struct WADTextureData { char TextureName[8]; uint32_t Flags; uint16_t Width, Height; uint32_t ColumnDirectory; uint16_t PatchCount; WADTexturePatch *pTexturePatch; };// ColumnDirectory Unused value.
+struct Thing { int16_t x, y; uint16_t angle, type, flags; };
+struct WADTexturePatch { int16_t dx, dy; uint16_t pnameIndex, stepDir, colorMap; }; // StepDir, ColorMap Unused values.
+struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; WADTexturePatch *texturePatch; };// ColumnDirectory Unused value.
 
 class Texture;
 class WADLoader;
@@ -34,7 +33,7 @@ class Things
 {
 public:
 	void AddThing(Thing &thing) {m_Things.push_back(thing);}
-	Thing* GetThingByID(int iID) { for (auto& t : m_Things) if (t.Type == iID) return &t; return nullptr; }
+	Thing* GetThingByID(int iID) { for (auto& t : m_Things) if (t.type == iID) return &t; return nullptr; }
 protected:
 	std::vector<Thing> m_Things;
 };

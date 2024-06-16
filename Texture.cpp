@@ -5,20 +5,20 @@ Texture::Texture(WADTextureData &TextureData, WADLoader *_wad) : wad(_wad)
 {
 	struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
 
-	m_iWidth = TextureData.Width;
-	m_iHeight = TextureData.Height;
+	m_iWidth = TextureData.width;
+	m_iHeight = TextureData.height;
 	
-	for (int i = 0; i < TextureData.PatchCount; ++i)
-		m_TexturePatches.push_back(TextureData.pTexturePatch[i]);
+	for (int i = 0; i < TextureData.patchCount; ++i)
+		m_TexturePatches.push_back(TextureData.texturePatch[i]);
 	
-	m_ColumnPatchCount.resize(TextureData.Width, 0);
-	m_ColumnIndex.resize(TextureData.Width, 0);
-	m_ColumnPatch.resize(TextureData.Width, 0);
+	m_ColumnPatchCount.resize(TextureData.width, 0);
+	m_ColumnIndex.resize(TextureData.width, 0);
+	m_ColumnPatch.resize(TextureData.width, 0);
 
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
-		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].PNameIndex);
-		int iXStart = m_TexturePatches[i].XOffset;
+		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].pnameIndex);
+		int iXStart = m_TexturePatches[i].dx;
 		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 		{
@@ -41,12 +41,12 @@ Texture::Texture(WADTextureData &TextureData, WADLoader *_wad) : wad(_wad)
 	m_pOverLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[m_iOverLapSize]);
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
-		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].PNameIndex);
-		int iXStart = m_TexturePatches[i].XOffset;
+		Patch *pPatch = wad->GetPatch(m_TexturePatches[i].pnameIndex);
+		int iXStart = m_TexturePatches[i].dx;
 		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 			if (m_ColumnPatch[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
-				pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->GetColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].YOffset);
+				pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->GetColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].dy);
 	}
 }
 
@@ -61,8 +61,8 @@ void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScree
 	pScreenBuffer += iBufferPitch * iYScreenLocation + iXScreenLocation;
     if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
     {
-        Patch *pPatch = wad->GetPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].PNameIndex);
-        pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].YOffset);
+        Patch *pPatch = wad->GetPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].pnameIndex);
+        pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].dy);
     }
     else
     {

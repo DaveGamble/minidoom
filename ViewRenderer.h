@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <map>
 #include "Angle.hpp"
 #include "DataTypes.hpp"
 
@@ -24,8 +23,7 @@ protected:
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;
-    std::map<const Texture*, uint8_t> wallColor;
-    std::map<int, Angle> screenXToAngle;
+    std::vector<Angle> screenXToAngle;
 	uint8_t *screenBuffer;
 	int rowlen;
 };

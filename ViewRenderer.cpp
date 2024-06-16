@@ -14,6 +14,7 @@ ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int rend
 , halfRenderHeight(renderYSize / 2)
 , distancePlayerToScreen(halfRenderWidth / tan(90 * 0.5 * M_PI / 180))	// 90 here is FOV
 {
+	screenXToAngle.resize(renderWidth + 1);
 	for (int i = 0; i <= renderWidth; ++i)
 		screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen) * 180 / M_PI;
 
@@ -126,8 +127,6 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	
 	struct SegmentRenderData
 	{
-		int V1XScreen;
-		int V2XScreen;
 		Angle V1Angle;
 		Angle V2Angle;
 		float DistanceToV1;
@@ -156,8 +155,6 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
 		bool UpdateFloor;
 		bool UpdateCeiling;
-
-		Seg *pSeg;
 	};
 	
     SegmentRenderData RenderData { 0 };
@@ -168,8 +165,6 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
     // Normal angle is 90 degree to wall
     Angle SegToPlayerAngle = Angle90 - NomalToV1Angle;
 
-	RenderData.V1XScreen = V1XScreen;
-	RenderData.V2XScreen = V2XScreen;
 	RenderData.V1Angle = V1Angle;
 	RenderData.V2Angle = V2Angle;
 
@@ -191,14 +186,12 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
     RenderData.FloorStep = -(RenderData.RightSectorFloor * RenderData.Steps);
     RenderData.FloorStart = round(halfRenderHeight - (RenderData.RightSectorFloor * RenderData.V1ScaleFactor));
 
-	RenderData.pSeg = &seg;
-
     if (seg.lSector)
     {
         RenderData.LeftSectorCeiling = seg.lSector->ceilingHeight - player->getZ();
         RenderData.LeftSectorFloor = seg.lSector->floorHeight - player->getZ();
 
-		if (!RenderData.pSeg->lSector)
+		if (!seg.lSector)
 		{
 			RenderData.UpdateFloor = true;
 			RenderData.UpdateCeiling = true;
@@ -208,11 +201,11 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 		RenderData.UpdateCeiling = (RenderData.LeftSectorCeiling != RenderData.RightSectorCeiling);
 		RenderData.UpdateFloor = (RenderData.LeftSectorFloor != RenderData.RightSectorFloor);
 
-		if (RenderData.pSeg->lSector->ceilingHeight <= RenderData.pSeg->rSector->floorHeight || RenderData.pSeg->lSector->floorHeight >= RenderData.pSeg->rSector->ceilingHeight) // closed door
+		if (seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight) // closed door
 			RenderData.UpdateCeiling = RenderData.UpdateFloor = true;
-		if (RenderData.pSeg->rSector->ceilingHeight <= player->getZ()) // below view plane
+		if (seg.rSector->ceilingHeight <= player->getZ()) // below view plane
 			RenderData.UpdateCeiling = false;
-		if (RenderData.pSeg->rSector->floorHeight >= player->getZ()) // above view plane
+		if (seg.rSector->floorHeight >= player->getZ()) // above view plane
 			RenderData.UpdateFloor = false;
 
         if (RenderData.LeftSectorCeiling < RenderData.RightSectorCeiling)
@@ -230,18 +223,18 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
         }
     }
 
-	auto GetSectionColor = [&](const Texture *texture) {
-		if (!wallColor.count(texture)) wallColor[texture] = rand() & 255;
-		return wallColor[texture];
-	};
-	auto DrawVerticalLine = [&](int iX, int iStartY, int iEndY, uint8_t color) {
-		for (; iStartY < iEndY; iStartY++) screenBuffer[rowlen * iStartY + iX] = color;
+	auto DrawTexture = [&](const Texture *texture, int x, int from, int to) {
+		if (!texture) return;
+
+		int width = texture->getWidth(), height = texture->getHeight();
+		float scale = (to - from) / (float)height;
+		texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, 0, scale);
 	};
 	
-	for (int iXCurrent = RenderData.V1XScreen; iXCurrent <= RenderData.V2XScreen; iXCurrent++)
+	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-        int CurrentCeilingEnd = std::max(RenderData.CeilingEnd, ceilingClipHeight[iXCurrent] + 1.f);
-        int CurrentFloorStart = std::min(RenderData.FloorStart, floorClipHeight[iXCurrent] - 1.f);
+        int CurrentCeilingEnd = std::max(RenderData.CeilingEnd, ceilingClipHeight[x] + 1.f);
+        int CurrentFloorStart = std::min(RenderData.FloorStart, floorClipHeight[x] - 1.f);
 
 		if (CurrentCeilingEnd > CurrentFloorStart)
 		{
@@ -250,35 +243,35 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 			continue;
 		}
 
-        if (RenderData.pSeg->lSector)
+        if (seg.lSector)
         {
 			if (RenderData.bDrawUpperSection)
 			{
-				int iUpperHeight = std::min(floorClipHeight[iXCurrent] - 1.f, RenderData.iUpperHeight);
+				int iUpperHeight = std::min(floorClipHeight[x] - 1.f, RenderData.iUpperHeight);
 				RenderData.iUpperHeight += RenderData.UpperHeightStep;
 				if (iUpperHeight >= CurrentCeilingEnd)
-					DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, GetSectionColor(RenderData.pSeg->linedef->rSidedef->uppertexture));
-				ceilingClipHeight[iXCurrent] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
+					DrawTexture(seg.linedef->rSidedef->uppertexture, x, CurrentCeilingEnd, iUpperHeight);
+				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
 			}
 			else if (RenderData.UpdateCeiling)
-				ceilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
+				ceilingClipHeight[x] = CurrentCeilingEnd - 1;
 
 			if (RenderData.bDrawLowerSection)
 			{
-				int iLowerHeight = std::max(RenderData.iLowerHeight, ceilingClipHeight[iXCurrent] + 1.f);
+				int iLowerHeight = std::max(RenderData.iLowerHeight, ceilingClipHeight[x] + 1.f);
 				RenderData.iLowerHeight += RenderData.LowerHeightStep;
 				if (iLowerHeight <= CurrentFloorStart)
-					DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, GetSectionColor(RenderData.pSeg->linedef->rSidedef->lowertexture));
-				floorClipHeight[iXCurrent] = std::min(CurrentFloorStart + 1, iLowerHeight);
+					DrawTexture(seg.linedef->rSidedef->lowertexture, x, iLowerHeight, CurrentFloorStart);
+				floorClipHeight[x] = std::min(CurrentFloorStart + 1, iLowerHeight);
 			}
 			else if (RenderData.UpdateFloor)
-				floorClipHeight[iXCurrent] = CurrentFloorStart + 1;
+				floorClipHeight[x] = CurrentFloorStart + 1;
 		}
         else
 		{
-			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, GetSectionColor(RenderData.pSeg->linedef->rSidedef->middletexture));
-			ceilingClipHeight[iXCurrent] = renderHeight;
-			floorClipHeight[iXCurrent] = -1;
+			DrawTexture(seg.linedef->rSidedef->middletexture, x, CurrentCeilingEnd, CurrentFloorStart);
+			ceilingClipHeight[x] = renderHeight;
+			floorClipHeight[x] = -1;
 
 		}
         RenderData.CeilingEnd += RenderData.CeilingStep;

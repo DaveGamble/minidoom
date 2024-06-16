@@ -60,6 +60,8 @@ void ViewRenderer::AddWallInFOV(Seg &seg)
 	}
 	if (amod(m_HalfFOV - V2AngleFromPlayer) > m_FOV) V2AngleFromPlayer = -45; // Validate and Clip V2 // Is V2 outside the FOV?
 	
+	V1AngleFromPlayer += 90;
+	V2AngleFromPlayer += 90;
 	auto AngleToScreen = [&](Angle angle) {
 		return m_iDistancePlayerToScreen + round(tanf((90 - angle.get()) * M_PI / 180.0f) * m_HalfScreenWidth);
 	};

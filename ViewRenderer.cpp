@@ -261,7 +261,7 @@ void ViewRenderer::CalculateWallHeight(Seg &seg, int V1XScreen, int V2XScreen, A
 	RenderData.V1Angle = V1Angle;
 	RenderData.V2Angle = V2Angle;
 
-    RenderData.DistanceToV1 = m_pPlayer->DistanceToPoint(*seg.pStartVertex);
+    RenderData.DistanceToV1 = m_pPlayer->DistanceToPoint(seg.pStartVertex);
     RenderData.DistanceToNormal = SegToPlayerAngle.GetSinValue() * RenderData.DistanceToV1;
 
     RenderData.V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, RenderData.DistanceToNormal);
@@ -410,7 +410,7 @@ void ViewRenderer::CalculateCeilingFloorHeight(Seg &seg, int &VXScreen, float &D
 
 void ViewRenderer::PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &DistanceToV, bool IsLeftSide)
 {
-    float SideC = sqrt(pow(seg.pStartVertex->XPosition - seg.pEndVertex->XPosition, 2) + pow(seg.pStartVertex->YPosition - seg.pEndVertex->YPosition, 2));
+    float SideC = sqrt(pow(seg.pStartVertex.XPosition - seg.pEndVertex.XPosition, 2) + pow(seg.pStartVertex.YPosition - seg.pEndVertex.YPosition, 2));
     Angle V1toV2Span = V1Angle - V2Angle;
     float SINEAngleB = DistanceToV * V1toV2Span.GetSinValue() / SideC;
     Angle AngleB(asinf(SINEAngleB) * 180.0 / PI);
@@ -432,7 +432,6 @@ void ViewRenderer::PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &D
 
 void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
 {
-    SDL_Color color;
     int iXCurrent = RenderData.V1XScreen;
 
     while (iXCurrent <= RenderData.V2XScreen)

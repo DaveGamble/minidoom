@@ -19,100 +19,17 @@ Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer,
 	};
 	
 	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) m_Vertexes.push_back(*(Vertex*)(ptr + i));
-	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) m_pSectors.push_back(*(WADSector*)(ptr + i));
-	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) m_pSidedefs.push_back(*(WADSidedef*)(ptr + i));
-	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) m_pLinedefs.push_back(*(WADLinedef*)(ptr + i));
+	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector)) m_Sectors.push_back(*(WADSector*)(ptr + i));
+	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef)) m_Sidedefs.push_back(Sidedef(*(WADSidedef*)(ptr + i), m_Sectors));
+	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef)) m_Linedefs.push_back(Linedef(*(WADLinedef*)(ptr + i), m_Sidedefs, m_Vertexes));
 	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg)) m_pSegs.push_back(*(WADSeg*)(ptr + i));
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) m_pThings->AddThing(*(Thing*)(ptr + i));
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) m_Nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) m_Subsector.push_back(*(Subsector*)(ptr + i));
 
-	BuildSectors();
-	BuildSidedefs();
-	BuildLinedef();
 	BuildSeg();
-
 }
 
-void Map::BuildSectors()
-{
-	WADSector wadsector;
-	Sector sector;
-	for (int i = 0; i < m_pSectors.size(); ++i)
-	{
-		wadsector = m_pSectors[i];
-		sector.FloorHeight = wadsector.FloorHeight;
-		sector.CeilingHeight = wadsector.CeilingHeight;
-		strncpy(sector.FloorTexture, wadsector.FloorTexture, 8);
-		sector.FloorTexture[8] = '\0';
-		strncpy(sector.CeilingTexture, wadsector.CeilingTexture, 8);
-		sector.CeilingTexture[8] = '\0';
-		sector.Lightlevel = wadsector.Lightlevel;
-		sector.Type = wadsector.Type;
-		sector.Tag = wadsector.Tag;
-		m_Sectors.push_back(sector);
-	}
-	m_pSectors.clear();
-}
-
-void Map::BuildSidedefs()
-{
-    WADSidedef wadsidedef;
-    Sidedef sidedef;
-    for (int i = 0; i < m_pSidedefs.size(); ++i)
-    {
-        wadsidedef = m_pSidedefs[i];
-        sidedef.XOffset = wadsidedef.XOffset;
-        sidedef.YOffset = wadsidedef.YOffset;
-        strncpy(sidedef.UpperTexture, wadsidedef.UpperTexture, 8);
-        sidedef.UpperTexture[8] = '\0';
-        strncpy(sidedef.LowerTexture, wadsidedef.LowerTexture, 8);
-        sidedef.LowerTexture[8] = '\0';
-        strncpy(sidedef.MiddleTexture, wadsidedef.MiddleTexture, 8);
-        sidedef.MiddleTexture[8] = '\0';
-        sidedef.pSector = &m_Sectors[wadsidedef.SectorID];
-        m_Sidedefs.push_back(sidedef);
-    }
-    m_pSidedefs.clear();
-}
-
-void Map::BuildLinedef()
-{
-    WADLinedef wadlinedef;
-    Linedef linedef;
-
-    for (int i = 0; i < m_pLinedefs.size(); ++i)
-    {
-        wadlinedef = m_pLinedefs[i];
-
-        linedef.pStartVertex = &m_Vertexes[wadlinedef.StartVertexID];
-        linedef.pEndVertex = &m_Vertexes[wadlinedef.EndVertexID];
-        linedef.Flags = wadlinedef.Flags;
-        linedef.LineType = wadlinedef.LineType;
-        linedef.SectorTag = wadlinedef.SectorTag;
-
-        if (wadlinedef.RightSidedef == 0xFFFF)
-        {
-            linedef.pRightSidedef = nullptr;
-        }
-        else
-        {
-            linedef.pRightSidedef = &m_Sidedefs[wadlinedef.RightSidedef];
-        }
-
-        if (wadlinedef.LeftSidedef == 0xFFFF)
-        {
-            linedef.pLeftSidedef = nullptr;
-        }
-        else
-        {
-            linedef.pLeftSidedef = &m_Sidedefs[wadlinedef.LeftSidedef];
-        }
-
-        m_Linedefs.push_back(linedef);
-    }
-	m_pLinedefs.clear();
-}
 
 void Map::BuildSeg()
 {
@@ -123,16 +40,16 @@ void Map::BuildSeg()
     {
 		wadseg = m_pSegs[i];
 
-        seg.pStartVertex = &m_Vertexes[wadseg.StartVertexID];
-        seg.pEndVertex = &m_Vertexes[wadseg.EndVertexID];
+        seg.pStartVertex = m_Vertexes[wadseg.StartVertexID];
+        seg.pEndVertex = m_Vertexes[wadseg.EndVertexID];
         // 8.38190317e-8 is to convert from Binary angles (BAMS) to float
         seg.SlopeAngle = ((float)(wadseg.SlopeAngle << 16) * 8.38190317e-8);
         seg.pLinedef = &m_Linedefs[wadseg.LinedefID];
         seg.Direction = wadseg.Direction;
         seg.Offset = (float)(wadseg.Offset << 16) / (float)(1 << 16);
 
-        Sidedef *pRightSidedef;
-        Sidedef *pLeftSidedef;
+        const Sidedef *pRightSidedef;
+        const Sidedef *pLeftSidedef;
 
         if (seg.Direction)
         {
@@ -200,7 +117,7 @@ void Map::RenderSubsector(int iSubsectorID)
     {
         Seg &seg = m_Segs[subsector.FirstSegID + i];
         Angle V1Angle, V2Angle, V1AngleFromPlayer, V2AngleFromPlayer;
-        if (m_pPlayer->ClipVertexesInFOV(*(seg.pStartVertex), *(seg.pEndVertex), V1Angle, V2Angle, V1AngleFromPlayer, V2AngleFromPlayer))
+        if (m_pPlayer->ClipVertexesInFOV((seg.pStartVertex), (seg.pEndVertex), V1Angle, V2Angle, V1AngleFromPlayer, V2AngleFromPlayer))
         {
             m_pViewRenderer->AddWallInFOV(seg, V1Angle, V2Angle, V1AngleFromPlayer, V2AngleFromPlayer);
         }
@@ -217,7 +134,7 @@ bool Map::IsPointOnLeftSide(int XPosition, int YPosition, int iNodeID)
 
 int Map::GetPlayerSubSectorHieght()
 {
-    int iSubsectorID = m_Nodes.size() - 1;
+    int iSubsectorID = (int)(m_Nodes.size() - 1);
     while (!(iSubsectorID & SUBSECTORIDENTIFIER))
     {
 

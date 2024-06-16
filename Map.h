@@ -14,14 +14,12 @@ public:
     Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *w);
 	~Map() {}
 
-	void Render3DView() { RenderBSPNodes(m_Nodes.size() - 1); }
+	void Render3DView() { RenderBSPNodes((int)m_Nodes.size() - 1); }
 
     int GetPlayerSubSectorHieght();
 	Things* GetThings() { return m_pThings; }
 
 protected:
-    void BuildSectors();
-    void BuildSidedefs();
     void BuildLinedef();
     void BuildSeg();
     void RenderBSPNodes(int iNodeID);
@@ -38,7 +36,6 @@ protected:
     std::vector<Node> m_Nodes;
 
 
-    std::vector<WADSector> m_pSectors;
     std::vector<WADSidedef> m_pSidedefs;
     std::vector<WADLinedef> m_pLinedefs;
     std::vector<WADSeg> m_pSegs;

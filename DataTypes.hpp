@@ -12,13 +12,13 @@ struct Directory { uint32_t LumpOffset, LumpSize; char LumpName[8] {}; };
 struct Thing { int16_t XPosition, YPosition; uint16_t Angle, Type, Flags; };
 struct Vertex { int16_t XPosition, YPosition; };
 struct WADSector { int16_t FloorHeight, CeilingHeight; char FloorTexture[8], CeilingTexture[8]; uint16_t Lightlevel, Type, Tag; };
-struct Sector { int16_t FloorHeight, CeilingHeight; char FloorTexture[9], CeilingTexture[9]; uint16_t Lightlevel, Type, Tag; };
+struct Sector { Sector(const WADSector& from); int16_t FloorHeight, CeilingHeight; char FloorTexture[9], CeilingTexture[9]; uint16_t Lightlevel, Type, Tag; };
 struct WADSidedef { int16_t XOffset, YOffset; char UpperTexture[8], LowerTexture[8], MiddleTexture[8]; uint16_t SectorID; };
-struct Sidedef { int16_t XOffset, YOffset; char UpperTexture[9], LowerTexture[9], MiddleTexture[9]; Sector *pSector; };
+struct Sidedef { Sidedef(const WADSidedef &from, const std::vector<Sector> &sectors); int16_t XOffset, YOffset; char UpperTexture[9], LowerTexture[9], MiddleTexture[9]; const Sector *pSector; };
 struct WADLinedef { uint16_t StartVertexID, EndVertexID, Flags, LineType, SectorTag, RightSidedef, LeftSidedef; }; // Sidedef 0xFFFF means there is no sidedef
-struct Linedef { Vertex *pStartVertex, *pEndVertex; uint16_t Flags, LineType, SectorTag; Sidedef *pRightSidedef, *pLeftSidedef; };
+struct Linedef { Linedef(const WADLinedef &from, const std::vector<Sidedef> & sidedefs, const std::vector<Vertex> &vertices); Vertex pStartVertex, pEndVertex; uint16_t Flags, LineType, SectorTag; const Sidedef *pRightSidedef, *pLeftSidedef; };
 struct WADSeg { uint16_t StartVertexID, EndVertexID, SlopeAngle, LinedefID, Direction, Offset; }; // Direction: 0 same as linedef, 1 opposite of linedef Offset: distance along linedef to start of seg
-struct Seg { Vertex *pStartVertex, *pEndVertex; Angle SlopeAngle; Linedef *pLinedef; uint16_t Direction, Offset; Sector *pRightSector, *pLeftSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
+struct Seg { Vertex pStartVertex, pEndVertex; Angle SlopeAngle; const Linedef *pLinedef; uint16_t Direction, Offset; const Sector *pRightSector, *pLeftSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
 struct Subsector { uint16_t SegCount, FirstSegID; };
 struct Node {
     int16_t XPartition, YPartition, ChangeXPartition, ChangeYPartition, RightBoxTop, RightBoxBottom, RightBoxLeft, RightBoxRight, LeftBoxTop, LeftBoxBottom, LeftBoxLeft, LeftBoxRight;

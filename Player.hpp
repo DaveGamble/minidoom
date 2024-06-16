@@ -64,9 +64,9 @@ public:
 	}
 
     // Calulate the distance between the player an the vertex.
-	float DistanceToPoint(Vertex &V) { return sqrt((m_XPosition - V.XPosition) * (m_XPosition - V.XPosition) + (m_YPosition - V.YPosition) * (m_YPosition - V.YPosition)); }
+	float DistanceToPoint(const Vertex &V) { return sqrt((m_XPosition - V.XPosition) * (m_XPosition - V.XPosition) + (m_YPosition - V.YPosition) * (m_YPosition - V.YPosition)); }
 
-	Angle AngleToVertex(Vertex &vertex) { return Angle(atan2f(vertex.YPosition - m_YPosition, vertex.XPosition - m_XPosition) * 180.0f / PI); }
+	Angle AngleToVertex(const Vertex &vertex) { return Angle(atan2f(vertex.YPosition - m_YPosition, vertex.XPosition - m_XPosition) * 180.0f / PI); }
 	Angle GetAngle() const { return m_Angle; }
 
 protected:

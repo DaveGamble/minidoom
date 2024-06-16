@@ -237,17 +237,12 @@ void ViewRenderer::PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &D
 
 void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
 {
-    int iXCurrent = RenderData.V1XScreen;
-
-    while (iXCurrent <= RenderData.V2XScreen)
+	for (int iXCurrent = RenderData.V1XScreen; iXCurrent <= RenderData.V2XScreen; iXCurrent++)
     {
         int CurrentCeilingEnd = RenderData.CeilingEnd;
         int CurrentFloorStart = RenderData.FloorStart;
 
-        if (!ValidateRange(RenderData, iXCurrent, CurrentCeilingEnd, CurrentFloorStart))
-        {
-            continue;
-        }
+        if (!ValidateRange(RenderData, iXCurrent, CurrentCeilingEnd, CurrentFloorStart)) continue;
 
         if (RenderData.pSeg->pLeftSector)
         {
@@ -255,13 +250,10 @@ void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
             DrawLowerSection(RenderData, iXCurrent, CurrentFloorStart);
         }
         else
-        {
             DrawMiddleSection(RenderData, iXCurrent, CurrentCeilingEnd, CurrentFloorStart);
-        }
 
         RenderData.CeilingEnd += RenderData.CeilingStep;
         RenderData.FloorStart += RenderData.FloorStep;
-        ++iXCurrent;
     }
 }
 
@@ -280,10 +272,7 @@ void ViewRenderer::DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData,
 		int iLowerHeight = RenderData.iLowerHeight;
         RenderData.iLowerHeight += RenderData.LowerHeightStep;
 
-        if (iLowerHeight <= m_CeilingClipHeight[iXCurrent])
-        {
-            iLowerHeight = m_CeilingClipHeight[iXCurrent] + 1;
-        }
+        if (iLowerHeight <= m_CeilingClipHeight[iXCurrent]) iLowerHeight = m_CeilingClipHeight[iXCurrent] + 1;
 
         if (iLowerHeight <= CurrentFloorStart)
         {
@@ -295,9 +284,7 @@ void ViewRenderer::DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData,
             m_FloorClipHeight[iXCurrent] = CurrentFloorStart + 1;
     }
     else if (RenderData.UpdateFloor)
-    {
         m_FloorClipHeight[iXCurrent] = CurrentFloorStart + 1;
-    }
 }
 
 void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd)
@@ -308,9 +295,7 @@ void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData,
         RenderData.iUpperHeight += RenderData.UpperHeightStep;
 
         if (iUpperHeight >= m_FloorClipHeight[iXCurrent])
-        {
             iUpperHeight = m_FloorClipHeight[iXCurrent] - 1;
-        }
 
         if (iUpperHeight >= CurrentCeilingEnd)
         {
@@ -319,27 +304,19 @@ void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData,
             m_CeilingClipHeight[iXCurrent] = iUpperHeight;
         }
         else
-        {
             m_CeilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
-        }
     }
     else if (RenderData.UpdateCeiling)
-    {
         m_CeilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
-    }
 }
 
 bool ViewRenderer::ValidateRange(ViewRenderer::SegmentRenderData & RenderData, int &iXCurrent, int &CurrentCeilingEnd, int &CurrentFloorStart)
 {
     if (CurrentCeilingEnd < m_CeilingClipHeight[iXCurrent] + 1)
-    {
         CurrentCeilingEnd = m_CeilingClipHeight[iXCurrent] + 1;
-    }
 
     if (CurrentFloorStart >= m_FloorClipHeight[iXCurrent])
-    {
         CurrentFloorStart = m_FloorClipHeight[iXCurrent] - 1;
-    }
 
     if (CurrentCeilingEnd > CurrentFloorStart)
     {
@@ -353,21 +330,13 @@ bool ViewRenderer::ValidateRange(ViewRenderer::SegmentRenderData & RenderData, i
 
 int ViewRenderer::AngleToScreen(Angle angle)
 {
-    int iX = 0;
-
     if (angle > 90)
     {
         angle -= 90;
-        iX = m_iDistancePlayerToScreen - round(angle.GetTanValue() * m_HalfScreenWidth);
+        return m_iDistancePlayerToScreen - round(angle.GetTanValue() * m_HalfScreenWidth);
     }
-    else
-    {
-        angle = 90 - angle.GetValue();
-        iX = round(angle.GetTanValue() * m_HalfScreenWidth);
-        iX += m_iDistancePlayerToScreen;
-    }
-
-    return iX;
+	angle = 90 - angle.GetValue();
+	return round(angle.GetTanValue() * m_HalfScreenWidth) + m_iDistancePlayerToScreen;
 }
 
 uint8_t ViewRenderer::GetSectionColor(const std::string &TextureName)

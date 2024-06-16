@@ -39,7 +39,7 @@ Patch::~Patch()
 		if (patchColumnData[i].topDelta != 0xFF) delete[] patchColumnData[i].columnData;
 }
 
-void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny)
+void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny) const
 {
 	buf += rowlen * screeny + screenx;
     for (size_t column = 0; column < patchColumnData.size(); column++)
@@ -52,7 +52,7 @@ void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny)
     }
 }
 
-void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset)
+void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset) const
 {
     int y = (yOffset < 0) ? yOffset * -1 : 0;
     while (patchColumnData[firstColumn].topDelta != 0xFF && maxHeight > 0)
@@ -69,7 +69,7 @@ void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeigh
     }
 }
 
-void Patch::composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset)
+void Patch::composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const
 {
     while (patchColumnData[firstColumn].topDelta != 0xFF)
     {

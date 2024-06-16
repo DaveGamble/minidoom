@@ -10,7 +10,11 @@ public:
     void render(uint8_t *buf, int rowlen, int screenx, int screeny);
     void renderColumn(uint8_t *buf, int rowlen, int firstColumn);
 protected:
-	int width, height;
+    int width, height, overlap {0};
 
-	std::vector<uint8_t> texture;
+    std::vector<int> columnIndices, columnYOffsets;
+	std::vector<const Patch*> columnPatches;
+	struct TexturePatch { int16_t dx, dy; uint16_t stepDir, colorMap; const Patch *patch; }; // StepDir, ColorMap Unused values.
+	std::vector<TexturePatch> texturePatches;
+    std::unique_ptr<uint8_t[]> overlapColumnData;
 };

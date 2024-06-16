@@ -7,41 +7,43 @@
 class Map
 {
 public:
-    Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *w);
+    Map(ViewRenderer *renderer, const std::string &mapName, Player *player, Things *things, WADLoader *wad);
 	~Map() {}
 
-	void Render3DView() { RenderBSPNodes((int)m_Nodes.size() - 1); }
+	void render3DView() { renderBSPNodes((int)nodes.size() - 1); }
 
-    int GetPlayerSubSectorHeight()
+    int getPlayerSubSectorHeight()
 	{
-		int iSubsectorID = (int)(m_Nodes.size() - 1);
-		while (!(iSubsectorID & SUBSECTORIDENTIFIER))
+		int subsector = (int)(nodes.size() - 1);
+		while (!(subsector & kSubsectorIdentifier))
 		{
-			if (IsPointOnLeftSide(m_pPlayer->getX(), m_pPlayer->getY(), iSubsectorID))
-				iSubsectorID = m_Nodes[iSubsectorID].lChild;
+			if (isPointOnLeftSide(player->getX(), player->getY(), subsector))
+				subsector = nodes[subsector].lChild;
 			else
-				iSubsectorID = m_Nodes[iSubsectorID].rChild;
+				subsector = nodes[subsector].rChild;
 		}
-		return m_Segs[m_Subsector[iSubsectorID & (~SUBSECTORIDENTIFIER)].firstSeg].rSector->floorHeight;
+		return segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
 	}
 
-	Things* GetThings() { return m_pThings; }
+	Things* getThings() { return things; }
 
 protected:
-    void RenderBSPNodes(int iNodeID);
+	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 
-    bool IsPointOnLeftSide(int XPosition, int YPosition, int iNodeID) const
+    void renderBSPNodes(int iNodeID);
+
+    bool isPointOnLeftSide(int x, int y, int node) const
 	{
-		return ((((XPosition - m_Nodes[iNodeID].x) * m_Nodes[iNodeID].dy) - ((YPosition - m_Nodes[iNodeID].y) * m_Nodes[iNodeID].dx)) <= 0);
+		return ((((x - nodes[node].x) * nodes[node].dy) - ((y - nodes[node].y) * nodes[node].dx)) <= 0);
 	}
 
-    std::vector<Sector> m_Sectors;
-    std::vector<Sidedef> m_Sidedefs;
-    std::vector<Linedef> m_Linedefs;
-    std::vector<Seg> m_Segs;
-    std::vector<Subsector> m_Subsector;
-    std::vector<Node> m_Nodes;
-    Player *m_pPlayer;
-    Things *m_pThings;
-    ViewRenderer *m_pViewRenderer;
+    std::vector<Sector> sectors;
+    std::vector<Sidedef> sidedefs;
+    std::vector<Linedef> linedefs;
+    std::vector<Seg> segs;
+    std::vector<Subsector> subsectors;
+    std::vector<Node> nodes;
+    Player *player;
+    Things *things;
+    ViewRenderer *renderer;
 };

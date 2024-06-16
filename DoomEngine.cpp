@@ -17,7 +17,7 @@ DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
-    m_Player.init((m_Map.GetThings())->GetID(m_Player.getID()), &m_WADLoader);
+    m_Player.init((m_Map.getThings())->GetID(m_Player.getID()), &m_WADLoader);
 }
 
 DoomEngine::~DoomEngine()
@@ -51,7 +51,7 @@ bool DoomEngine::Tick()
 	if (KeyStates[SDL_SCANCODE_X]) m_Player.sink();
 	
 	// Update
-	m_Player.think(m_Map.GetPlayerSubSectorHeight());
+	m_Player.think(m_Map.getPlayerSubSectorHeight());
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;

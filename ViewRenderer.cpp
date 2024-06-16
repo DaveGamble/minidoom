@@ -32,7 +32,7 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 	std::fill(m_CeilingClipHeight.begin(), m_CeilingClipHeight.end(), -1);
 	std::fill(m_FloorClipHeight.begin(), m_FloorClipHeight.end(), m_iRenderYSize);
 
-	m_pMap->Render3DView();
+	m_pMap->render3DView();
 }
 
 void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer)

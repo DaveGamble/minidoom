@@ -105,7 +105,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
     // Calculate the distance to the first edge of the wall
     Angle Angle90(90);
     SegmentRenderData RenderData { 0 };
-    Angle SegToNormalAngle = seg.SlopeAngle + Angle90;
+    Angle SegToNormalAngle = Angle(seg.SlopeAngle) + Angle90;
 
     //Angle NomalToV1Angle = abs(SegToNormalAngle.GetSignedValue() - V1Angle.GetSignedValue());
     Angle NomalToV1Angle = SegToNormalAngle.GetValue() - V1Angle.GetValue();

@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <vector>
-#include "Angle.hpp"
 
 #define SUBSECTORIDENTIFIER 0x8000 // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 
@@ -34,7 +33,7 @@ struct Linedef {
 };
 struct Seg {
 	Seg(const WADSeg &from, const std::vector<Linedef>& linedefs, const std::vector<Vertex> &vertices);
-	Vertex start, end; Angle SlopeAngle; const Linedef *pLinedef; uint16_t Direction; float Offset; const Sector *pRightSector, *pLeftSector; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
+	Vertex start, end; float SlopeAngle; const Linedef *pLinedef; uint16_t Direction; float Offset; const Sector *pRightSector, *pLeftSector; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
 };
 struct Subsector { uint16_t SegCount, FirstSegID; };
 struct Node { int16_t x, y, dx, dy, RightBoxTop, RightBoxBottom, RightBoxLeft, RightBoxRight, LeftBoxTop, LeftBoxBottom, LeftBoxLeft, LeftBoxRight; uint16_t RightChildID, LeftChildID; };

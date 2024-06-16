@@ -1,10 +1,7 @@
 #pragma once
 
 #include "Angle.hpp"
-#include "DataTypes.hpp"
 #include "WADLoader.hpp"
-#include "ViewRenderer.h"
-#include "Patch.h"
 
 class Player
 {

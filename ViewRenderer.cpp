@@ -1,12 +1,9 @@
 #include "ViewRenderer.h"
 
-#include <math.h>
-#include <iostream>
 #include <algorithm>
-
 #include "Map.h"
-#include "Texture.h"
 #include "Player.hpp"
+#include "Texture.h"
 
 ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int renderYSize)
 : m_pMap(pMap)

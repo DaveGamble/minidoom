@@ -1,9 +1,5 @@
 #include "Map.h"
 
-#include <stdlib.h> 
-
-using namespace std;
-
 Map::Map(ViewRenderer *pViewRenderer, const std::string &sName, Player *pPlayer, Things *pThings, WADLoader *wad)
 : m_pPlayer(pPlayer), m_pThings(pThings), m_pViewRenderer(pViewRenderer)
 {

@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-#include <string>
-
-#include "DataTypes.hpp"
 #include "Player.hpp"
 #include "ViewRenderer.h"
 #include "WADLoader.hpp"

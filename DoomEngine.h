@@ -1,12 +1,8 @@
 #pragma once
 
 #include <SDL.h>
-#include <string>
-#include <memory>
-
 #include "Map.h"
 #include "Player.hpp"
-#include "WADLoader.hpp"
 #include "ViewRenderer.h"
 
 class DoomEngine

@@ -1,7 +1,4 @@
 #pragma once
-#include <memory>
-#include <vector>
-
 #include "DataTypes.hpp"
 
 class Patch

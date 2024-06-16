@@ -1,8 +1,4 @@
 #pragma once
-#include <string>
-#include <vector>
-
-#include "DataTypes.hpp"
 #include "Patch.h"
 
 class Texture
@@ -20,5 +16,4 @@ protected:
     std::vector<int> m_ColumnPatchCount, m_ColumnIndex, m_ColumnPatch;
     std::vector<WADTexturePatch> m_TexturePatches;
     std::unique_ptr<uint8_t[]> m_pOverLapColumnData;
-
 };

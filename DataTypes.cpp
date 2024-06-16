@@ -43,19 +43,8 @@ Seg::Seg(const WADSeg &wadseg, const std::vector<Linedef>& linedefs, const std::
 	pLinedef = &linedefs[wadseg.LinedefID];
 	Direction = wadseg.Direction;
 	Offset = wadseg.Offset / 65536.f;
-
-	const Sidedef *pRightSidedef;
-	const Sidedef *pLeftSidedef;
-	if (Direction)
-	{
-		pRightSidedef = pLinedef->pLeftSidedef;
-		pLeftSidedef = pLinedef->pRightSidedef;
-	}
-	else
-	{
-		pRightSidedef = pLinedef->pRightSidedef;
-		pLeftSidedef = pLinedef->pLeftSidedef;
-	}
+	const Sidedef *pRightSidedef = Direction ? pLinedef->pLeftSidedef : pLinedef->pRightSidedef;
+	const Sidedef *pLeftSidedef = Direction ? pLinedef->pRightSidedef : pLinedef->pLeftSidedef;
 	pRightSector = (pRightSidedef) ? pRightSidedef->pSector : nullptr;
 	pLeftSector = (pLeftSidedef) ? pLeftSidedef->pSector : nullptr;
 }

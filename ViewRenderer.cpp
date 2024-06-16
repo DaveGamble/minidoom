@@ -6,40 +6,40 @@
 #include "Texture.h"
 
 ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int renderYSize)
-: m_pMap(pMap)
-, m_pPlayer(pPlayer)
-, m_iRenderXSize(renderXSize)
-, m_iRenderYSize(renderYSize)
-, m_HalfScreenWidth(renderXSize / 2)
-, m_HalfScreenHeight(renderYSize / 2)
-, m_iDistancePlayerToScreen(m_HalfScreenWidth / tan(90 * 0.5 * M_PI / 180))	// 90 here is FOV
+: map(pMap)
+, player(pPlayer)
+, renderWidth(renderXSize)
+, renderHeight(renderYSize)
+, halfRenderWidth(renderXSize / 2)
+, halfRenderHeight(renderYSize / 2)
+, distancePlayerToScreen(halfRenderWidth / tan(90 * 0.5 * M_PI / 180))	// 90 here is FOV
 {
-	for (int i = 0; i <= m_iRenderXSize; ++i)
-		m_ScreenXToAngle[i] = atan((m_HalfScreenWidth - i) / (float)m_iDistancePlayerToScreen) * 180 / M_PI;
+	for (int i = 0; i <= renderWidth; ++i)
+		screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen) * 180 / M_PI;
 
-	m_CeilingClipHeight.resize(m_iRenderXSize);
-	m_FloorClipHeight.resize(m_iRenderXSize);
+	ceilingClipHeight.resize(renderWidth);
+	floorClipHeight.resize(renderWidth);
 }
 
 
-void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
+void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 {
-	m_pScreenBuffer = pScreenBuffer;
-	m_iBufferPitch = iBufferPitch;
-	m_SolidWallRanges.clear();
-	m_SolidWallRanges.push_back({INT_MIN, -1});
-	m_SolidWallRanges.push_back({m_iRenderXSize, INT_MAX});
-	std::fill(m_CeilingClipHeight.begin(), m_CeilingClipHeight.end(), -1);
-	std::fill(m_FloorClipHeight.begin(), m_FloorClipHeight.end(), m_iRenderYSize);
+	screenBuffer = pScreenBuffer;
+	rowlen = iBufferPitch;
+	solidWallRanges.clear();
+	solidWallRanges.push_back({INT_MIN, -1});
+	solidWallRanges.push_back({renderWidth, INT_MAX});
+	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
+	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
 
-	m_pMap->render3DView();
+	map->render3DView();
 }
 
-void ViewRenderer::AddWallInFOV(Seg &seg)
+void ViewRenderer::addWallInFOV(Seg &seg)
 {
 	constexpr int m_FOV = 90, m_HalfFOV = 45;
-	const float m_Angle = m_pPlayer->getAngle().get();
-	const int px = m_pPlayer->getX(), py = m_pPlayer->getY();
+	const float m_Angle = player->getAngle().get();
+	const int px = player->getX(), py = player->getY();
 
 	auto amod = [](float a) {
 		return a - 360 * floor(a / 360);
@@ -63,7 +63,7 @@ void ViewRenderer::AddWallInFOV(Seg &seg)
 	V1AngleFromPlayer += 90;
 	V2AngleFromPlayer += 90;
 	auto AngleToScreen = [&](Angle angle) {
-		return m_iDistancePlayerToScreen + round(tanf((90 - angle.get()) * M_PI / 180.0f) * m_HalfScreenWidth);
+		return distancePlayerToScreen + round(tanf((90 - angle.get()) * M_PI / 180.0f) * halfRenderWidth);
 	};
 
     int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
@@ -76,20 +76,20 @@ void ViewRenderer::AddWallInFOV(Seg &seg)
         solid = false;
 	else return;
 
-	if (solid && m_SolidWallRanges.size() < 2) return;
+	if (solid && solidWallRanges.size() < 2) return;
     SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
-    std::list<SolidSegmentRange>::iterator FoundClipWall = m_SolidWallRanges.begin();
-    while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
+    std::list<SolidSegmentRange>::iterator FoundClipWall = solidWallRanges.begin();
+    while (FoundClipWall != solidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
 
     if (CurrentWall.XStart < FoundClipWall->XStart)
     {
         if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
         {
-            StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle); //All of the wall is visible, so insert it
-            if (solid) m_SolidWallRanges.insert(FoundClipWall, CurrentWall);
+            storeWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle); //All of the wall is visible, so insert it
+            if (solid) solidWallRanges.insert(FoundClipWall, CurrentWall);
             return;
         }
-        StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle); // The end is already included, just update start
+        storeWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle); // The end is already included, just update start
         if (solid) FoundClipWall->XStart = CurrentWall.XStart;
     }
     
@@ -97,31 +97,31 @@ void ViewRenderer::AddWallInFOV(Seg &seg)
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
     while (CurrentWall.XEnd >= next(NextWall, 1)->XStart - 1)
     {
-        StoreWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle); // partialy clipped by other walls, store each fragment
         ++NextWall;
         if (CurrentWall.XEnd <= NextWall->XEnd)
         {
 			if (solid)
 			{
 				FoundClipWall->XEnd = NextWall->XEnd;
-				if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
+				if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
 			}
             return;
         }
     }
-    StoreWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle);
+    storeWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle);
 	if (solid)
 	{
 		FoundClipWall->XEnd = CurrentWall.XEnd;
-		if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
+		if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
 	}
 }
 
-void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
+void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
 {
 	auto GetScaleFactor = [&](int VXScreen, Angle SegToNormalAngle, float DistanceToNormal) {
-		Angle SkewAngle = m_ScreenXToAngle[VXScreen] + m_pPlayer->getAngle() - SegToNormalAngle;
-		return std::clamp((m_iDistancePlayerToScreen * SkewAngle.cos()) / (DistanceToNormal * m_ScreenXToAngle[VXScreen].cos()), 0.00390625f, 64.0f);
+		Angle SkewAngle = screenXToAngle[VXScreen] + player->getAngle() - SegToNormalAngle;
+		return std::clamp((distancePlayerToScreen * SkewAngle.cos()) / (DistanceToNormal * screenXToAngle[VXScreen].cos()), 0.00390625f, 64.0f);
 	};
 
     // Calculate the distance to the first edge of the wall
@@ -176,7 +176,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	RenderData.V1Angle = V1Angle;
 	RenderData.V2Angle = V2Angle;
 
-	float px = m_pPlayer->getX(), py = m_pPlayer->getY();     // Calculate the distance between the player an the vertex.
+	float px = player->getX(), py = player->getY();     // Calculate the distance between the player an the vertex.
 	RenderData.DistanceToV1 = sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
     RenderData.DistanceToNormal = SegToPlayerAngle.sin() * RenderData.DistanceToV1;
 
@@ -185,21 +185,21 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
     RenderData.Steps = (RenderData.V2ScaleFactor - RenderData.V1ScaleFactor) / (V2XScreen - V1XScreen);
 
-    RenderData.RightSectorCeiling = seg.rSector->ceilingHeight - m_pPlayer->getZ();
-    RenderData.RightSectorFloor = seg.rSector->floorHeight - m_pPlayer->getZ();
+    RenderData.RightSectorCeiling = seg.rSector->ceilingHeight - player->getZ();
+    RenderData.RightSectorFloor = seg.rSector->floorHeight - player->getZ();
 
     RenderData.CeilingStep = -(RenderData.RightSectorCeiling * RenderData.Steps);
-    RenderData.CeilingEnd = round(m_HalfScreenHeight - (RenderData.RightSectorCeiling * RenderData.V1ScaleFactor));
+    RenderData.CeilingEnd = round(halfRenderHeight - (RenderData.RightSectorCeiling * RenderData.V1ScaleFactor));
 
     RenderData.FloorStep = -(RenderData.RightSectorFloor * RenderData.Steps);
-    RenderData.FloorStart = round(m_HalfScreenHeight - (RenderData.RightSectorFloor * RenderData.V1ScaleFactor));
+    RenderData.FloorStart = round(halfRenderHeight - (RenderData.RightSectorFloor * RenderData.V1ScaleFactor));
 
 	RenderData.pSeg = &seg;
 
     if (seg.lSector)
     {
-        RenderData.LeftSectorCeiling = seg.lSector->ceilingHeight - m_pPlayer->getZ();
-        RenderData.LeftSectorFloor = seg.lSector->floorHeight - m_pPlayer->getZ();
+        RenderData.LeftSectorCeiling = seg.lSector->ceilingHeight - player->getZ();
+        RenderData.LeftSectorFloor = seg.lSector->floorHeight - player->getZ();
 
 		if (!RenderData.pSeg->lSector)
 		{
@@ -213,38 +213,38 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
 		if (RenderData.pSeg->lSector->ceilingHeight <= RenderData.pSeg->rSector->floorHeight || RenderData.pSeg->lSector->floorHeight >= RenderData.pSeg->rSector->ceilingHeight) // closed door
 			RenderData.UpdateCeiling = RenderData.UpdateFloor = true;
-		if (RenderData.pSeg->rSector->ceilingHeight <= m_pPlayer->getZ()) // below view plane
+		if (RenderData.pSeg->rSector->ceilingHeight <= player->getZ()) // below view plane
 			RenderData.UpdateCeiling = false;
-		if (RenderData.pSeg->rSector->floorHeight >= m_pPlayer->getZ()) // above view plane
+		if (RenderData.pSeg->rSector->floorHeight >= player->getZ()) // above view plane
 			RenderData.UpdateFloor = false;
 
         if (RenderData.LeftSectorCeiling < RenderData.RightSectorCeiling)
         {
             RenderData.bDrawUpperSection = true;
             RenderData.UpperHeightStep = -(RenderData.LeftSectorCeiling * RenderData.Steps);
-            RenderData.iUpperHeight = round(m_HalfScreenHeight - (RenderData.LeftSectorCeiling * RenderData.V1ScaleFactor));
+            RenderData.iUpperHeight = round(halfRenderHeight - (RenderData.LeftSectorCeiling * RenderData.V1ScaleFactor));
         }
 
         if (RenderData.LeftSectorFloor > RenderData.RightSectorFloor)
         {
             RenderData.bDrawLowerSection = true;
             RenderData.LowerHeightStep = -(RenderData.LeftSectorFloor * RenderData.Steps);
-            RenderData.iLowerHeight = round(m_HalfScreenHeight - (RenderData.LeftSectorFloor * RenderData.V1ScaleFactor));
+            RenderData.iLowerHeight = round(halfRenderHeight - (RenderData.LeftSectorFloor * RenderData.V1ScaleFactor));
         }
     }
 
 	auto GetSectionColor = [&](const Texture *texture) {
-		if (!m_WallColor.count(texture)) m_WallColor[texture] = rand() & 255;
-		return m_WallColor[texture];
+		if (!wallColor.count(texture)) wallColor[texture] = rand() & 255;
+		return wallColor[texture];
 	};
 	auto DrawVerticalLine = [&](int iX, int iStartY, int iEndY, uint8_t color) {
-		for (; iStartY < iEndY; iStartY++) m_pScreenBuffer[m_iBufferPitch * iStartY + iX] = color;
+		for (; iStartY < iEndY; iStartY++) screenBuffer[rowlen * iStartY + iX] = color;
 	};
 	
 	for (int iXCurrent = RenderData.V1XScreen; iXCurrent <= RenderData.V2XScreen; iXCurrent++)
     {
-        int CurrentCeilingEnd = std::max(RenderData.CeilingEnd, m_CeilingClipHeight[iXCurrent] + 1.f);
-        int CurrentFloorStart = std::min(RenderData.FloorStart, m_FloorClipHeight[iXCurrent] - 1.f);
+        int CurrentCeilingEnd = std::max(RenderData.CeilingEnd, ceilingClipHeight[iXCurrent] + 1.f);
+        int CurrentFloorStart = std::min(RenderData.FloorStart, floorClipHeight[iXCurrent] - 1.f);
 
 		if (CurrentCeilingEnd > CurrentFloorStart)
 		{
@@ -257,31 +257,31 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
         {
 			if (RenderData.bDrawUpperSection)
 			{
-				int iUpperHeight = std::min(m_FloorClipHeight[iXCurrent] - 1.f, RenderData.iUpperHeight);
+				int iUpperHeight = std::min(floorClipHeight[iXCurrent] - 1.f, RenderData.iUpperHeight);
 				RenderData.iUpperHeight += RenderData.UpperHeightStep;
 				if (iUpperHeight >= CurrentCeilingEnd)
 					DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, GetSectionColor(RenderData.pSeg->linedef->rSidedef->uppertexture));
-				m_CeilingClipHeight[iXCurrent] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
+				ceilingClipHeight[iXCurrent] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
 			}
 			else if (RenderData.UpdateCeiling)
-				m_CeilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
+				ceilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
 
 			if (RenderData.bDrawLowerSection)
 			{
-				int iLowerHeight = std::max(RenderData.iLowerHeight, m_CeilingClipHeight[iXCurrent] + 1.f);
+				int iLowerHeight = std::max(RenderData.iLowerHeight, ceilingClipHeight[iXCurrent] + 1.f);
 				RenderData.iLowerHeight += RenderData.LowerHeightStep;
 				if (iLowerHeight <= CurrentFloorStart)
 					DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, GetSectionColor(RenderData.pSeg->linedef->rSidedef->lowertexture));
-				m_FloorClipHeight[iXCurrent] = std::min(CurrentFloorStart + 1, iLowerHeight);
+				floorClipHeight[iXCurrent] = std::min(CurrentFloorStart + 1, iLowerHeight);
 			}
 			else if (RenderData.UpdateFloor)
-				m_FloorClipHeight[iXCurrent] = CurrentFloorStart + 1;
+				floorClipHeight[iXCurrent] = CurrentFloorStart + 1;
 		}
         else
 		{
 			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, GetSectionColor(RenderData.pSeg->linedef->rSidedef->middletexture));
-			m_CeilingClipHeight[iXCurrent] = m_iRenderYSize;
-			m_FloorClipHeight[iXCurrent] = -1;
+			ceilingClipHeight[iXCurrent] = renderHeight;
+			floorClipHeight[iXCurrent] = -1;
 
 		}
         RenderData.CeilingEnd += RenderData.CeilingStep;

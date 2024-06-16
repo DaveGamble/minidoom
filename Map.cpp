@@ -81,6 +81,5 @@ void Map::renderBSPNodes(int iNodeID)
 	}
 
 	Subsector &subsector = subsectors[iNodeID & (~kSubsectorIdentifier)];
-	for (int i = 0; i < subsector.numSegs; i++)
-		renderer->AddWallInFOV(segs[subsector.firstSeg + i]);
+	for (int i = 0; i < subsector.numSegs; i++) renderer->addWallInFOV(segs[subsector.firstSeg + i]);
 }

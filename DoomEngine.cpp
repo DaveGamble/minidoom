@@ -57,7 +57,7 @@ bool DoomEngine::Tick()
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
-		m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
+		m_ViewRenderer.render(pScreenBuffer, m_iRenderWidth);
 //		m_Player.render(pScreenBuffer, m_iRenderWidth);
 //		m_WADLoader.getTexture("BROWNPIP")->render(pScreenBuffer, m_iRenderWidth, 10, 10, 4);
 	}

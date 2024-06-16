@@ -41,7 +41,7 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 		}
 	}
 	
-	overLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[overlap]);
+	overlapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[overlap]);
 	for (int i = 0; i < texturePatches.size(); ++i)
 	{
 		const Patch *pPatch = texturePatches[i].patch;
@@ -49,27 +49,20 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 		int iMaxWidth = (iXStart + pPatch->getWidth()) > width ? width : iXStart + pPatch->getWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 			if (columnPatches[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
-				pPatch->composeColumn(overLapColumnData.get() + columnIndices[iXIndex], height, pPatch->getColumnDataIndex(iXIndex - iXStart), texturePatches[i].dy);
+				pPatch->composeColumn(overlapColumnData.get() + columnIndices[iXIndex], height, pPatch->getColumnDataIndex(iXIndex - iXStart), texturePatches[i].dy);
 	}
 }
 
-void Texture::render(uint8_t * pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation)
+void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny)
 {
-    for (int iCurrentColumnIndex = 0; iCurrentColumnIndex < width; ++iCurrentColumnIndex)
-        renderColumn(pScreenBuffer, iBufferPitch, iXScreenLocation + iCurrentColumnIndex, iYScreenLocation, iCurrentColumnIndex);
+	buf += rowlen * screeny + screenx;
+    for (int column = 0; column < width; ++column) renderColumn(buf + column, rowlen, column);
 }
 
-void Texture::renderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex)
+void Texture::renderColumn(uint8_t *buf, int rowlen, int column)
 {
-	pScreenBuffer += iBufferPitch * iYScreenLocation + iXScreenLocation;
-    if (columnPatches[iCurrentColumnIndex] > -1 )
-    {
-		const Patch *pPatch = texturePatches[columnPatches[iCurrentColumnIndex]].patch;
-        pPatch->renderColumn(pScreenBuffer, iBufferPitch, columnIndices[iCurrentColumnIndex], height, texturePatches[columnPatches[iCurrentColumnIndex]].dy);
-    }
+    if (columnPatches[column] > -1 )
+		texturePatches[columnPatches[column]].patch->renderColumn(buf, rowlen, columnIndices[column], height, texturePatches[columnPatches[column]].dy);
     else
-    {
-        for (int iYIndex = 0; iYIndex < height; ++iYIndex, pScreenBuffer += iBufferPitch)
-            *pScreenBuffer = overLapColumnData[columnIndices[iCurrentColumnIndex] + iYIndex];
-    }
+        for (int y = 0; y < height; y++, buf += rowlen) *buf = overlapColumnData[columnIndices[column] + y];
 }

@@ -42,7 +42,7 @@ Seg::Seg(const WADSeg &wadseg, const std::vector<Linedef>& linedefs, const std::
 	SlopeAngle = wadseg.SlopeAngle * 360.0 / 65536.0;
 	pLinedef = &linedefs[wadseg.LinedefID];
 	Direction = wadseg.Direction;
-	Offset = (float)(wadseg.Offset << 16) / (float)(1 << 16);
+	Offset = wadseg.Offset / 65536.f;
 
 	const Sidedef *pRightSidedef;
 	const Sidedef *pLeftSidedef;

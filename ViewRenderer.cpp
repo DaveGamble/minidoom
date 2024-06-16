@@ -268,8 +268,7 @@ void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
 
 void ViewRenderer::DrawMiddleSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd, int CurrentFloorStart)
 {
-	uint8_t color = GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->MiddleTexture);
-	DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, color);
+	DrawVerticalLine(iXCurrent, CurrentCeilingEnd, CurrentFloorStart, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->MiddleTexture));
     m_CeilingClipHeight[iXCurrent] = m_iRenderYSize;
     m_FloorClipHeight[iXCurrent] = -1;
 }
@@ -278,19 +277,11 @@ void ViewRenderer::DrawLowerSection(ViewRenderer::SegmentRenderData &RenderData,
 {
     if (RenderData.bDrawLowerSection)
     {
-		int iLowerHeight = RenderData.iLowerHeight;
+		int iLowerHeight = std::max(RenderData.iLowerHeight, m_CeilingClipHeight[iXCurrent] + 1.f);
         RenderData.iLowerHeight += RenderData.LowerHeightStep;
-
-        if (iLowerHeight <= m_CeilingClipHeight[iXCurrent]) iLowerHeight = m_CeilingClipHeight[iXCurrent] + 1;
-
         if (iLowerHeight <= CurrentFloorStart)
-        {
-			uint8_t color = GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->LowerTexture);
-			DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, color);
-            m_FloorClipHeight[iXCurrent] = iLowerHeight;
-        }
-        else
-            m_FloorClipHeight[iXCurrent] = CurrentFloorStart + 1;
+			DrawVerticalLine(iXCurrent, iLowerHeight, CurrentFloorStart, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->LowerTexture));
+		m_FloorClipHeight[iXCurrent] = std::min(CurrentFloorStart + 1, iLowerHeight);
     }
     else if (RenderData.UpdateFloor)
         m_FloorClipHeight[iXCurrent] = CurrentFloorStart + 1;
@@ -300,20 +291,11 @@ void ViewRenderer::DrawUpperSection(ViewRenderer::SegmentRenderData &RenderData,
 {
     if (RenderData.bDrawUpperSection)
     {
-        int iUpperHeight = RenderData.iUpperHeight;
+		int iUpperHeight = std::min(m_FloorClipHeight[iXCurrent] - 1.f, RenderData.iUpperHeight);
         RenderData.iUpperHeight += RenderData.UpperHeightStep;
-
-        if (iUpperHeight >= m_FloorClipHeight[iXCurrent])
-            iUpperHeight = m_FloorClipHeight[iXCurrent] - 1;
-
         if (iUpperHeight >= CurrentCeilingEnd)
-        {
-			uint8_t color = GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->UpperTexture);
-			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, color);
-            m_CeilingClipHeight[iXCurrent] = iUpperHeight;
-        }
-        else
-            m_CeilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;
+			DrawVerticalLine(iXCurrent, CurrentCeilingEnd, iUpperHeight, GetSectionColor(RenderData.pSeg->pLinedef->pRightSidedef->UpperTexture));
+		m_CeilingClipHeight[iXCurrent] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
     }
     else if (RenderData.UpdateCeiling)
         m_CeilingClipHeight[iXCurrent] = CurrentCeilingEnd - 1;

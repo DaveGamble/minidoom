@@ -21,9 +21,10 @@ struct WADPalette { uint8_t bytes[768]; };
 
 
 class Texture;
+class WADLoader;
 struct Vertex { int16_t x, y; };
-struct Sector { Sector(const WADSector& from, class WADLoader *wad); int16_t FloorHeight, CeilingHeight; const Texture *floortexture, *ceilingtexture; uint16_t Lightlevel, Type, Tag; };
-struct Sidedef { Sidedef(const WADSidedef &from, const std::vector<Sector> &sectors, class WADLoader *wad); int16_t XOffset, YOffset; const Texture *uppertexture, *middletexture, *lowertexture; const Sector *pSector; };
+struct Sector { Sector(const WADSector& from, WADLoader *wad); int16_t FloorHeight, CeilingHeight; const Texture *floortexture, *ceilingtexture; uint16_t Lightlevel, Type, Tag; };
+struct Sidedef { Sidedef(const WADSidedef &from, const std::vector<Sector> &sectors, WADLoader *wad); int16_t XOffset, YOffset; const Texture *uppertexture, *middletexture, *lowertexture; const Sector *pSector; };
 struct Linedef { Linedef(const WADLinedef &from, const std::vector<Sidedef> & sidedefs, const std::vector<Vertex> &vertices); Vertex pStartVertex, pEndVertex; uint16_t Flags, LineType, SectorTag; const Sidedef *pRightSidedef, *pLeftSidedef; };
 struct Seg { Seg(const WADSeg &from, const std::vector<Linedef>& linedefs, const std::vector<Vertex> &vertices); Vertex start, end; Angle SlopeAngle; const Linedef *pLinedef; uint16_t Direction, Offset; const Sector *pRightSector, *pLeftSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
 struct Subsector { uint16_t SegCount, FirstSegID; };

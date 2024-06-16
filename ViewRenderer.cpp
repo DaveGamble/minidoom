@@ -70,7 +70,7 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 	m_iBufferPitch = iBufferPitch;
 
     InitFrame();
-    Render3DView();
+	m_pMap->Render3DView();
 }
 
 void ViewRenderer::InitFrame()
@@ -94,36 +94,13 @@ void ViewRenderer::InitFrame()
 
 void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer)
 {
-    // Find Wall X Coordinates 
-    int V1XScreen = AngleToScreen(V1AngleFromPlayer);
-    int V2XScreen = AngleToScreen(V2AngleFromPlayer);
-
-    // Skip same pixel wall
-    if (V1XScreen == V2XScreen)
-        return;
-
-    // Handle solid walls
-    if (seg.pLeftSector == nullptr)
-    {
+    int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
+    if (V1XScreen == V2XScreen) return; // Skip same pixel wall
+    if (!seg.pLeftSector) ClipSolidWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle); // Handle solid walls
+    else if (seg.pLeftSector->CeilingHeight <= seg.pRightSector->FloorHeight || seg.pLeftSector->FloorHeight >= seg.pRightSector->CeilingHeight) // Handle closed door
         ClipSolidWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle);
-        return;
-    }
-
-    // Handle closed door
-    if (seg.pLeftSector->CeilingHeight <= seg.pRightSector->FloorHeight
-        || seg.pLeftSector->FloorHeight >= seg.pRightSector->CeilingHeight)
-    {
-        ClipSolidWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle);
-        return;
-    }
-
-    // Windowed walls
-    if (seg.pRightSector->CeilingHeight != seg.pLeftSector->CeilingHeight ||
-        seg.pRightSector->FloorHeight != seg.pLeftSector->FloorHeight)
-    {
+    else if (seg.pRightSector->CeilingHeight != seg.pLeftSector->CeilingHeight || seg.pRightSector->FloorHeight != seg.pLeftSector->FloorHeight) // Windowed walls
         ClipPassWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle);
-        return;
-    }
 }
 
 void ViewRenderer::ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
@@ -544,11 +521,6 @@ bool ViewRenderer::ValidateRange(ViewRenderer::SegmentRenderData & RenderData, i
         return false;
     }
     return true;
-}
-
-void ViewRenderer::Render3DView()
-{
-    m_pMap->Render3DView();
 }
 
 int ViewRenderer::AngleToScreen(Angle angle)

@@ -68,7 +68,6 @@ protected:
 		Seg *pSeg;
     };
 
-    void Render3DView();
 	void DrawVerticalLine(int iX, int iStartY, int iEndY, uint8_t color);
 
     void ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);

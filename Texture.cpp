@@ -39,11 +39,11 @@ void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny, float s
 	for (int column = 0, tox = 0; column < width; ++column) while (tox < (column + 1) * scale) {renderColumn(buf + tox, rowlen, column, scale); tox++;}
 }
 
-void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale) const
+void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset) const
 {
 	if (columns[c].overlap.size())
 	{
-		for (int y = 0, toy = 0; y < height; y++) while (toy < (y + 1) * scale) buf[(toy++) * rowlen] = columns[c].overlap[y];
+		for (int y = yOffset, toy = yOffset * scale; y < height; y++) while (toy < (y + 1) * scale) buf[(toy++ - yOffset) * rowlen] = columns[c].overlap[y];
 	}
-    else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, height, columns[c].yOffset, scale);
+    else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, height, columns[c].yOffset + yOffset, scale);
 }

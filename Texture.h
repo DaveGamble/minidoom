@@ -8,7 +8,7 @@ public:
 	~Texture() {}
 
     void render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale = 1.0) const;
-    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, float scale = 1.0) const;
+    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, float scale = 1.0, int yOffset = 0) const;
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }
 protected:

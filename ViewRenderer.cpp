@@ -123,41 +123,10 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	};
 
     // Calculate the distance to the first edge of the wall
-    Angle Angle90(90);
-	
-	struct SegmentRenderData
-	{
-		Angle V1Angle;
-		Angle V2Angle;
-		float DistanceToV1;
-		float DistanceToNormal;
-		float V1ScaleFactor;
-		float V2ScaleFactor;
-		float Steps;
+	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
+	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
-		float RightSectorCeiling;
-		float RightSectorFloor;
-		float CeilingStep;
-		float CeilingEnd;
-		float FloorStep;
-		float FloorStart;
-
-		float LeftSectorCeiling;
-		float LeftSectorFloor;
-
-		bool bDrawUpperSection;
-		bool bDrawLowerSection;
-
-		float UpperHeightStep;
-		float iUpperHeight;
-		float LowerHeightStep;
-		float iLowerHeight;
-
-		bool UpdateFloor;
-		bool UpdateCeiling;
-	};
-	
-    SegmentRenderData RenderData { 0 };
+	Angle Angle90(90);
     Angle SegToNormalAngle = Angle(seg.slopeAngle) + Angle90;
 
     Angle NomalToV1Angle = SegToNormalAngle.get() - V1Angle.get();
@@ -165,61 +134,51 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
     // Normal angle is 90 degree to wall
     Angle SegToPlayerAngle = Angle90 - NomalToV1Angle;
 
-	RenderData.V1Angle = V1Angle;
-	RenderData.V2Angle = V2Angle;
-
 	float px = player->getX(), py = player->getY();     // Calculate the distance between the player an the vertex.
-	RenderData.DistanceToV1 = sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
-    RenderData.DistanceToNormal = SegToPlayerAngle.sin() * RenderData.DistanceToV1;
+	float DistanceToV1 = sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
+    float DistanceToNormal = SegToPlayerAngle.sin() * DistanceToV1;
 
-    RenderData.V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, RenderData.DistanceToNormal);
-    RenderData.V2ScaleFactor = GetScaleFactor(V2XScreen, SegToNormalAngle, RenderData.DistanceToNormal);
+    float V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, DistanceToNormal);
+    float V2ScaleFactor = GetScaleFactor(V2XScreen, SegToNormalAngle, DistanceToNormal);
 
-    RenderData.Steps = (RenderData.V2ScaleFactor - RenderData.V1ScaleFactor) / (V2XScreen - V1XScreen);
+    float Steps = (V2ScaleFactor - V1ScaleFactor) / (V2XScreen - V1XScreen);
 
-    RenderData.RightSectorCeiling = seg.rSector->ceilingHeight - player->getZ();
-    RenderData.RightSectorFloor = seg.rSector->floorHeight - player->getZ();
+    float RightSectorCeiling = seg.rSector->ceilingHeight - player->getZ();
+    float RightSectorFloor = seg.rSector->floorHeight - player->getZ();
 
-    RenderData.CeilingStep = -(RenderData.RightSectorCeiling * RenderData.Steps);
-    RenderData.CeilingEnd = round(halfRenderHeight - (RenderData.RightSectorCeiling * RenderData.V1ScaleFactor));
+    float CeilingStep = -(RightSectorCeiling * Steps);
+    float CeilingEnd = round(halfRenderHeight - RightSectorCeiling * V1ScaleFactor);
 
-    RenderData.FloorStep = -(RenderData.RightSectorFloor * RenderData.Steps);
-    RenderData.FloorStart = round(halfRenderHeight - (RenderData.RightSectorFloor * RenderData.V1ScaleFactor));
+    float FloorStep = -(RightSectorFloor * Steps);
+    float FloorStart = round(halfRenderHeight - RightSectorFloor * V1ScaleFactor);
 
     if (seg.lSector)
     {
-        RenderData.LeftSectorCeiling = seg.lSector->ceilingHeight - player->getZ();
-        RenderData.LeftSectorFloor = seg.lSector->floorHeight - player->getZ();
+        float LeftSectorCeiling = seg.lSector->ceilingHeight - player->getZ();
+        float LeftSectorFloor = seg.lSector->floorHeight - player->getZ();
 
-		if (!seg.lSector)
-		{
-			RenderData.UpdateFloor = true;
-			RenderData.UpdateCeiling = true;
-			return;
-		}
-
-		RenderData.UpdateCeiling = (RenderData.LeftSectorCeiling != RenderData.RightSectorCeiling);
-		RenderData.UpdateFloor = (RenderData.LeftSectorFloor != RenderData.RightSectorFloor);
+		UpdateCeiling = (LeftSectorCeiling != RightSectorCeiling);
+		UpdateFloor = (LeftSectorFloor != RightSectorFloor);
 
 		if (seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight) // closed door
-			RenderData.UpdateCeiling = RenderData.UpdateFloor = true;
+			UpdateCeiling = UpdateFloor = true;
 		if (seg.rSector->ceilingHeight <= player->getZ()) // below view plane
-			RenderData.UpdateCeiling = false;
+			UpdateCeiling = false;
 		if (seg.rSector->floorHeight >= player->getZ()) // above view plane
-			RenderData.UpdateFloor = false;
+			UpdateFloor = false;
 
-        if (RenderData.LeftSectorCeiling < RenderData.RightSectorCeiling)
+        if (LeftSectorCeiling < RightSectorCeiling)
         {
-            RenderData.bDrawUpperSection = true;
-            RenderData.UpperHeightStep = -(RenderData.LeftSectorCeiling * RenderData.Steps);
-            RenderData.iUpperHeight = round(halfRenderHeight - (RenderData.LeftSectorCeiling * RenderData.V1ScaleFactor));
+            bDrawUpperSection = true;
+            UpperHeightStep = -(LeftSectorCeiling * Steps);
+            iUpperHeight = round(halfRenderHeight - (LeftSectorCeiling * V1ScaleFactor));
         }
 
-        if (RenderData.LeftSectorFloor > RenderData.RightSectorFloor)
+        if (LeftSectorFloor > RightSectorFloor)
         {
-            RenderData.bDrawLowerSection = true;
-            RenderData.LowerHeightStep = -(RenderData.LeftSectorFloor * RenderData.Steps);
-            RenderData.iLowerHeight = round(halfRenderHeight - (RenderData.LeftSectorFloor * RenderData.V1ScaleFactor));
+            bDrawLowerSection = true;
+            LowerHeightStep = -(LeftSectorFloor * Steps);
+            iLowerHeight = round(halfRenderHeight - (LeftSectorFloor * V1ScaleFactor));
         }
     }
 
@@ -233,38 +192,38 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-        int CurrentCeilingEnd = std::max(RenderData.CeilingEnd, ceilingClipHeight[x] + 1.f);
-        int CurrentFloorStart = std::min(RenderData.FloorStart, floorClipHeight[x] - 1.f);
+        int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);
+        int CurrentFloorStart = std::min(FloorStart, floorClipHeight[x] - 1.f);
 
 		if (CurrentCeilingEnd > CurrentFloorStart)
 		{
-			RenderData.CeilingEnd += RenderData.CeilingStep;
-			RenderData.FloorStart += RenderData.FloorStep;
+			CeilingEnd += CeilingStep;
+			FloorStart += FloorStep;
 			continue;
 		}
 
         if (seg.lSector)
         {
-			if (RenderData.bDrawUpperSection)
+			if (bDrawUpperSection)
 			{
-				int iUpperHeight = std::min(floorClipHeight[x] - 1.f, RenderData.iUpperHeight);
-				RenderData.iUpperHeight += RenderData.UpperHeightStep;
-				if (iUpperHeight >= CurrentCeilingEnd)
-					DrawTexture(seg.linedef->rSidedef->uppertexture, x, CurrentCeilingEnd, iUpperHeight);
-				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, iUpperHeight);
+				int upper = std::min(floorClipHeight[x] - 1.f, iUpperHeight);
+				iUpperHeight += UpperHeightStep;
+				if (upper >= CurrentCeilingEnd)
+					DrawTexture(seg.linedef->rSidedef->uppertexture, x, CurrentCeilingEnd, upper);
+				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			}
-			else if (RenderData.UpdateCeiling)
+			else if (UpdateCeiling)
 				ceilingClipHeight[x] = CurrentCeilingEnd - 1;
 
-			if (RenderData.bDrawLowerSection)
+			if (bDrawLowerSection)
 			{
-				int iLowerHeight = std::max(RenderData.iLowerHeight, ceilingClipHeight[x] + 1.f);
-				RenderData.iLowerHeight += RenderData.LowerHeightStep;
-				if (iLowerHeight <= CurrentFloorStart)
-					DrawTexture(seg.linedef->rSidedef->lowertexture, x, iLowerHeight, CurrentFloorStart);
-				floorClipHeight[x] = std::min(CurrentFloorStart + 1, iLowerHeight);
+				int lower = std::max(iLowerHeight, ceilingClipHeight[x] + 1.f);
+				iLowerHeight += LowerHeightStep;
+				if (lower <= CurrentFloorStart)
+					DrawTexture(seg.linedef->rSidedef->lowertexture, x, lower, CurrentFloorStart);
+				floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 			}
-			else if (RenderData.UpdateFloor)
+			else if (UpdateFloor)
 				floorClipHeight[x] = CurrentFloorStart + 1;
 		}
         else
@@ -274,8 +233,8 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 			floorClipHeight[x] = -1;
 
 		}
-        RenderData.CeilingEnd += RenderData.CeilingStep;
-        RenderData.FloorStart += RenderData.FloorStep;
+        CeilingEnd += CeilingStep;
+        FloorStart += FloorStep;
     }
 }
 

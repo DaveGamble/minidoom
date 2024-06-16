@@ -32,7 +32,6 @@ protected:
 
     void norm()
 	{
-		a = fmodf(a, 360);
-		if (a < 0) a += 360;
+		a -= 360 * floor(a / 360);
 	}
 };

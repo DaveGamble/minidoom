@@ -196,11 +196,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
             RenderData.iLowerHeight = round(m_HalfScreenHeight - (RenderData.LeftSectorFloor * RenderData.V1ScaleFactor));
         }
     }
-    RenderSegment(RenderData);
-}
 
-void ViewRenderer::RenderSegment(SegmentRenderData &RenderData)
-{
 	auto GetSectionColor = [&](const std::string &TextureName) {
 		if (!m_WallColor.count(TextureName)) m_WallColor[TextureName] = rand() & 255;
 		return m_WallColor[TextureName];

@@ -68,7 +68,6 @@ protected:
     void ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void ClipPassWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
-    void RenderSegment(SegmentRenderData &RenderData);
 
 	Map *m_pMap;
 	Player *m_pPlayer;

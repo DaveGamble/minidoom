@@ -42,8 +42,7 @@ Patch::~Patch()
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale) const
 {
 	buf += rowlen * screeny + screenx;
-	int tox = 0;
-	for (int x = 0; x < width; x++)
+	for (int x = 0, tox = 0; x < width; x++)
 	{
 		while (tox < (x + 1) * scale)
 		{
@@ -51,12 +50,7 @@ void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, float sca
 			{
 				int off = floor(scale * patchColumnData[column].topDelta) * rowlen + tox;
 				uint8_t *from = patchColumnData[column].columnData;
-				int to = 0;
-				for (int y = 0; y < patchColumnData[column].length; y++)
-				{
-					uint8_t f = from[y];
-					while (to < (y + 1) * scale) buf[off + (to++) * rowlen] = f;
-				}
+				for (int y = 0, to = 0; y < patchColumnData[column].length; y++) while (to < (y + 1) * scale) buf[off + (to++) * rowlen] = from[y];
 			}
 			tox++;
 		}
@@ -71,12 +65,7 @@ void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeigh
 		int run = std::clamp(patchColumnData[firstColumn].length - y, 0, maxHeight);
 		int start = rowlen * floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
 		const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-		int to = 0;
-		for (int i = 0; i < run; i++)
-		{
-			uint8_t f = from[i];
-			while (to < (i + 1) * scale) buf[start + (to++) * rowlen] = f;
-		}
+		for (int i = 0, to = 0; i < run; i++) while (to < (i + 1) * scale) buf[start + (to++) * rowlen] = from[i];
 		maxHeight -= run;
         ++firstColumn;
         y = 0;

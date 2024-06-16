@@ -44,8 +44,7 @@ void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale)
 {
 	if (columns[c].overlap.size())
 	{
-		float iscale = 1.0 / scale;
-		for (int y = 0; y < height * scale; y++, buf += rowlen) *buf = columns[c].overlap[floor(y * iscale)];
+		for (int y = 0, toy = 0; y < height; y++) while (toy < (y + 1) * scale) buf[(toy++) * rowlen] = columns[c].overlap[y];
 	}
     else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, height, columns[c].yOffset, scale);
 }

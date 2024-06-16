@@ -101,6 +101,43 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 
     // Calculate the distance to the first edge of the wall
     Angle Angle90(90);
+	
+	struct SegmentRenderData
+	{
+		int V1XScreen;
+		int V2XScreen;
+		Angle V1Angle;
+		Angle V2Angle;
+		float DistanceToV1;
+		float DistanceToNormal;
+		float V1ScaleFactor;
+		float V2ScaleFactor;
+		float Steps;
+
+		float RightSectorCeiling;
+		float RightSectorFloor;
+		float CeilingStep;
+		float CeilingEnd;
+		float FloorStep;
+		float FloorStart;
+
+		float LeftSectorCeiling;
+		float LeftSectorFloor;
+
+		bool bDrawUpperSection;
+		bool bDrawLowerSection;
+
+		float UpperHeightStep;
+		float iUpperHeight;
+		float LowerHeightStep;
+		float iLowerHeight;
+
+		bool UpdateFloor;
+		bool UpdateCeiling;
+
+		Seg *pSeg;
+	};
+	
     SegmentRenderData RenderData { 0 };
     Angle SegToNormalAngle = Angle(seg.SlopeAngle) + Angle90;
 

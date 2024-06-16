@@ -45,7 +45,7 @@ void  ViewRenderer::Init(Map *pMap, Player *pPlayer)
 
     m_HalfScreenWidth = m_iRenderXSize / 2;
     m_HalfScreenHeight = m_iRenderYSize / 2;
-    Angle HalfFOV = m_pPlayer->GetFOV() / 2;
+	Angle HalfFOV = 45;
     m_iDistancePlayerToScreen = m_HalfScreenWidth / HalfFOV.GetTanValue();
 
     for (int i = 0; i <= m_iRenderXSize; ++i)

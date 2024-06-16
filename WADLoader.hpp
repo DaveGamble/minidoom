@@ -3,6 +3,7 @@
 #include <map>
 #include "DataTypes.hpp"
 #include "Texture.h"
+#include "Flat.hpp"
 
 class WADLoader
 {
@@ -45,6 +46,13 @@ public:
 				textures[name] = std::unique_ptr<Texture>(new Texture(data.data() + asint[i + 1], this));
 			}
 		}
+		
+		for (int flat = findLumpByName("F_START") + 1; strncasecmp(dirs[flat].lumpName, "F_END", 8); flat++)
+		{
+			if (dirs[flat].lumpSize != 4096) continue;
+			char name[9] {}; memcpy(name, dirs[flat].lumpName, 8);
+			flats[name] = std::unique_ptr<Flat>(new Flat(data + dirs[flat].lumpOffset));
+	   }
 	}
 
 	~WADLoader() { delete[] data; }
@@ -60,7 +68,7 @@ public:
 		return -1;
 	}
 	
-	Patch* getPatch(const std::string &name)
+	Patch *getPatch(const std::string &name)
 	{
 		if (!patches.count(name))
 		{
@@ -69,14 +77,15 @@ public:
 		}
 		return patches[name].get();
 	}
-	Patch* getPatch(int index) { return getPatch(pnames[index]); }
-	Texture* getTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
-
+	Patch *getPatch(int index) { return getPatch(pnames[index]); }
+	Texture *getTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
+	Flat *getFlat(const std::string &name) { return flats[name].get(); }
 protected:
 	uint8_t *data {nullptr};
 	size_t numLumps {0};
 	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8] {}; };
 	const Directory* dirs {nullptr};
+	std::map<std::string, std::unique_ptr<Flat>> flats;
 	std::map<std::string, std::unique_ptr<Patch>> patches;
 	std::map<std::string, std::unique_ptr<Texture>> textures;
 	std::vector<std::string> pnames;

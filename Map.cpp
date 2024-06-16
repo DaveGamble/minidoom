@@ -24,7 +24,7 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, Player *_player, T
 		char floorname[9] {}, ceilname[9] {};
 		memcpy(floorname, ws->floorTexture, 8);
 		memcpy(ceilname, ws->ceilingTexture, 8);
-		sectors.push_back({ws->fh, ws->ch, wad->getTexture(floorname), wad->getTexture(ceilname), ws->lightlevel, ws->type, ws->tag});
+		sectors.push_back({ws->fh, ws->ch, wad->getFlat(floorname), wad->getFlat(ceilname), ws->lightlevel, ws->type, ws->tag});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };

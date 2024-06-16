@@ -36,8 +36,7 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale)
 {
 	buf += rowlen * screeny + screenx;
-	float iscale = 1.0 / scale;
-    for (int column = 0; column < width * scale; ++column) renderColumn(buf + column, rowlen, floor(column * iscale), scale);
+	for (int column = 0, tox = 0; column < width; ++column) while (tox < (column + 1) * scale) {renderColumn(buf + tox, rowlen, column, scale); tox++;}
 }
 
 void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale)

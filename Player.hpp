@@ -15,7 +15,7 @@ public:
 		{
 			x = thing->x;
 			y = thing->y;
-			a = thing->angle * M_PI / 65536;
+			a = thing->angle * M_PI / 180;
 		}
 	}
     void moveForward() { x += cos(a) * moveSpeed; y += sin(a) * moveSpeed; }

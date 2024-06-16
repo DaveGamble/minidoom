@@ -59,17 +59,16 @@ void Patch::Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocatio
 
 void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iXScreenLocation, int iYScreenLocation, int iMaxHeight, int iYOffset)
 {
-    int iTotalHeight = 0, iYIndex = 0;
-    if (iYOffset < 0) iYIndex = iYOffset * -1;
-
-    while (m_PatchData[iColumn].TopDelta != 0xFF && iTotalHeight < iMaxHeight)
+    int iYIndex = (iYOffset < 0) ? iYOffset * -1 : 0;
+    while (m_PatchData[iColumn].TopDelta != 0xFF && iMaxHeight > 0)
     {
-        while (iYIndex < m_PatchData[iColumn].Length && iTotalHeight < iMaxHeight)
-        {
-            pScreenBuffer[iBufferPitch * (iYScreenLocation + m_PatchData[iColumn].TopDelta + iYIndex + iYOffset) + iXScreenLocation] = m_PatchData[iColumn].pColumnData[iYIndex];
-            ++iTotalHeight;
-            ++iYIndex;
-        }
+		int run = m_PatchData[iColumn].Length - iYIndex;
+		run = (run > iMaxHeight) ? iMaxHeight : run;
+		if (run > 0)
+		{
+			memcpy(pScreenBuffer + iBufferPitch * (iYScreenLocation + m_PatchData[iColumn].TopDelta + iYIndex + iYOffset) + iXScreenLocation, m_PatchData[iColumn].pColumnData + iYIndex, run);
+			iMaxHeight -= run;
+		}
         ++iColumn;
         iYIndex = 0;
     }

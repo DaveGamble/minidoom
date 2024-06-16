@@ -49,22 +49,18 @@ void Map::RenderBSPNodes(int iNodeID)
 	Subsector &subsector = m_Subsector[iNodeID & (~SUBSECTORIDENTIFIER)];
 	
 	constexpr int m_FOV = 90;
-	Angle m_HalfFOV = 45;
-	Angle m_Angle = m_pPlayer->GetAngle();
+	Angle m_HalfFOV = 45, m_Angle = m_pPlayer->GetAngle();
 	int px = m_pPlayer->GetXPosition(), py = m_pPlayer->GetYPosition();
 	for (int i = 0; i < subsector.SegCount; i++)
 	{
 		Seg &seg = m_Segs[subsector.FirstSegID + i];
-		Angle V1Angle, V2Angle, V1AngleFromPlayer, V2AngleFromPlayer;
-		
-		V1Angle = Angle(atan2f(seg.pStartVertex.YPosition - py, seg.pStartVertex.XPosition - px) * 180.0f / PI);
-		V2Angle = Angle(atan2f(seg.pEndVertex.YPosition - py, seg.pEndVertex.XPosition - px) * 180.0f / PI);
+		Angle V1Angle = Angle(atan2f(seg.pStartVertex.YPosition - py, seg.pStartVertex.XPosition - px) * 180.0f / PI);
+		Angle V2Angle = Angle(atan2f(seg.pEndVertex.YPosition - py, seg.pEndVertex.XPosition - px) * 180.0f / PI);
 		Angle V1ToV2Span = V1Angle - V2Angle;
 
 		if (V1ToV2Span >= 180) continue;
-		V1AngleFromPlayer = V1Angle - m_Angle; // Rotate every thing.
-		V2AngleFromPlayer = V2Angle - m_Angle;
-			
+		Angle V1AngleFromPlayer = V1Angle - m_Angle; // Rotate every thing.
+		Angle V2AngleFromPlayer = V2Angle - m_Angle;
 		Angle V1Moved = V1AngleFromPlayer + m_HalfFOV; // Validate and Clip V1. shift angles to be between 0 and 90 (now virtualy we shifted FOV to be in that range)
 
 		if (V1Moved > m_FOV)

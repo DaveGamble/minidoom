@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <iostream>
+#include <algorithm>
 
 #include "Map.h"
 #include "Texture.h"
@@ -51,112 +52,65 @@ void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1
 
 void ViewRenderer::ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
 {
-    if (m_SolidWallRanges.size() < 2)
-    {
-        return;
-    }
-    // Find clip window 
-    SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen };
-
+    if (m_SolidWallRanges.size() < 2) return;
+    SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = m_SolidWallRanges.begin();
-    while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1)
-    {
-        ++FoundClipWall;
-    }
+    while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
 
     if (CurrentWall.XStart < FoundClipWall->XStart)
     {
         if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
         {
-            //All of the wall is visible, so insert it
-            StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle);
+            StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle); //All of the wall is visible, so insert it
             m_SolidWallRanges.insert(FoundClipWall, CurrentWall);
             return;
         }
-
-        // The end is already included, just update start
-        StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle);
+        StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle); // The end is already included, just update start
         FoundClipWall->XStart = CurrentWall.XStart;
     }
-
-    // This part is already occupied
-    if (CurrentWall.XEnd <= FoundClipWall->XEnd)
-        return;
-
+    
+    if (CurrentWall.XEnd <= FoundClipWall->XEnd) return; // This part is already occupied
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
-
     while (CurrentWall.XEnd >= next(NextWall, 1)->XStart - 1)
     {
-        // partialy clipped by other walls, store each fragment
-        StoreWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle);
+        StoreWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle); // partialy clipped by other walls, store each fragment
         ++NextWall;
-
         if (CurrentWall.XEnd <= NextWall->XEnd)
         {
             FoundClipWall->XEnd = NextWall->XEnd;
-            if (NextWall != FoundClipWall)
-            {
-                FoundClipWall++;
-                NextWall++;
-                m_SolidWallRanges.erase(FoundClipWall, NextWall);
-            }
+            if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
             return;
         }
     }
-
     StoreWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle);
     FoundClipWall->XEnd = CurrentWall.XEnd;
-
-    if (NextWall != FoundClipWall)
-    {
-        FoundClipWall++;
-        NextWall++;
-        m_SolidWallRanges.erase(FoundClipWall, NextWall);
-    }
+    if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
 }
 
 void ViewRenderer::ClipPassWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
 {
-    // Find clip window 
-    SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen };
-
+    SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = m_SolidWallRanges.begin();
-    while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1)
-    {
-        ++FoundClipWall;
-    }
+    while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
 
     if (CurrentWall.XStart < FoundClipWall->XStart)
     {
         if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
         {
-            //All of the wall is visible, so insert it
-            StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle);
+            StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle); //All of the wall is visible, so insert it
             return;
         }
-
-        // The end is already included, just update start
-        StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle);
+        StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle); // The end is already included, just update start
     }
-
-    // This part is already occupied
-    if (CurrentWall.XEnd <= FoundClipWall->XEnd)
-        return;
-
+    
+    if (CurrentWall.XEnd <= FoundClipWall->XEnd) return; // This part is already occupied
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
-
     while (CurrentWall.XEnd >= next(NextWall, 1)->XStart - 1)
     {
-        // partialy clipped by other walls, store each fragment
-        StoreWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle);
+        StoreWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle); // partialy clipped by other walls, store each fragment
         ++NextWall;
-
-        if (CurrentWall.XEnd <= NextWall->XEnd)
-        {
-            return;
-        }
+        if (CurrentWall.XEnd <= NextWall->XEnd) return;
     }
-
     StoreWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle);
 }
 
@@ -237,98 +191,30 @@ void ViewRenderer::CeilingFloorUpdate(SegmentRenderData &RenderData)
         return;
     }
 
-    if (RenderData.LeftSectorCeiling != RenderData.RightSectorCeiling)
-    {
-        RenderData.UpdateCeiling = true;
-    }
-    else
-    {
-        RenderData.UpdateCeiling = false;
-    }
+	RenderData.UpdateCeiling = (RenderData.LeftSectorCeiling != RenderData.RightSectorCeiling);
+	RenderData.UpdateFloor = (RenderData.LeftSectorFloor != RenderData.RightSectorFloor);
 
-    if (RenderData.LeftSectorFloor != RenderData.RightSectorFloor)
-    {
-        RenderData.UpdateFloor = true;
-    }
-    else
-    {
-        RenderData.UpdateFloor = false;
-    }
-
-    if (RenderData.pSeg->pLeftSector->CeilingHeight <= RenderData.pSeg->pRightSector->FloorHeight || RenderData.pSeg->pLeftSector->FloorHeight >= RenderData.pSeg->pRightSector->CeilingHeight)
-    {
-        // closed door
+	if (RenderData.pSeg->pLeftSector->CeilingHeight <= RenderData.pSeg->pRightSector->FloorHeight || RenderData.pSeg->pLeftSector->FloorHeight >= RenderData.pSeg->pRightSector->CeilingHeight) // closed door
         RenderData.UpdateCeiling = RenderData.UpdateFloor = true;
-    }
-
-    if (RenderData.pSeg->pRightSector->CeilingHeight <= m_pPlayer->GetZPosition())
-    {
-        // below view plane
+    if (RenderData.pSeg->pRightSector->CeilingHeight <= m_pPlayer->GetZPosition()) // below view plane
         RenderData.UpdateCeiling = false;
-    }
-
-    if (RenderData.pSeg->pRightSector->FloorHeight >= m_pPlayer->GetZPosition())
-    {
-        // above view plane
+    if (RenderData.pSeg->pRightSector->FloorHeight >= m_pPlayer->GetZPosition()) // above view plane
         RenderData.UpdateFloor = false;
-    }
 }
 
 float ViewRenderer::GetScaleFactor(int VXScreen, Angle SegToNormalAngle, float DistanceToNormal)
 {
-    static float MAX_SCALEFACTOR = 64.0f;
-    static float MIN_SCALEFACTOR = 0.00390625f;
-
-    Angle Angle90(90);
-
-    Angle ScreenXAngle = m_ScreenXToAngle[VXScreen];
     Angle SkewAngle = m_ScreenXToAngle[VXScreen] + m_pPlayer->GetAngle() - SegToNormalAngle;
-
-    float ScreenXAngleCos = ScreenXAngle.GetCosValue();
-    float SkewAngleCos = SkewAngle.GetCosValue();
-    float ScaleFactor = (m_iDistancePlayerToScreen * SkewAngleCos) / (DistanceToNormal * ScreenXAngleCos);
-
-    if (ScaleFactor > MAX_SCALEFACTOR)
-    {
-        ScaleFactor = MAX_SCALEFACTOR;
-    }
-    else if (MIN_SCALEFACTOR > ScaleFactor)
-    {
-        ScaleFactor = MIN_SCALEFACTOR;
-    }
-
-    return ScaleFactor;
+	return std::clamp((m_iDistancePlayerToScreen * SkewAngle.GetCosValue()) / (DistanceToNormal * m_ScreenXToAngle[VXScreen].GetCosValue()), 0.00390625f, 64.0f);
 }
 
-void ViewRenderer::CalculateCeilingFloorHeight(Seg &seg, int &VXScreen, float &DistanceToV, float &CeilingVOnScreen, float &FloorVOnScreen)
+void ViewRenderer::CalculateCeilingFloorHeight(Seg &seg, int VXScreen, float DistanceToV, float &CeilingVOnScreen, float &FloorVOnScreen)
 {
     float Ceiling = seg.pRightSector->CeilingHeight - m_pPlayer->GetZPosition();
     float Floor = seg.pRightSector->FloorHeight - m_pPlayer->GetZPosition();
-
-    Angle VScreenAngle = m_ScreenXToAngle[VXScreen];
-
-    float DistanceToVScreen = m_iDistancePlayerToScreen / VScreenAngle.GetCosValue();
-
-    CeilingVOnScreen = (abs(Ceiling) * DistanceToVScreen) / DistanceToV;
-    FloorVOnScreen = (abs(Floor) * DistanceToVScreen) / DistanceToV;
-
-    if (Ceiling > 0)
-    {
-        CeilingVOnScreen = m_HalfScreenHeight - CeilingVOnScreen;
-    }
-    else
-    {
-        CeilingVOnScreen += m_HalfScreenHeight;
-    }
-
-    if (Floor > 0)
-    {
-        FloorVOnScreen = m_HalfScreenHeight - FloorVOnScreen;
-    }
-    else
-    {
-        FloorVOnScreen += m_HalfScreenHeight;
-    }
+    float DistanceToVScreen = m_iDistancePlayerToScreen / (m_ScreenXToAngle[VXScreen].GetCosValue() * DistanceToV);
+	CeilingVOnScreen = m_HalfScreenHeight + ((Ceiling > 0) ? -1 : 1) * abs(Ceiling) * DistanceToVScreen;
+	FloorVOnScreen = m_HalfScreenHeight + ((Floor > 0) ? -1 : 1) * abs(Floor) * DistanceToVScreen;
 }
 
 void ViewRenderer::PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &DistanceToV, bool IsLeftSide)
@@ -341,13 +227,9 @@ void ViewRenderer::PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &D
 
     Angle AngleVToFOV;
     if (IsLeftSide)
-    {
         AngleVToFOV = V1Angle - (m_pPlayer->GetAngle() + 45);
-    }
     else
-    {
         AngleVToFOV = (m_pPlayer->GetAngle() - 45) - V2Angle;
-    }
 
     Angle NewAngleB(180 - AngleVToFOV.GetValue() - AngleA.GetValue());
     DistanceToV = DistanceToV * AngleA.GetSinValue() / NewAngleB.GetSinValue();

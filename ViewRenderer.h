@@ -72,7 +72,7 @@ protected:
     void StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void CalculateWallHeight(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
     void CeilingFloorUpdate(ViewRenderer::SegmentRenderData &RenderData);
-    void CalculateCeilingFloorHeight(Seg &seg, int &VXScreen, float &DistanceToV, float &CeilingVOnScreen, float &FloorVOnScreen);
+    void CalculateCeilingFloorHeight(Seg &seg, int VXScreen, float DistanceToV, float &CeilingVOnScreen, float &FloorVOnScreen);
     void PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &DistanceToV1, bool IsLeftSide);
     void RenderSegment(SegmentRenderData &RenderData);
     void DrawMiddleSection(ViewRenderer::SegmentRenderData &RenderData, int iXCurrent, int CurrentCeilingEnd, int CurrentFloorStart);

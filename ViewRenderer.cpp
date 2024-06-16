@@ -38,7 +38,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 
 void ViewRenderer::addWallInFOV(Seg &seg)
 {
-	const float m_Angle = player->getAngle().get();
+	const float m_Angle = player->getAngle();
 	const int px = player->getX(), py = player->getY();
 
 	auto amod = [](float a) {
@@ -46,8 +46,8 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 	};
 
 	int toV1x = seg.start.x - px, toV1y = seg.start.y - py, toV2x = seg.end.x - px, toV2y = seg.end.y - py;
-	float V1Angle = atan2f(toV1y, toV1x) * 180.0f / M_PI;
-	float V2Angle = atan2f(toV2y, toV2x) * 180.0f / M_PI;
+	float V1Angle = atan2f(toV1y, toV1x) * 180.0f * M_1_PI;
+	float V2Angle = atan2f(toV2y, toV2x) * 180.0f * M_1_PI;
 	float V1ToV2Span = amod(V1Angle - V2Angle);
 
 	if (V1ToV2Span >= 180) return;
@@ -115,28 +115,30 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 	}
 }
 
-void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
+void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle)
 {
-	auto GetScaleFactor = [&](int VXScreen, Angle SegToNormalAngle, float DistanceToNormal) {
-		Angle SkewAngle = screenXToAngle[VXScreen] + player->getAngle() - SegToNormalAngle;
-		return std::clamp((distancePlayerToScreen * SkewAngle.cos()) / (DistanceToNormal * screenXToAngle[VXScreen].cos()), 0.00390625f, 64.0f);
+	auto amod = [](float a) {
+		return a - 360 * floor(a / 360);
+	};
+
+	auto GetScaleFactor = [&](int VXScreen, float SegToNormalAngle, float DistanceToNormal) {
+		float SkewAngle = amod(screenXToAngle[VXScreen] + player->getAngle() - SegToNormalAngle);
+		return std::clamp((distancePlayerToScreen * cosf(M_PI * SkewAngle / 180)) / (DistanceToNormal * cosf(M_PI * screenXToAngle[VXScreen] / 180)), 0.00390625f, 64.0f);
 	};
 
     // Calculate the distance to the first edge of the wall
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
-	Angle Angle90(90);
-    Angle SegToNormalAngle = Angle(seg.slopeAngle) + Angle90;
-
-    Angle NomalToV1Angle = SegToNormalAngle.get() - V1Angle.get();
+	float SegToNormalAngle = amod(seg.slopeAngle + 90);
+    float NomalToV1Angle = amod(SegToNormalAngle - V1Angle);
 
     // Normal angle is 90 degree to wall
-    Angle SegToPlayerAngle = Angle90 - NomalToV1Angle;
+    float SegToPlayerAngle = amod(90 - NomalToV1Angle);
 
 	float px = player->getX(), py = player->getY();     // Calculate the distance between the player an the vertex.
 	float DistanceToV1 = sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
-    float DistanceToNormal = SegToPlayerAngle.sin() * DistanceToV1;
+    float DistanceToNormal = sin(M_PI * SegToPlayerAngle / 180) * DistanceToV1;
 
     float V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, DistanceToNormal);
     float V2ScaleFactor = GetScaleFactor(V2XScreen, SegToNormalAngle, DistanceToNormal);

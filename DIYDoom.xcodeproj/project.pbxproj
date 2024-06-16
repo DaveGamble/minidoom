@@ -121,7 +121,6 @@
 		55FEA4BB2C1DBCC800F9DCAC /* SDL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL.h; sourceTree = "<group>"; };
 		55FEA4BE2C1DBCC800F9DCAC /* Map.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Map.h; sourceTree = SOURCE_ROOT; };
 		55FEA4C42C1DBCC800F9DCAC /* Map.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Map.cpp; sourceTree = SOURCE_ROOT; };
-		55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Angle.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C72C1DBCC800F9DCAC /* Player.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Player.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4C82C1DBCC800F9DCAC /* Texture.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Texture.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4CA2C1DBCC800F9DCAC /* DataTypes.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = DataTypes.hpp; sourceTree = SOURCE_ROOT; };
@@ -191,7 +190,6 @@
 			children = (
 				55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */,
 				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
-				55FEA4C52C1DBCC800F9DCAC /* Angle.hpp */,
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.hpp */,
 				55FEA4C72C1DBCC800F9DCAC /* Player.hpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.hpp */,

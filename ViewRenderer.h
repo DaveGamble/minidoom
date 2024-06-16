@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include "Angle.hpp"
 #include "DataTypes.hpp"
 
 class ViewRenderer
@@ -15,7 +14,7 @@ public:
 protected:
     struct SolidSegmentRange { int XStart, XEnd; };
 
-    void storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle);
+    void storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle);
 	class Map *map;
 	class Player *player;
     int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
@@ -23,7 +22,7 @@ protected:
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;
-    std::vector<Angle> screenXToAngle;
+    std::vector<float> screenXToAngle;
 	uint8_t *screenBuffer;
 	int rowlen;
 };

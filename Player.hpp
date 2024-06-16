@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Angle.hpp"
 #include "WADLoader.hpp"
 
 class Player
@@ -16,14 +15,14 @@ public:
 		{
 			x = thing->x;
 			y = thing->y;
-			a = thing->angle;
+			a = thing->angle * M_PI / 65536;
 		}
 	}
-    void moveForward() { x += a.cos() * moveSpeed; y += a.sin() * moveSpeed; }
-	void moveBackward() { x -= a.cos() * moveSpeed; y -= a.sin() * moveSpeed; }
-    void strafeLeft() { x -= a.sin() * moveSpeed; y += a.cos() * moveSpeed; }
-	void strafeRight() { x += a.sin() * moveSpeed; y -= a.cos() * moveSpeed; }
-	void rotateBy(float dt) { a += (dt * rotateSpeed); }
+    void moveForward() { x += cos(a) * moveSpeed; y += sin(a) * moveSpeed; }
+	void moveBackward() { x -= cos(a) * moveSpeed; y -= sin(a) * moveSpeed; }
+    void strafeLeft() { x -= sin(a) * moveSpeed; y += cos(a) * moveSpeed; }
+	void strafeRight() { x += sin(a) * moveSpeed; y -= cos(a) * moveSpeed; }
+	void rotateBy(float dt) { a += (dt * rotateSpeed); a -= M_PI * 2 * floorf(0.5 * a * M_1_PI); }
 	void rotateLeft() { rotateBy(0.1875f); }
 	void rotateRight() { rotateBy(-0.1875f); }
 	void fly() { z += 1; }
@@ -35,10 +34,10 @@ public:
 	int getX() const { return x; }
 	int getY() const { return y; }
 	int getZ() const { return z; }
-	Angle getAngle() const { return a; }
+	float getAngle() const { return a * 180 * M_1_PI; }
 protected:
-	static constexpr int moveSpeed = 4, rotateSpeed = 4;
+	static constexpr float moveSpeed = 4, rotateSpeed = 0.06981317008;
 	int id, x {0}, y {0}, z {41};
-	Angle a {0};
+	float a {0};
 	Patch *weapon {nullptr};
 };

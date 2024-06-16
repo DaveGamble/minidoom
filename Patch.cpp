@@ -2,85 +2,81 @@
 
 Patch::Patch(const uint8_t *ptr)
 {
-	struct WADPatchHeader { uint16_t Width, Height; int16_t LeftOffset, TopOffset; uint32_t *pColumnOffsets; };
+	struct WADPatchHeader { uint16_t width, height; int16_t leftOffset, topOffset; };
 
-	WADPatchHeader *PatchHeader = (WADPatchHeader*)ptr;
-	m_iWidth = PatchHeader->Width;
-	m_iHeight = PatchHeader->Height;
-	m_iXOffset = PatchHeader->LeftOffset;
-	m_iYOffset = PatchHeader->TopOffset;
+	WADPatchHeader *patchHeader = (WADPatchHeader*)ptr;
+	width = patchHeader->width;
+	height = patchHeader->height;
+	xoffset = patchHeader->leftOffset;
+	yoffset = patchHeader->topOffset;
 
-	uint32_t *pColumnOffsets = (uint32_t*)(ptr + 8);
-	for (int i = 0; i < m_iWidth; ++i)
+	uint32_t *columnOffsets = (uint32_t*)(ptr + 8);
+	for (int i = 0; i < width; ++i)
 	{
-		int Offset = pColumnOffsets[i];
-		m_ColumnIndex.push_back((int)m_PatchData.size());
-		PatchColumnData PatchColumn;
+		int off = columnOffsets[i];
+		columnIndices.push_back((int)patchColumnData.size());
+		PatchColumnData patchColumn;
 		do
 		{
-			PatchColumn.TopDelta = ptr[Offset++];
-			if (PatchColumn.TopDelta != 0xFF)
+			patchColumn.topDelta = ptr[off++];
+			if (patchColumn.topDelta != 0xFF)
 			{
-				PatchColumn.Length = ptr[Offset++];
-				PatchColumn.PaddingPre = ptr[Offset++];
-				PatchColumn.pColumnData = new uint8_t[PatchColumn.Length];
-				memcpy(PatchColumn.pColumnData, ptr + Offset, PatchColumn.Length);
-				Offset += PatchColumn.Length;
-				PatchColumn.PaddingPost = ptr[Offset++];
+				patchColumn.length = ptr[off++];
+				patchColumn.paddingPre = ptr[off++];
+				patchColumn.columnData = new uint8_t[patchColumn.length];
+				memcpy(patchColumn.columnData, ptr + off, patchColumn.length);
+				off += patchColumn.length;
+				patchColumn.paddingPost = ptr[off++];
 			}
-			m_PatchData.push_back(PatchColumn);
-		} while (PatchColumn.TopDelta != 0xFF);
+			patchColumnData.push_back(patchColumn);
+		} while (patchColumn.topDelta != 0xFF);
 	}
 }
 
 Patch::~Patch()
 {
-	for (size_t iPatchColumnIndex = 0; iPatchColumnIndex < m_PatchData.size(); ++iPatchColumnIndex)
-	{
-		if (m_PatchData[iPatchColumnIndex].TopDelta == 0xFF) continue;
-		delete[] m_PatchData[iPatchColumnIndex].pColumnData;
-		m_PatchData[iPatchColumnIndex].pColumnData = nullptr;
-	}
+	for (size_t i = 0; i < patchColumnData.size(); ++i)
+		if (patchColumnData[i].topDelta != 0xFF) delete[] patchColumnData[i].columnData;
 }
 
-void Patch::Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation)
+void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny)
 {
-	int offset = iBufferPitch * iYScreenLocation + iXScreenLocation;
-    for (size_t iPatchColumnIndex = 0; iPatchColumnIndex < m_PatchData.size(); iPatchColumnIndex++)
+	buf += rowlen * screeny + screenx;
+    for (size_t column = 0; column < patchColumnData.size(); column++)
     {
-		int off = offset + m_PatchData[iPatchColumnIndex].TopDelta * iBufferPitch;
-        if (m_PatchData[iPatchColumnIndex].TopDelta == 0xFF) offset++;
+		int off = patchColumnData[column].topDelta * rowlen;
+        if (patchColumnData[column].topDelta == 0xFF) buf++;
 		else
-			for (int y = 0; y < m_PatchData[iPatchColumnIndex].Length; y++, off += iBufferPitch)
-				pScreenBuffer[off] = m_PatchData[iPatchColumnIndex].pColumnData[y];
+			for (int y = 0; y < patchColumnData[column].length; y++, off += rowlen)
+				buf[off] = patchColumnData[column].columnData[y];
     }
 }
 
-void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iMaxHeight, int iYOffset)
+void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset)
 {
-    int iYIndex = (iYOffset < 0) ? iYOffset * -1 : 0;
-    while (m_PatchData[iColumn].TopDelta != 0xFF && iMaxHeight > 0)
+    int y = (yOffset < 0) ? yOffset * -1 : 0;
+    while (patchColumnData[firstColumn].topDelta != 0xFF && maxHeight > 0)
     {
-		int run = m_PatchData[iColumn].Length - iYIndex;
-		run = (run > iMaxHeight) ? iMaxHeight : run;
+		int run = patchColumnData[firstColumn].length - y;
+		run = (run > maxHeight) ? maxHeight : run;
 		if (run > 0)
 		{
-			memcpy(pScreenBuffer + iBufferPitch * (m_PatchData[iColumn].TopDelta + iYIndex + iYOffset), m_PatchData[iColumn].pColumnData + iYIndex, run);
-			iMaxHeight -= run;
+			memcpy(buf + rowlen * (patchColumnData[firstColumn].topDelta + y + yOffset), patchColumnData[firstColumn].columnData + y, run);
+			maxHeight -= run;
 		}
-        ++iColumn;
-        iYIndex = 0;
+        ++firstColumn;
+        y = 0;
     }
 }
 
-void Patch::ComposeColumn(uint8_t *pOverLapColumnData, int iHeight, int iPatchColumnIndex, int iYOrigin)
+void Patch::composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset)
 {
-    while (m_PatchData[iPatchColumnIndex].TopDelta != 0xFF)
+    while (patchColumnData[firstColumn].topDelta != 0xFF)
     {
-        int iYPosition = iYOrigin + m_PatchData[iPatchColumnIndex].TopDelta, iMaxRun = m_PatchData[iPatchColumnIndex].Length;
-        if (iYPosition < 0) { iMaxRun += iYPosition; iYPosition = 0; }
-        if (iMaxRun > iHeight - iYPosition) iMaxRun = iHeight - iYPosition;
-		if (iMaxRun > 0) memcpy(pOverLapColumnData + iYPosition, m_PatchData[iPatchColumnIndex].pColumnData, iMaxRun);
-        ++iPatchColumnIndex;
+        int y = yOffset + patchColumnData[firstColumn].topDelta, iMaxRun = patchColumnData[firstColumn].length;
+        if (y < 0) { iMaxRun += y; y = 0; }
+        if (iMaxRun > iHeight - y) iMaxRun = iHeight - y;
+		if (iMaxRun > 0) memcpy(buf + y, patchColumnData[firstColumn].columnData, iMaxRun);
+        ++firstColumn;
     }
 }

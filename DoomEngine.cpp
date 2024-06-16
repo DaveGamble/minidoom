@@ -58,7 +58,7 @@ bool DoomEngine::Tick()
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
 		m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
-//		m_Player.Render(pScreenBuffer, m_iRenderWidth);
+//		m_Player.render(pScreenBuffer, m_iRenderWidth);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);

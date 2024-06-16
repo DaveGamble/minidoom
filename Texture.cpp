@@ -25,12 +25,12 @@ Texture::Texture(const uint8_t *ptr, WADLoader *_wad) : wad(_wad)
 	{
 		Patch *pPatch = wad->getPatch(m_TexturePatches[i].pnameIndex);
 		int iXStart = m_TexturePatches[i].dx;
-		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
+		int iMaxWidth = (iXStart + pPatch->getWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->getWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 		{
 			m_ColumnPatchCount[iXIndex]++;
 			m_ColumnPatch[iXIndex] = i/*pPatch*/;
-			m_ColumnIndex[iXIndex] = pPatch->GetColumnDataIndex(iXIndex - iXStart);
+			m_ColumnIndex[iXIndex] = pPatch->getColumnDataIndex(iXIndex - iXStart);
 		}
 	}
 
@@ -49,10 +49,10 @@ Texture::Texture(const uint8_t *ptr, WADLoader *_wad) : wad(_wad)
 	{
 		Patch *pPatch = wad->getPatch(m_TexturePatches[i].pnameIndex);
 		int iXStart = m_TexturePatches[i].dx;
-		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
+		int iMaxWidth = (iXStart + pPatch->getWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->getWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 			if (m_ColumnPatch[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
-				pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->GetColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].dy);
+				pPatch->composeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->getColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].dy);
 	}
 }
 
@@ -68,7 +68,7 @@ void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScree
     if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
     {
         Patch *pPatch = wad->getPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].pnameIndex);
-        pPatch->RenderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].dy);
+        pPatch->renderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].dy);
     }
     else
     {

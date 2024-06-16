@@ -7,21 +7,20 @@ public:
 	Patch(const uint8_t *ptr);
 	~Patch();
 
-    void Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation);
-    void RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iMaxHeight, int iYOffset);
-    void ComposeColumn(uint8_t *m_pOverLapColumnData, int m_iHeight, int iPatchColumnIndex, int iYOrigin);
+    void render(uint8_t *buf, int rowlen, int screenx, int screeny);
+    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset);
+	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset);
 
-	int GetHeight() const { return m_iHeight; }
-	int GetWidth() const { return m_iWidth; }
-	int GetXOffset() const { return m_iXOffset; }
-	int GetYOffset() const { return m_iYOffset; }
-	int GetColumnDataIndex(int iIndex) const { return m_ColumnIndex[iIndex]; }
+	int getWidth() const { return width; }
+	int getXOffset() const { return xoffset; }
+	int getYOffset() const { return yoffset; }
+	int getColumnDataIndex(int iIndex) const { return columnIndices[iIndex]; }
 
 protected:
-	int m_iHeight {0}, m_iWidth {0}, m_iXOffset {0}, m_iYOffset {0};
-	struct PatchColumnData { uint8_t TopDelta, Length, PaddingPre, *pColumnData, PaddingPost; } PatchColumn;
+	int height {0}, width {0}, xoffset {0}, yoffset {0};
+	struct PatchColumnData { uint8_t topDelta, length, paddingPre, *columnData, paddingPost; };
 
-    std::vector<PatchColumnData> m_PatchData;
-    std::vector<int> m_ColumnIndex;
+    std::vector<PatchColumnData> patchColumnData;
+    std::vector<int> columnIndices;
 };
 

@@ -33,14 +33,19 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 	}
 }
 
-void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny)
+void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale)
 {
 	buf += rowlen * screeny + screenx;
-    for (int column = 0; column < width; ++column) renderColumn(buf + column, rowlen, column);
+	float iscale = 1.0 / scale;
+    for (int column = 0; column < width * scale; ++column) renderColumn(buf + column, rowlen, floor(column * iscale), scale);
 }
 
-void Texture::renderColumn(uint8_t *buf, int rowlen, int c)
+void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale)
 {
-	if (columns[c].overlap.size()) for (int y = 0; y < height; y++, buf += rowlen) *buf = columns[c].overlap[y];
-    else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, height, columns[c].yOffset);
+	if (columns[c].overlap.size())
+	{
+		float iscale = 1.0 / scale;
+		for (int y = 0; y < height * scale; y++, buf += rowlen) *buf = columns[c].overlap[floor(y * iscale)];
+	}
+    else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, height, columns[c].yOffset, scale);
 }

@@ -7,8 +7,8 @@ public:
 	Patch(const uint8_t *ptr);
 	~Patch();
 
-    void render(uint8_t *buf, int rowlen, int screenx, int screeny) const;
-    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset) const;
+    void render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale = 1) const;
+    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale = 1) const;
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
 	int getWidth() const { return width; }

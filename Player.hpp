@@ -29,7 +29,7 @@ public:
 	void fly() { z += 1; }
 	void sink() { z -= 1; }
 	void think(int subsectorHeight) { z = subsectorHeight + 41; }
-	void render(uint8_t *buf, int rowlen) { weapon->render(buf, rowlen, -weapon->getXOffset(), -weapon->getYOffset()); }
+	void render(uint8_t *buf, int rowlen) { weapon->render(buf, rowlen, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, 3); }
 
 	int getID() const { return id; }
 	int getX() const { return x; }

@@ -39,31 +39,31 @@ Patch::~Patch()
 		if (patchColumnData[i].topDelta != 0xFF) delete[] patchColumnData[i].columnData;
 }
 
-void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny) const
+void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale) const
 {
+	const float iscale = 1.0 / scale;
 	buf += rowlen * screeny + screenx;
-    for (size_t column = 0; column < patchColumnData.size(); column++)
-    {
-		int off = patchColumnData[column].topDelta * rowlen;
-        if (patchColumnData[column].topDelta == 0xFF) buf++;
-		else
-			for (int y = 0; y < patchColumnData[column].length; y++, off += rowlen)
-				buf[off] = patchColumnData[column].columnData[y];
-    }
+	for (int x = 0; x < width * scale; x++, buf++)
+		for (int column = columnIndices[floor(x * iscale)]; patchColumnData[column].topDelta != 0xFF; column++)
+		{
+			int off = floor(scale * patchColumnData[column].topDelta) * rowlen;
+			uint8_t *from = patchColumnData[column].columnData;
+			for (int y = 0; y < patchColumnData[column].length * scale; y++, off += rowlen)
+				buf[off] = from[(int)floor(y * iscale)];
+		}
 }
 
-void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset) const
+void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale) const
 {
-    int y = (yOffset < 0) ? yOffset * -1 : 0;
+	const float iscale = 1.0 / scale;
+    int y = (yOffset < 0) ? yOffset * -iscale : 0;
     while (patchColumnData[firstColumn].topDelta != 0xFF && maxHeight > 0)
     {
-		int run = patchColumnData[firstColumn].length - y;
-		run = (run > maxHeight) ? maxHeight : run;
-		if (run > 0)
-		{
-			memcpy(buf + rowlen * (patchColumnData[firstColumn].topDelta + y + yOffset), patchColumnData[firstColumn].columnData + y, run);
-			maxHeight -= run;
-		}
+		int run = std::clamp(patchColumnData[firstColumn].length - y, 0, maxHeight);
+		int start = rowlen * floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
+		const uint8_t *from = patchColumnData[firstColumn].columnData + y;
+		for (int i = 0; i < run * scale; i++) buf[start + i * rowlen] = from[(int)floor(iscale * i)];
+		maxHeight -= run;
         ++firstColumn;
         y = 0;
     }

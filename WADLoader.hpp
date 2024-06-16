@@ -28,7 +28,7 @@ public:
 		for (int i = 0; i < count; ++i)
 		{
 			memcpy(Name, lump.data() + 4 + 8 * i, 8);
-			m_PNameLookup.push_back(Name);
+			pnames.push_back(Name);
 		}
 		
 		const char *toload[2] = {"TEXTURE1", "TEXTURE2"};
@@ -45,7 +45,7 @@ public:
 				const uint8_t *ptr = data.data() + asint[i + 1];
 				memcpy(TextureData.textureName, ptr, 22);
 				TextureData.texturePatch = (WADTexturePatch*)(ptr + 22);
-				m_TexturesCache[TextureData.textureName] = std::unique_ptr<Texture>(new Texture(TextureData, this));
+				textures[TextureData.textureName] = std::unique_ptr<Texture>(new Texture(TextureData, this));
 			}
 		}
 	}
@@ -63,23 +63,25 @@ public:
 		return -1;
 	}
 	
-	Patch* GetPatch(const std::string &sPatchName) { if (m_PatchesCache.count(sPatchName) <= 0) LoadPatch(sPatchName); return m_PatchesCache[sPatchName].get(); }
-	Patch* GetPatch(int index) { return GetPatch(m_PNameLookup[index]); }
-	Texture* GetTexture(const std::string &sTextureName) { return m_TexturesCache[sTextureName].get(); }
+	Patch* GetPatch(const std::string &name)
+	{
+		if (!patches.count(name))
+		{
+			std::vector<uint8_t> lump = GetLumpNamed(name);
+			if (lump.size()) patches[name] = std::unique_ptr<Patch>(new Patch(lump.data()));
+		}
+		return patches[name].get();
+	}
+	Patch* GetPatch(int index) { return GetPatch(pnames[index]); }
+	Texture* GetTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
 
 protected:
+	uint8_t *data {nullptr};
+	size_t numLumps {0};
 	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8] {}; };
 	const Directory* dirs {nullptr};
-	size_t numLumps {0};
-	uint8_t *data {nullptr};
-	void LoadPatch(const std::string &sPatchName)
-	{
-		std::vector<uint8_t> lump = GetLumpNamed(sPatchName);
-		if (!lump.size()) return;
-		m_PatchesCache[sPatchName] = std::unique_ptr<Patch>(new Patch(lump.data()));
-	}
-	std::map<std::string, std::unique_ptr<Patch>> m_PatchesCache;
-	std::map<std::string, std::unique_ptr<Texture>> m_TexturesCache;
-	std::vector<std::string> m_PNameLookup;
+	std::map<std::string, std::unique_ptr<Patch>> patches;
+	std::map<std::string, std::unique_ptr<Texture>> textures;
+	std::vector<std::string> pnames;
 };
 

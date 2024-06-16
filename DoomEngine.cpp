@@ -17,7 +17,7 @@ DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
-    m_Player.Init((m_Map.GetThings())->GetThingByID(m_Player.GetID()), &m_WADLoader);
+    m_Player.Init((m_Map.GetThings())->GetID(m_Player.GetID()), &m_WADLoader);
 }
 
 DoomEngine::~DoomEngine()

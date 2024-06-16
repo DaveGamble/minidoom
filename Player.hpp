@@ -6,41 +6,42 @@
 class Player
 {
 public:
-	Player(int iID = 1) : m_iPlayerID(iID) {}
+	Player(int _id = 1) : id(_id) {}
 	~Player() {}
 
     void Init(Thing *thing, WADLoader *wad)
 	{
-		m_pWeapon = wad->GetPatch("PISGA0");
+		weapon = wad->GetPatch("PISGA0");
 		if (thing)
 		{
-			m_XPosition = thing->x;
-			m_YPosition = thing->y;
-			m_Angle = thing->angle;
+			x = thing->x;
+			y = thing->y;
+			a = thing->angle;
 		}
 	}
-    void MoveForward() { m_XPosition += m_Angle.GetCosValue() * m_iMoveSpeed; m_YPosition += m_Angle.GetSinValue() * m_iMoveSpeed; }
-	void MoveBackward() { m_XPosition -= m_Angle.GetCosValue() * m_iMoveSpeed; m_YPosition -= m_Angle.GetSinValue() * m_iMoveSpeed; }
-    void MoveLeftward() { m_XPosition -= m_Angle.GetSinValue() * m_iMoveSpeed; m_YPosition += m_Angle.GetCosValue() * m_iMoveSpeed; }
-	void MoveRightward() { m_XPosition += m_Angle.GetSinValue() * m_iMoveSpeed; m_YPosition -= m_Angle.GetCosValue() * m_iMoveSpeed; }
-	void RotateBy(float dt) { m_Angle += (dt * m_iRotationSpeed); }
-	void RotateLeft() { m_Angle += (0.1875f * m_iRotationSpeed); }
-	void RotateRight() { m_Angle -= (0.1875f * m_iRotationSpeed); }
-	void Fly() { m_ZPosition += 1; }
-	void Sink() { m_ZPosition -= 1; }
-	void Think(int iSubSectorHieght) { m_ZPosition = iSubSectorHieght + m_EyeLevel; }
-	void Render(uint8_t *pScreenBuffer, int iBufferPitch) { m_pWeapon->Render(pScreenBuffer, iBufferPitch, -m_pWeapon->GetXOffset(), -m_pWeapon->GetYOffset()); }
+    void MoveForward() { x += a.GetCosValue() * moveSpeed; y += a.GetSinValue() * moveSpeed; }
+	void MoveBackward() { x -= a.GetCosValue() * moveSpeed; y -= a.GetSinValue() * moveSpeed; }
+    void MoveLeftward() { x -= a.GetSinValue() * moveSpeed; y += a.GetCosValue() * moveSpeed; }
+	void MoveRightward() { x += a.GetSinValue() * moveSpeed; y -= a.GetCosValue() * moveSpeed; }
+	void RotateBy(float dt) { a += (dt * rotateSpeed); }
+	void RotateLeft() { a += (0.1875f * rotateSpeed); }
+	void RotateRight() { a -= (0.1875f * rotateSpeed); }
+	void Fly() { z += 1; }
+	void Sink() { z -= 1; }
+	void Think(int subsectorHeight) { z = subsectorHeight + 41; }
+	void Render(uint8_t *buf, int rowlen) { weapon->Render(buf, rowlen, -weapon->GetXOffset(), -weapon->GetYOffset()); }
 
-	int GetID() const { return m_iPlayerID; }
-	int GetXPosition() const { return m_XPosition; }
-	int GetYPosition() const { return m_YPosition; }
-	int GetZPosition() const { return m_ZPosition; }
-	Angle GetAngle() const { return m_Angle; }
+	int GetID() const { return id; }
+	int GetXPosition() const { return x; }
+	int GetYPosition() const { return y; }
+	int GetZPosition() const { return z; }
+	Angle GetAngle() const { return a; }
 
     // Calulate the distance between the player an the vertex.
-	float DistanceToPoint(const Vertex &V) const { return sqrt((m_XPosition - V.x) * (m_XPosition - V.x) + (m_YPosition - V.y) * (m_YPosition - V.y)); }
+	float DistanceToPoint(const Vertex &V) const { return sqrt((x - V.x) * (x - V.x) + (y - V.y) * (y - V.y)); }
 protected:
-	int m_iPlayerID, m_XPosition, m_YPosition, m_ZPosition {41}, m_EyeLevel {41}, m_iRotationSpeed {4}, m_iMoveSpeed {4};
-	Angle m_Angle;
-	Patch *m_pWeapon;
+	static constexpr int moveSpeed = 4, rotateSpeed = 4;
+	int id, x, y, z {41};
+	Angle a;
+	Patch *weapon;
 };

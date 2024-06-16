@@ -37,7 +37,6 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 
 void ViewRenderer::addWallInFOV(Seg &seg)
 {
-	constexpr int m_FOV = 90, m_HalfFOV = 45;
 	const float m_Angle = player->getAngle().get();
 	const int px = player->getX(), py = player->getY();
 
@@ -53,18 +52,18 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 	if (V1ToV2Span >= 180) return;
 	float V1AngleFromPlayer = amod(V1Angle - m_Angle); // Rotate every thing.
 	float V2AngleFromPlayer = amod(V2Angle - m_Angle);
-	if (amod(V1AngleFromPlayer + m_HalfFOV) > m_FOV)
+	if (amod(V1AngleFromPlayer + 45) > 90)
 	{
-		if (amod(V1AngleFromPlayer - m_HalfFOV) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
-		V1AngleFromPlayer = m_HalfFOV; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
+		if (amod(V1AngleFromPlayer - 45) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+		V1AngleFromPlayer = 45; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
 	}
-	if (amod(m_HalfFOV - V2AngleFromPlayer) > m_FOV) V2AngleFromPlayer = -45; // Validate and Clip V2 // Is V2 outside the FOV?
+	if (amod(45 - V2AngleFromPlayer) > 90) V2AngleFromPlayer = -45; // Validate and Clip V2 // Is V2 outside the FOV?
 	
-	auto AngleToScreen = [&](Angle angle) {
-		return distancePlayerToScreen - round(tanf((angle.get()) * M_PI / 180.0f) * halfRenderWidth);
+	auto AngleToScreen = [&](float angle) {
+		return distancePlayerToScreen - round(tanf((angle) * M_PI / 180.0f) * halfRenderWidth);
 	};
 
-    int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
+    const int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
     if (V1XScreen == V2XScreen) return; // Skip same pixel wall
 	bool solid = false;
     if (!seg.lSector) solid = true; // Handle solid walls
@@ -75,9 +74,9 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 	else return;
 
 	if (solid && solidWallRanges.size() < 2) return;
-    SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
+    const SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = solidWallRanges.begin();
-    while (FoundClipWall != solidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
+    while (FoundClipWall != solidWallRanges.end() && CurrentWall.XStart - 1 > FoundClipWall->XEnd) ++FoundClipWall;
 
     if (CurrentWall.XStart < FoundClipWall->XStart)
     {

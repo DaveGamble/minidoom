@@ -59,13 +59,14 @@ void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, float sca
 
 void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale) const
 {
+	if (scale < 0) return;
     int y = (yOffset < 0) ? -yOffset : 0;
     while (patchColumnData[firstColumn].topDelta != 0xFF && maxHeight > 0)
     {
-		int run = std::clamp(patchColumnData[firstColumn].length - y, 0, maxHeight);
+		int run = std::clamp(int((patchColumnData[firstColumn].length - y) * scale), 0, maxHeight);
 		int start = rowlen * floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
 		const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-		for (int i = 0, to = 0; i < run; i++) while (to < (i + 1) * scale) buf[start + (to++) * rowlen] = from[i];
+		for (int i = 0, to = 0; to < run; i++) while (to < (i + 1) * scale) buf[start + (to++) * rowlen] = from[i];
 		maxHeight -= run;
         ++firstColumn;
         y = 0;

@@ -36,14 +36,14 @@ Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 void Texture::render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale) const
 {
 	buf += rowlen * screeny + screenx;
-	for (int column = 0, tox = 0; column < width; ++column) while (tox < (column + 1) * scale) {renderColumn(buf + tox, rowlen, column, scale); tox++;}
+	for (int column = 0, tox = 0; column < width; ++column) while (tox < (column + 1) * scale) {renderColumn(buf + tox, rowlen, column, scale, 0, height); tox++;}
 }
 
-void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset) const
+void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset, int yEnd) const
 {
 	if (columns[c].overlap.size())
 	{
-		for (int y = yOffset, toy = yOffset * scale; y < height; y++) while (toy < (y + 1) * scale) buf[(toy++ - yOffset) * rowlen] = columns[c].overlap[y];
+		for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++) while (toy < (y + 1) * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = columns[c].overlap[y];
 	}
-    else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, height, columns[c].yOffset + yOffset, scale);
+    else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale);
 }

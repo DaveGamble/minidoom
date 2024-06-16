@@ -59,6 +59,7 @@ bool DoomEngine::Tick()
 	{
 		m_ViewRenderer.Render(pScreenBuffer, m_iRenderWidth);
 //		m_Player.render(pScreenBuffer, m_iRenderWidth);
+//		m_WADLoader.getTexture("BROWNPIP")->render(pScreenBuffer, m_iRenderWidth, 10, 10);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);

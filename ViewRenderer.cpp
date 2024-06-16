@@ -35,8 +35,31 @@ void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 	m_pMap->render3DView();
 }
 
-void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer)
+void ViewRenderer::AddWallInFOV(Seg &seg)
 {
+	constexpr int m_FOV = 90, m_HalfFOV = 45;
+	const float m_Angle = m_pPlayer->getAngle().get();
+	const int px = m_pPlayer->getX(), py = m_pPlayer->getY();
+
+	auto amod = [](float a) {
+		return a - 360 * floor(a / 360);
+	};
+
+	int toV1x = seg.start.x - px, toV1y = seg.start.y - py, toV2x = seg.end.x - px, toV2y = seg.end.y - py;
+	float V1Angle = atan2f(toV1y, toV1x) * 180.0f / M_PI;
+	float V2Angle = atan2f(toV2y, toV2x) * 180.0f / M_PI;
+	float V1ToV2Span = amod(V1Angle - V2Angle);
+
+	if (V1ToV2Span >= 180) return;
+	float V1AngleFromPlayer = amod(V1Angle - m_Angle); // Rotate every thing.
+	float V2AngleFromPlayer = amod(V2Angle - m_Angle);
+	if (amod(V1AngleFromPlayer + m_HalfFOV) > m_FOV)
+	{
+		if (amod(V1AngleFromPlayer - m_HalfFOV) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+		V1AngleFromPlayer = m_HalfFOV; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
+	}
+	if (amod(m_HalfFOV - V2AngleFromPlayer) > m_FOV) V2AngleFromPlayer = -45; // Validate and Clip V2 // Is V2 outside the FOV?
+	
 	auto AngleToScreen = [&](Angle angle) {
 		return m_iDistancePlayerToScreen + round(tanf((90 - angle.get()) * M_PI / 180.0f) * m_HalfScreenWidth);
 	};

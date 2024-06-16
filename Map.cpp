@@ -81,31 +81,10 @@ void Map::renderBSPNodes(int iNodeID)
 	}
 
 	Subsector &subsector = subsectors[iNodeID & (~kSubsectorIdentifier)];
-	
-	constexpr int m_FOV = 90, m_HalfFOV = 45;
-	const float m_Angle = player->getAngle().get();
-	const int px = player->getX(), py = player->getY();
-
-	auto amod = [](float a) {
-		return a - 360 * floor(a / 360);
-	};
-	
 	for (int i = 0; i < subsector.numSegs; i++)
 	{
 		Seg &seg = segs[subsector.firstSeg + i];
-		float V1Angle = atan2f(seg.start.y - py, seg.start.x - px) * 180.0f / M_PI;
-		float V2Angle = atan2f(seg.end.y - py, seg.end.x - px) * 180.0f / M_PI;
-		float V1ToV2Span = amod(V1Angle - V2Angle);
 
-		if (V1ToV2Span >= 180) continue;
-		float V1AngleFromPlayer = amod(V1Angle - m_Angle); // Rotate every thing.
-		float V2AngleFromPlayer = amod(V2Angle - m_Angle);
-		if (amod(V1AngleFromPlayer + m_HalfFOV) > m_FOV)
-		{
-			if (amod(V1AngleFromPlayer - m_HalfFOV) >= V1ToV2Span) continue; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
-			V1AngleFromPlayer = m_HalfFOV; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
-		}
-		if (amod(m_HalfFOV - V2AngleFromPlayer) > m_FOV) V2AngleFromPlayer = -45; // Validate and Clip V2 // Is V2 outside the FOV?
-		renderer->AddWallInFOV(seg, V1Angle, V2Angle, V1AngleFromPlayer + 90, V2AngleFromPlayer + 90);
+		renderer->AddWallInFOV(seg);
 	}
 }

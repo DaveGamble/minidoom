@@ -47,16 +47,15 @@ void ViewRenderer::AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1
 
     int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
     if (V1XScreen == V2XScreen) return; // Skip same pixel wall
-    if (!seg.pLeftSector) ClipSolidWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle); // Handle solid walls
+	bool solid = false;
+    if (!seg.pLeftSector) solid = true; // Handle solid walls
     else if (seg.pLeftSector->CeilingHeight <= seg.pRightSector->FloorHeight || seg.pLeftSector->FloorHeight >= seg.pRightSector->CeilingHeight) // Handle closed door
-        ClipSolidWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle);
+        solid = true;
     else if (seg.pRightSector->CeilingHeight != seg.pLeftSector->CeilingHeight || seg.pRightSector->FloorHeight != seg.pLeftSector->FloorHeight) // Windowed walls
-        ClipPassWalls(seg, V1XScreen, V2XScreen, V1Angle, V2Angle);
-}
+        solid = false;
+	else return;
 
-void ViewRenderer::ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
-{
-    if (m_SolidWallRanges.size() < 2) return;
+	if (solid && m_SolidWallRanges.size() < 2) return;
     SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = m_SolidWallRanges.begin();
     while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
@@ -66,11 +65,11 @@ void ViewRenderer::ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle 
         if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
         {
             StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle); //All of the wall is visible, so insert it
-            m_SolidWallRanges.insert(FoundClipWall, CurrentWall);
+            if (solid) m_SolidWallRanges.insert(FoundClipWall, CurrentWall);
             return;
         }
         StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle); // The end is already included, just update start
-        FoundClipWall->XStart = CurrentWall.XStart;
+        if (solid) FoundClipWall->XStart = CurrentWall.XStart;
     }
     
     if (CurrentWall.XEnd <= FoundClipWall->XEnd) return; // This part is already occupied
@@ -81,41 +80,20 @@ void ViewRenderer::ClipSolidWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle 
         ++NextWall;
         if (CurrentWall.XEnd <= NextWall->XEnd)
         {
-            FoundClipWall->XEnd = NextWall->XEnd;
-            if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
+			if (solid)
+			{
+				FoundClipWall->XEnd = NextWall->XEnd;
+				if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
+			}
             return;
         }
     }
     StoreWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle);
-    FoundClipWall->XEnd = CurrentWall.XEnd;
-    if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
-}
-
-void ViewRenderer::ClipPassWalls(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)
-{
-    SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
-    std::list<SolidSegmentRange>::iterator FoundClipWall = m_SolidWallRanges.begin();
-    while (FoundClipWall != m_SolidWallRanges.end() && FoundClipWall->XEnd < CurrentWall.XStart - 1) ++FoundClipWall;
-
-    if (CurrentWall.XStart < FoundClipWall->XStart)
-    {
-        if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
-        {
-            StoreWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle); //All of the wall is visible, so insert it
-            return;
-        }
-        StoreWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle); // The end is already included, just update start
-    }
-    
-    if (CurrentWall.XEnd <= FoundClipWall->XEnd) return; // This part is already occupied
-    std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
-    while (CurrentWall.XEnd >= next(NextWall, 1)->XStart - 1)
-    {
-        StoreWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle); // partialy clipped by other walls, store each fragment
-        ++NextWall;
-        if (CurrentWall.XEnd <= NextWall->XEnd) return;
-    }
-    StoreWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle);
+	if (solid)
+	{
+		FoundClipWall->XEnd = CurrentWall.XEnd;
+		if (NextWall != FoundClipWall) m_SolidWallRanges.erase(++FoundClipWall, ++NextWall);
+	}
 }
 
 void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle V1Angle, Angle V2Angle)

@@ -17,10 +17,8 @@ class Player;
 class ViewRenderer
 {
 public:
-    ViewRenderer();
-    ~ViewRenderer();
-
-    void Init(Map *pMap, Player *pPlayer);
+    ViewRenderer(Map *pMap, Player *pPlayer);
+	~ViewRenderer() {}
     void Render(uint8_t *pScreenBuffer, int iBufferPitch);
     void AddWallInFOV(Seg &seg, Angle V1Angle, Angle V2Angle, Angle V1AngleFromPlayer, Angle V2AngleFromPlayer);
     void InitFrame();

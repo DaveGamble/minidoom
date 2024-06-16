@@ -27,42 +27,35 @@ constexpr float classicDoomScreenXtoView[] = {
   319.614258f, 319.394531f, 319.218750f, 318.999023f, 318.779297f, 318.603516f, 318.383789f, 318.208008f, 317.988281f, 317.812500f, 317.592773f, 317.416992f, 317.197266f, 317.021484f, 316.845703f, 316.625977f, 316.450195f, 316.274414f, 316.054687f,
   315.878906f, 315.703125f, 315.527344f, 315.351562f, 315.175781f, 314.956055f };
 
-ViewRenderer::ViewRenderer() : m_UseClassicDoomScreenToAngle(true)
+ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer) : m_UseClassicDoomScreenToAngle(true)
 {
-}
+	m_pMap = pMap;
+	m_pPlayer = pPlayer;
 
-ViewRenderer::~ViewRenderer()
-{
-}
+	m_iRenderXSize = 320;
+	m_iRenderYSize = 200;
 
-void  ViewRenderer::Init(Map *pMap, Player *pPlayer)
-{
-    m_pMap = pMap;
-    m_pPlayer = pPlayer;
-
-    m_iRenderXSize = 320;
-    m_iRenderYSize = 200;
-
-    m_HalfScreenWidth = m_iRenderXSize / 2;
-    m_HalfScreenHeight = m_iRenderYSize / 2;
+	m_HalfScreenWidth = m_iRenderXSize / 2;
+	m_HalfScreenHeight = m_iRenderYSize / 2;
 	Angle HalfFOV = 45;
-    m_iDistancePlayerToScreen = m_HalfScreenWidth / HalfFOV.GetTanValue();
+	m_iDistancePlayerToScreen = m_HalfScreenWidth / HalfFOV.GetTanValue();
 
-    for (int i = 0; i <= m_iRenderXSize; ++i)
-    {
-        if (m_UseClassicDoomScreenToAngle)
-        {
-            m_ScreenXToAngle[i] = classicDoomScreenXtoView[i];
-        }
-        else
-        {
-            m_ScreenXToAngle[i] = atan((m_HalfScreenWidth - i) / (float)m_iDistancePlayerToScreen) * 180 / PI;
-        }
-    }
+	for (int i = 0; i <= m_iRenderXSize; ++i)
+	{
+		if (m_UseClassicDoomScreenToAngle)
+		{
+			m_ScreenXToAngle[i] = classicDoomScreenXtoView[i];
+		}
+		else
+		{
+			m_ScreenXToAngle[i] = atan((m_HalfScreenWidth - i) / (float)m_iDistancePlayerToScreen) * 180 / PI;
+		}
+	}
 
-    m_CeilingClipHeight.resize(m_iRenderXSize);
-    m_FloorClipHeight.resize(m_iRenderXSize);
+	m_CeilingClipHeight.resize(m_iRenderXSize);
+	m_FloorClipHeight.resize(m_iRenderXSize);
 }
+
 
 void ViewRenderer::Render(uint8_t *pScreenBuffer, int iBufferPitch)
 {

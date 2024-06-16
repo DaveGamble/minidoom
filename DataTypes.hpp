@@ -16,8 +16,6 @@ struct WADLinedef { uint16_t StartVertexID, EndVertexID, Flags, LineType, Sector
 struct WADSeg { uint16_t StartVertexID, EndVertexID, SlopeAngle, LinedefID, Direction, Offset; }; // Direction: 0 same as linedef, 1 opposite of linedef Offset: distance along linedef to start of seg
 struct WADTexturePatch { int16_t XOffset, YOffset; uint16_t PNameIndex, StepDir, ColorMap; }; // StepDir, ColorMap Unused values.
 struct WADTextureData { char TextureName[8]; uint32_t Flags; uint16_t Width, Height; uint32_t ColumnDirectory; uint16_t PatchCount; WADTexturePatch *pTexturePatch; };// ColumnDirectory Unused value.
-struct WADPalette { uint8_t bytes[768]; };
-
 
 class Texture;
 class WADLoader;

@@ -6,6 +6,8 @@ using namespace std;
 
 Texture::Texture(WADTextureData &TextureData, WADLoader *_wad) : wad(_wad)
 {
+	struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
+
 	m_iWidth = TextureData.Width;
 	m_iHeight = TextureData.Height;
 	

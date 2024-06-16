@@ -7,11 +7,7 @@
 
 // enum ELINEDEFFLAGS { eBLOCKING = 0, eBLOCKMONSTERS = 1, eTWOSIDED = 2, eDONTPEGTOP = 4, eDONTPEGBOTTOM = 8, eSECRET = 16, eSOUNDBLOCK = 32, eDONTDRAW = 64, eDRAW = 128 }; // Unused for now
 
-struct WADTexturePatch { int16_t dx, dy; uint16_t pnameIndex, stepDir, colorMap; }; // StepDir, ColorMap Unused values.
-struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; WADTexturePatch *texturePatch; };// ColumnDirectory Unused value.
-
 class Texture;
-class WADLoader;
 struct Vertex { int16_t x, y; };
 struct Sector { int16_t floorHeight, ceilingHeight; const Texture *floortexture, *ceilingtexture; uint16_t lightlevel, type, tag; };
 struct Sidedef { int16_t dx, dy; const Texture *uppertexture, *middletexture, *lowertexture; const Sector *sector; };

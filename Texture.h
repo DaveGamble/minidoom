@@ -4,7 +4,7 @@
 class Texture
 {
 public:
-    Texture(WADTextureData &TextureData, class WADLoader *wad);
+    Texture(const uint8_t *ptr, class WADLoader *wad);
 	~Texture() {}
 
     void Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation);
@@ -14,6 +14,7 @@ protected:
 
 	class WADLoader *wad;
     std::vector<int> m_ColumnPatchCount, m_ColumnIndex, m_ColumnPatch;
-    std::vector<WADTexturePatch> m_TexturePatches;
+	struct WADTexturePatch { int16_t dx, dy; uint16_t pnameIndex, stepDir, colorMap; }; // StepDir, ColorMap Unused values.
+	std::vector<WADTexturePatch> m_TexturePatches;
     std::unique_ptr<uint8_t[]> m_pOverLapColumnData;
 };

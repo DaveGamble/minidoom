@@ -1,8 +1,14 @@
 #include "Texture.h"
 #include "WADLoader.hpp"
 
-Texture::Texture(WADTextureData &TextureData, WADLoader *_wad) : wad(_wad)
+Texture::Texture(const uint8_t *ptr, WADLoader *_wad) : wad(_wad)
 {
+	struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; WADTexturePatch *texturePatch; };// ColumnDirectory Unused value.
+	WADTextureData TextureData;
+	memcpy(TextureData.textureName, ptr, 22);
+	TextureData.texturePatch = (WADTexturePatch*)(ptr + 22);
+
+	
 	struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
 
 	m_iWidth = TextureData.width;

@@ -39,13 +39,10 @@ public:
 			
 			const int32_t *asint = (const int32_t*)data.data();
 			int32_t numTextures = asint[0];
-			WADTextureData TextureData;
 			for (int i = 0; i < numTextures; ++i)
 			{
-				const uint8_t *ptr = data.data() + asint[i + 1];
-				memcpy(TextureData.textureName, ptr, 22);
-				TextureData.texturePatch = (WADTexturePatch*)(ptr + 22);
-				textures[TextureData.textureName] = std::unique_ptr<Texture>(new Texture(TextureData, this));
+				char name[9] {}; memcpy(name, data.data() + asint[i + 1], 8);
+				textures[name] = std::unique_ptr<Texture>(new Texture(data.data() + asint[i + 1], this));
 			}
 		}
 	}

@@ -20,21 +20,18 @@ Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_
 	{
 		Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
 		int iXStart = m_TexturePatches[i].XOffset;
-		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth(), iXIndex = (iXStart > 0) ? iXStart : 0;
-		while (iXIndex < iMaxWidth)
+		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
+		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 		{
 			m_ColumnPatchCount[iXIndex]++;
 			m_ColumnPatch[iXIndex] = i/*pPatch*/;
 			m_ColumnIndex[iXIndex] = pPatch->GetColumnDataIndex(iXIndex - iXStart);
-			++iXIndex;
 		}
 	}
 
-	// Cleanup and update
-	for (int i = 0; i < m_iWidth; ++i)
+	for (int i = 0; i < m_iWidth; ++i)	// Cleanup and update
 	{
-		// Is the column covered by more than one patch?
-		if (m_ColumnPatchCount[i] > 1)
+		if (m_ColumnPatchCount[i] > 1)	// Is the column covered by more than one patch?
 		{
 			m_ColumnPatch[i] = -1;
 			m_ColumnIndex[i] = m_iOverLapSize;
@@ -43,18 +40,14 @@ Texture::Texture(WADTextureData &TextureData, AssetsManager *_assets) : assets(_
 	}
 	
 	m_pOverLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[m_iOverLapSize]);
-
 	for (int i = 0; i < m_TexturePatches.size(); ++i)
 	{
 		Patch *pPatch = assets->GetPatch(m_TexturePatches[i].PNameIndex);
 		int iXStart = m_TexturePatches[i].XOffset;
-		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth(), iXIndex = (iXStart > 0) ? iXStart : 0;
-		while (iXIndex < iMaxWidth)
-		{
+		int iMaxWidth = (iXStart + pPatch->GetWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->GetWidth();
+		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 			if (m_ColumnPatch[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
 				pPatch->ComposeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->GetColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].YOffset);
-			++iXIndex;
-		}
 	}
 }
 

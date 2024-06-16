@@ -1,20 +1,9 @@
 #include "Patch.h"
 
-using namespace std;
-
-
-Patch::~Patch()
-{
-    for (size_t iPatchColumnIndex = 0; iPatchColumnIndex < m_PatchData.size(); ++iPatchColumnIndex)
-    {
-        if (m_PatchData[iPatchColumnIndex].TopDelta == 0xFF) continue;
-        delete[] m_PatchData[iPatchColumnIndex].pColumnData;
-        m_PatchData[iPatchColumnIndex].pColumnData = nullptr;
-    }
-}
-
 Patch::Patch(const uint8_t *ptr)
 {
+	struct WADPatchHeader { uint16_t Width, Height; int16_t LeftOffset, TopOffset; uint32_t *pColumnOffsets; };
+
 	WADPatchHeader *PatchHeader = (WADPatchHeader*)ptr;
 	m_iWidth = PatchHeader->Width;
 	m_iHeight = PatchHeader->Height;
@@ -41,6 +30,16 @@ Patch::Patch(const uint8_t *ptr)
 			}
 			m_PatchData.push_back(PatchColumn);
 		} while (PatchColumn.TopDelta != 0xFF);
+	}
+}
+
+Patch::~Patch()
+{
+	for (size_t iPatchColumnIndex = 0; iPatchColumnIndex < m_PatchData.size(); ++iPatchColumnIndex)
+	{
+		if (m_PatchData[iPatchColumnIndex].TopDelta == 0xFF) continue;
+		delete[] m_PatchData[iPatchColumnIndex].pColumnData;
+		m_PatchData[iPatchColumnIndex].pColumnData = nullptr;
 	}
 }
 

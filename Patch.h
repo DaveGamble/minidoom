@@ -10,7 +10,6 @@ public:
 	Patch(const uint8_t *ptr);
 	~Patch();
 
-    void Initialize(WADPatchHeader &PatchHeader);
     void Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation);
     void RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iMaxHeight, int iYOffset);
     void ComposeColumn(uint8_t *m_pOverLapColumnData, int m_iHeight, int iPatchColumnIndex, int iYOrigin);

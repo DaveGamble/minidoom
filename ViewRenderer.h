@@ -8,7 +8,7 @@
 
 #include <SDL.h>
 
-#include "DataTypes.h"
+#include "DataTypes.hpp"
 #include "Angle.hpp"
 
 class Map;

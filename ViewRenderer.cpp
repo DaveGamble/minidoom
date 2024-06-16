@@ -6,7 +6,7 @@
 #include "Map.h"
 #include "Texture.h"
 #include "Player.h"
-#include "AssetsManager.h"
+#include "AssetsManager.hpp"
 
 constexpr float classicDoomScreenXtoView[] = {
   45.043945f, 44.824219f, 44.648437f, 44.472656f, 44.296875f, 44.121094f, 43.945312f, 43.725586f, 43.549805f, 43.374023f, 43.154297f, 42.978516f, 42.802734f, 42.583008f, 42.407227f, 42.187500f, 42.011719f, 41.791992f, 41.616211f, 41.396484f,

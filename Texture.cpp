@@ -1,5 +1,5 @@
 #include "Texture.h"
-#include "AssetsManager.h"
+#include "AssetsManager.hpp"
 
 #include <string>
 using namespace std;

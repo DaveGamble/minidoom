@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#include "DataTypes.h"
+#include "DataTypes.hpp"
 #include "Patch.h"
 
 class Texture

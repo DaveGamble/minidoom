@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Angle.hpp"
-#include "DataTypes.h"
+#include "DataTypes.hpp"
 #include "ViewRenderer.h"
 #include "Patch.h"
 

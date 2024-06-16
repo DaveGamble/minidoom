@@ -3,10 +3,10 @@
 #include <vector>
 #include <string>
 
-#include "DataTypes.h"
+#include "DataTypes.hpp"
 #include "Player.h"
 #include "ViewRenderer.h"
-#include "WADLoader.h"
+#include "WADLoader.hpp"
 
 class Map
 {

@@ -6,9 +6,9 @@
 
 #include "Map.h"
 #include "Player.h"
-#include "WADLoader.h"
+#include "WADLoader.hpp"
 #include "ViewRenderer.h"
-#include "AssetsManager.h"
+#include "AssetsManager.hpp"
 
 class DoomEngine
 {

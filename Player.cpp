@@ -1,5 +1,5 @@
 #include "Player.h"
-#include "AssetsManager.h"
+#include "AssetsManager.hpp"
 #include <math.h>
 
 void Player::Init(Thing* thing, AssetsManager *assets)

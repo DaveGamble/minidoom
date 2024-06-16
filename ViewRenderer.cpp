@@ -225,16 +225,9 @@ void ViewRenderer::PartialSeg(Seg &seg, Angle &V1Angle, Angle &V2Angle, float &D
 {
     float SideC = sqrt(pow(seg.pStartVertex.XPosition - seg.pEndVertex.XPosition, 2) + pow(seg.pStartVertex.YPosition - seg.pEndVertex.YPosition, 2));
     Angle V1toV2Span = V1Angle - V2Angle;
-    float SINEAngleB = DistanceToV * V1toV2Span.GetSinValue() / SideC;
-    Angle AngleB(asinf(SINEAngleB) * 180.0 / PI);
+    Angle AngleB(asinf(DistanceToV * V1toV2Span.GetSinValue() / SideC) * 180.0 / PI);
     Angle AngleA(180 - V1toV2Span.GetValue() - AngleB.GetValue());
-
-    Angle AngleVToFOV;
-    if (IsLeftSide)
-        AngleVToFOV = V1Angle - (m_pPlayer->GetAngle() + 45);
-    else
-        AngleVToFOV = (m_pPlayer->GetAngle() - 45) - V2Angle;
-
+    Angle AngleVToFOV = (IsLeftSide) ? V1Angle - (m_pPlayer->GetAngle() + 45) : (m_pPlayer->GetAngle() - 45) - V2Angle;
     Angle NewAngleB(180 - AngleVToFOV.GetValue() - AngleA.GetValue());
     DistanceToV = DistanceToV * AngleA.GetSinValue() / NewAngleB.GetSinValue();
 }

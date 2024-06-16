@@ -121,35 +121,27 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		return a - 360 * floor(a / 360);
 	};
 
-
-    // Calculate the distance to the first edge of the wall
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
 	float SegToNormalAngle = amod(seg.slopeAngle + 90);
-    float SegToPlayerAngle = amod(V1Angle - seg.slopeAngle);
 
-	float px = player->getX(), py = player->getY();     // Calculate the distance between the player an the vertex.
-	float DistanceToNormal = sin(M_PI * SegToPlayerAngle / 180) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
+	float px = player->getX(), py = player->getY(), pa = player->getAngle();     // Calculate the distance between the player an the vertex.
+	float DistanceToNormal = sin(M_PI * (V1Angle - seg.slopeAngle) / 180) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		float SkewAngle = amod(screenXToAngle[VXScreen] + player->getAngle() - SegToNormalAngle);
+		float SkewAngle = amod(screenXToAngle[VXScreen] + pa - SegToNormalAngle);
 		return std::clamp((distancePlayerToScreen * cosf(M_PI * SkewAngle / 180)) / (DistanceToNormal * cosf(M_PI * screenXToAngle[VXScreen] / 180)), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(V1XScreen);
-    float V2ScaleFactor = GetScaleFactor(V2XScreen);
-
-    float Steps = (V2ScaleFactor - V1ScaleFactor) / (V2XScreen - V1XScreen);
+    float Steps = (GetScaleFactor(V2XScreen) - V1ScaleFactor) / (V2XScreen - V1XScreen);
 
     float RightSectorCeiling = seg.rSector->ceilingHeight - player->getZ();
     float RightSectorFloor = seg.rSector->floorHeight - player->getZ();
 
-    float CeilingStep = -(RightSectorCeiling * Steps);
-    float CeilingEnd = round(halfRenderHeight - RightSectorCeiling * V1ScaleFactor);
-
-    float FloorStep = -(RightSectorFloor * Steps);
-    float FloorStart = round(halfRenderHeight - RightSectorFloor * V1ScaleFactor);
+    float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(halfRenderHeight - RightSectorCeiling * V1ScaleFactor);
+    float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(halfRenderHeight - RightSectorFloor * V1ScaleFactor);
 
     if (seg.lSector)
     {
@@ -186,8 +178,47 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, texture->getWidth() * u, (to - from) / (float)texture->getHeight());
 	};
 	
+	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
+	
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
+		/*
+		 
+		Vertex V1 = seg.start, V2 = seg.end;
+		V1.x * (1-t) + V2.x * t = x
+		V1.y * (1-t) + V2.y * t = y
+		
+		 relative to user this is..
+		 V1.x * (1-t) + V2.x * t - px = x
+		 V1.y * (1-t) + V2.y * t - py = y
+
+		 Now I have a ray from the origin that intersects the screen plane at x.
+		 Screen is at distancePlayerToScreen from the origin, in the direction player->getAngle().
+		 Therefore my line is PERPENDICULAR to player->getAngle(). -45 would be 0, +45 would be renderWidth.
+		 So, we have screenXToAngle, so this is screenXToAngle[x] + player->getAngle().
+		 Now I just need an intersection such that
+		 theta = screenXToAngle[x] + player->getAngle
+		 x = N cos(theta) = V1.x * (1-t) + V2.x * t - px
+		 y = N sin(theta) = V1.y * (1-t) + V2.y * t - py
+		 ...with the caveat that I may have sin and cos wrong way around there, because that's orthodoxy not law.
+
+		 Let's divide them:
+		 (V1.y * (1-t) + V2.y * t - py) / (V1.x * (1-t) + V2.x * t - px)  =  tan(theta)
+		 let K = tan(theta) = tan(screenXToAngle[x] + player->getAngle()); (or 1/ this)
+		 (V1.y * (1-t) + V2.y * t - py) / (V1.x * (1-t) + V2.x * t - px) = K
+		 (V1.y * (1-t) + V2.y * t - py) = K (V1.x * (1-t) + V2.x * t - px)
+		 t is now the only unknown, which is what we wanted, so...
+		 V1.y  - t * V1.y + V2.y * t - py = K*V1.x - K*V1.x * t + K * V2.x * t - K*px
+		 t(-V1.y + V2.y + K*V1.x - K*V2.x) = -V1.y + py + K*V1.x - K*px
+		 t(V2.y-V1.y + K*(V1.x - V2.x)) = py - V1.y + K*(V1.x - px)
+
+		 so t = (py - V1.y + K*(V1.x - px) / (V2.y-V1.y + K*(V1.x - V2.x))
+		*/
+		float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
+		
+		float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99f);
+		
+		
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);
         int CurrentFloorStart = std::min(FloorStart, floorClipHeight[x] - 1.f);
 
@@ -198,8 +229,6 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 			continue;
 		}
 		
-		float u = (x - V1XScreen) / (float)(1 + V2XScreen - V1XScreen);
-
         if (seg.lSector)
         {
 			if (bDrawUpperSection)

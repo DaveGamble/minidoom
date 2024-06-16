@@ -57,7 +57,7 @@ void Patch::Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocatio
     }
 }
 
-void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iXScreenLocation, int iYScreenLocation, int iMaxHeight, int iYOffset)
+void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, int iMaxHeight, int iYOffset)
 {
     int iYIndex = (iYOffset < 0) ? iYOffset * -1 : 0;
     while (m_PatchData[iColumn].TopDelta != 0xFF && iMaxHeight > 0)
@@ -66,7 +66,7 @@ void Patch::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iColumn, 
 		run = (run > iMaxHeight) ? iMaxHeight : run;
 		if (run > 0)
 		{
-			memcpy(pScreenBuffer + iBufferPitch * (iYScreenLocation + m_PatchData[iColumn].TopDelta + iYIndex + iYOffset) + iXScreenLocation, m_PatchData[iColumn].pColumnData + iYIndex, run);
+			memcpy(pScreenBuffer + iBufferPitch * (m_PatchData[iColumn].TopDelta + iYIndex + iYOffset), m_PatchData[iColumn].pColumnData + iYIndex, run);
 			iMaxHeight -= run;
 		}
         ++iColumn;

@@ -8,29 +8,16 @@
 class Texture
 {
 public:
-    Texture(WADTextureData &TextureData);
-    ~Texture();
-
-    bool IsComposed();
-    bool Initialize(class AssetsManager *assets);
-    bool Compose(class AssetsManager *assets);
+    Texture(WADTextureData &TextureData, class AssetsManager *assets);
+	~Texture() {}
 
     void Render(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation);
     void RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex);
-
 protected:
-    //int m_Flags; // Ignored
-    int m_iWidth;
-    int m_iHeight;
-    int m_iOverLapSize;
+    int m_iWidth, m_iHeight, m_iOverLapSize {0};
 
-    bool m_IsComposed;
-
-    std::string m_sName;
-
-    std::vector<int> m_ColumnPatchCount;
-    std::vector<int> m_ColumnIndex;
-    std::vector<int> m_ColumnPatch;
+	class AssetsManager *assets;
+    std::vector<int> m_ColumnPatchCount, m_ColumnIndex, m_ColumnPatch;
     std::vector<WADTexturePatch> m_TexturePatches;
     std::unique_ptr<uint8_t[]> m_pOverLapColumnData;
 

@@ -29,9 +29,7 @@ AssetsManager::AssetsManager(WADLoader *l) : wadLoader(l)
 			const uint8_t *ptr = data.data() + asint[i + 1];
 			memcpy(TextureData.TextureName, ptr, 22);
 			TextureData.pTexturePatch = (WADTexturePatch*)(ptr + 22);
-			auto texture = std::unique_ptr<Texture>(new Texture(TextureData));
-			if (!texture->IsComposed()) texture->Compose(this);
-			m_TexturesCache[TextureData.TextureName] = std::move(texture);
+			m_TexturesCache[TextureData.TextureName] = std::unique_ptr<Texture>(new Texture(TextureData, this));
 		}
 	}
 }

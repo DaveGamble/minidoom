@@ -119,7 +119,7 @@ void ViewRenderer::StoreWallRange(Seg &seg, int V1XScreen, int V2XScreen, Angle 
 	RenderData.V1Angle = V1Angle;
 	RenderData.V2Angle = V2Angle;
 
-    RenderData.DistanceToV1 = m_pPlayer->DistanceToPoint(seg.pStartVertex);
+    RenderData.DistanceToV1 = m_pPlayer->DistanceToPoint(seg.start);
     RenderData.DistanceToNormal = SegToPlayerAngle.GetSinValue() * RenderData.DistanceToV1;
 
     RenderData.V1ScaleFactor = GetScaleFactor(V1XScreen, SegToNormalAngle, RenderData.DistanceToNormal);

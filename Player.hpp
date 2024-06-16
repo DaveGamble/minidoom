@@ -41,7 +41,7 @@ public:
 	Angle GetAngle() const { return m_Angle; }
 
     // Calulate the distance between the player an the vertex.
-	float DistanceToPoint(const Vertex &V) const { return sqrt((m_XPosition - V.XPosition) * (m_XPosition - V.XPosition) + (m_YPosition - V.YPosition) * (m_YPosition - V.YPosition)); }
+	float DistanceToPoint(const Vertex &V) const { return sqrt((m_XPosition - V.x) * (m_XPosition - V.x) + (m_YPosition - V.y) * (m_YPosition - V.y)); }
 protected:
 	int m_iPlayerID, m_XPosition, m_YPosition, m_ZPosition {41}, m_EyeLevel {41}, m_iRotationSpeed {4}, m_iMoveSpeed {4};
 	Angle m_Angle;

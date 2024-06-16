@@ -1,78 +1,75 @@
 #include "Texture.h"
 #include "WADLoader.hpp"
 
-Texture::Texture(const uint8_t *ptr, WADLoader *_wad) : wad(_wad)
+Texture::Texture(const uint8_t *ptr, WADLoader *wad)
 {
-	struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; WADTexturePatch *texturePatch; };// ColumnDirectory Unused value.
-	WADTextureData TextureData;
-	memcpy(TextureData.textureName, ptr, 22);
-	TextureData.texturePatch = (WADTexturePatch*)(ptr + 22);
+	struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; };// ColumnDirectory Unused value.
+	WADTextureData *textureData = (WADTextureData*)ptr;
+	struct WADTexturePatch { int16_t dx, dy; uint16_t pnameIndex, stepDir, colorMap; }; // StepDir, ColorMap Unused values.
+	WADTexturePatch *texturePatch = (WADTexturePatch*)(ptr + 22);
 
+	width = textureData->width;
+	height = textureData->height;
 	
-	struct WADTextureHeader { uint32_t TexturesCount, TexturesOffset, *pTexturesDataOffset; };
+	for (int i = 0; i < textureData->patchCount; ++i)
+		texturePatches.push_back({texturePatch[i].dx, texturePatch[i].dy, texturePatch[i].stepDir, texturePatch[i].colorMap, wad->getPatch(texturePatch[i].pnameIndex)});
 
-	m_iWidth = TextureData.width;
-	m_iHeight = TextureData.height;
-	
-	for (int i = 0; i < TextureData.patchCount; ++i)
-		m_TexturePatches.push_back(TextureData.texturePatch[i]);
-	
-	m_ColumnPatchCount.resize(TextureData.width, 0);
-	m_ColumnIndex.resize(TextureData.width, 0);
-	m_ColumnPatch.resize(TextureData.width, 0);
+	numPatchesPerColumn.resize(width, 0);
+	columnIndices.resize(width, 0);
+	columnPatches.resize(width, 0);
 
-	for (int i = 0; i < m_TexturePatches.size(); ++i)
+	for (int i = 0; i < texturePatches.size(); ++i)
 	{
-		Patch *pPatch = wad->getPatch(m_TexturePatches[i].pnameIndex);
-		int iXStart = m_TexturePatches[i].dx;
-		int iMaxWidth = (iXStart + pPatch->getWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->getWidth();
+		const Patch *pPatch =texturePatches[i].patch;
+		int iXStart = texturePatches[i].dx;
+		int iMaxWidth = (iXStart + pPatch->getWidth()) > width ? width : iXStart + pPatch->getWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
 		{
-			m_ColumnPatchCount[iXIndex]++;
-			m_ColumnPatch[iXIndex] = i/*pPatch*/;
-			m_ColumnIndex[iXIndex] = pPatch->getColumnDataIndex(iXIndex - iXStart);
+			numPatchesPerColumn[iXIndex]++;
+			columnPatches[iXIndex] = i/*pPatch*/;
+			columnIndices[iXIndex] = pPatch->getColumnDataIndex(iXIndex - iXStart);
 		}
 	}
 
-	for (int i = 0; i < m_iWidth; ++i)	// Cleanup and update
+	for (int i = 0; i < width; ++i)	// Cleanup and update
 	{
-		if (m_ColumnPatchCount[i] > 1)	// Is the column covered by more than one patch?
+		if (numPatchesPerColumn[i] > 1)	// Is the column covered by more than one patch?
 		{
-			m_ColumnPatch[i] = -1;
-			m_ColumnIndex[i] = m_iOverLapSize;
-			m_iOverLapSize += m_iHeight;
+			columnPatches[i] = -1;
+			columnIndices[i] = overlap;
+			overlap += height;
 		}
 	}
 	
-	m_pOverLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[m_iOverLapSize]);
-	for (int i = 0; i < m_TexturePatches.size(); ++i)
+	overLapColumnData = std::unique_ptr<uint8_t[]>(new uint8_t[overlap]);
+	for (int i = 0; i < texturePatches.size(); ++i)
 	{
-		Patch *pPatch = wad->getPatch(m_TexturePatches[i].pnameIndex);
-		int iXStart = m_TexturePatches[i].dx;
-		int iMaxWidth = (iXStart + pPatch->getWidth()) > m_iWidth ? m_iWidth : iXStart + pPatch->getWidth();
+		const Patch *pPatch = texturePatches[i].patch;
+		int iXStart = texturePatches[i].dx;
+		int iMaxWidth = (iXStart + pPatch->getWidth()) > width ? width : iXStart + pPatch->getWidth();
 		for (int iXIndex = (iXStart > 0) ? iXStart : 0; iXIndex < iMaxWidth; iXIndex++)
-			if (m_ColumnPatch[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
-				pPatch->composeColumn(m_pOverLapColumnData.get() + m_ColumnIndex[iXIndex], m_iHeight, pPatch->getColumnDataIndex(iXIndex - iXStart), m_TexturePatches[i].dy);
+			if (columnPatches[iXIndex] < 0) // Does this column have more than one patch? if yes compose it, else skip it
+				pPatch->composeColumn(overLapColumnData.get() + columnIndices[iXIndex], height, pPatch->getColumnDataIndex(iXIndex - iXStart), texturePatches[i].dy);
 	}
 }
 
-void Texture::Render(uint8_t * pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation)
+void Texture::render(uint8_t * pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation)
 {
-    for (int iCurrentColumnIndex = 0; iCurrentColumnIndex < m_iWidth; ++iCurrentColumnIndex)
-        RenderColumn(pScreenBuffer, iBufferPitch, iXScreenLocation + iCurrentColumnIndex, iYScreenLocation, iCurrentColumnIndex);
+    for (int iCurrentColumnIndex = 0; iCurrentColumnIndex < width; ++iCurrentColumnIndex)
+        renderColumn(pScreenBuffer, iBufferPitch, iXScreenLocation + iCurrentColumnIndex, iYScreenLocation, iCurrentColumnIndex);
 }
 
-void Texture::RenderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex)
+void Texture::renderColumn(uint8_t *pScreenBuffer, int iBufferPitch, int iXScreenLocation, int iYScreenLocation, int iCurrentColumnIndex)
 {
 	pScreenBuffer += iBufferPitch * iYScreenLocation + iXScreenLocation;
-    if (m_ColumnPatch[iCurrentColumnIndex] > -1 )
+    if (columnPatches[iCurrentColumnIndex] > -1 )
     {
-        Patch *pPatch = wad->getPatch(m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].pnameIndex);
-        pPatch->renderColumn(pScreenBuffer, iBufferPitch, m_ColumnIndex[iCurrentColumnIndex], m_iHeight, m_TexturePatches[m_ColumnPatch[iCurrentColumnIndex]].dy);
+		const Patch *pPatch = texturePatches[columnPatches[iCurrentColumnIndex]].patch;
+        pPatch->renderColumn(pScreenBuffer, iBufferPitch, columnIndices[iCurrentColumnIndex], height, texturePatches[columnPatches[iCurrentColumnIndex]].dy);
     }
     else
     {
-        for (int iYIndex = 0; iYIndex < m_iHeight; ++iYIndex, pScreenBuffer += iBufferPitch)
-            *pScreenBuffer = m_pOverLapColumnData[m_ColumnIndex[iCurrentColumnIndex] + iYIndex];
+        for (int iYIndex = 0; iYIndex < height; ++iYIndex, pScreenBuffer += iBufferPitch)
+            *pScreenBuffer = overLapColumnData[columnIndices[iCurrentColumnIndex] + iYIndex];
     }
 }

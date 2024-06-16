@@ -544,26 +544,11 @@ int ViewRenderer::AngleToScreen(Angle angle)
 
 uint8_t ViewRenderer::GetSectionColor(const std::string &TextureName)
 {
-    uint8_t color;
-    if (m_WallColor.count(TextureName))
-    {
-        color = m_WallColor[TextureName];
-    }
-    else
-    {
-        color = rand() % 256;
-        m_WallColor[TextureName] = color;
-    };
-
-    return color;
+    if (!m_WallColor.count(TextureName)) m_WallColor[TextureName] = rand() & 255;
+	return m_WallColor[TextureName];
 }
 
 void ViewRenderer::DrawVerticalLine(int iX, int iStartY, int iEndY, uint8_t color)
 {
-	//int iStartY = line->y1;
-	while (iStartY < iEndY)
-	{
-		m_pScreenBuffer[m_iBufferPitch * iStartY + iX] = color;
-		++iStartY;
-	}
+	for (; iStartY < iEndY; iStartY++) m_pScreenBuffer[m_iBufferPitch * iStartY + iX] = color;
 }

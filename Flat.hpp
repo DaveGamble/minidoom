@@ -8,7 +8,7 @@ public:
 	
 	void renderSpan(uint8_t *buffer, int len, float u1, float v1, float du, float dv) const
 	{
-		for (int i = 0; i < len; i++) buffer[i] = data[(int)(64*floor(64*(v1 + i * dv)) + floor(64*(u1 + i * du)))];
+		for (int i = 0; i < len; i++) buffer[i] = data[(int)(64*floor(64*(v1 + i * dv)) + floor(64*(u1 + i * du))) & 4095];
 	}
 protected:
 	uint8_t data[4096];

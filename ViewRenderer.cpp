@@ -178,6 +178,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		iLowerHeight = round(halfRenderHeight - (LeftSectorFloor * V1ScaleFactor));
     }
 
+	const float PT = tan(pa * M_PI / 180);
 	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
 	const float pc = cos(pa * M_PI / 180) / 64, ps = sin(pa * M_PI / 180) / 64;
 	const float vG = distancePlayerToScreen * (player->getZ() -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - player->getZ());
@@ -185,7 +186,21 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-		const float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
+//		const float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
+		/*
+		 If PT = tan(pa * M_PI / 180);
+		 tan(a + b) = (tan(a) + tan(b) / (1 - tan(a)tan(b))
+		 = (tan(screenXToAngle[x] * M_PI / 180) + PT) / (1 - tan(screenXToAngle[x] * M_PI / 180) * PT);
+		 screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen) * 180 / M_PI
+		 so
+		 = (tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen) * 180 / M_PI * M_PI / 180) + PT) / (1 - tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen) * 180 / M_PI * M_PI / 180) * PT);
+		 = (tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen)) + PT) / (1 - tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen)) * PT);
+		 = (((halfRenderWidth - x) / (float)distancePlayerToScreen) + PT) / (1 - ((halfRenderWidth - x) / (float)distancePlayerToScreen)) * PT);
+		 = ((halfRenderWidth - x) + PT * distancePlayerToScreen) / (distancePlayerToScreen - ((halfRenderWidth - x) * PT));
+		 */
+		const float K = ((halfRenderWidth - x) + PT * distancePlayerToScreen) / (distancePlayerToScreen - PT * (halfRenderWidth - x));
+		
+		
 		const float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99999f);
 				
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);

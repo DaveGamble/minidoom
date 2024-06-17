@@ -60,16 +60,16 @@ void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, float sca
 void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale) const
 {
 	if (scale < 0) return;
-    int y = (yOffset < 0) ? -yOffset : 0;
-    while (patchColumnData[firstColumn].topDelta != 0xFF && maxHeight > 0)
+    while (patchColumnData[firstColumn].topDelta != 0xFF)
     {
-		int run = std::clamp(int((patchColumnData[firstColumn].length - y) * scale), 0, maxHeight);
-		int start = rowlen * floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
+		int y = (patchColumnData[firstColumn].topDelta + yOffset < 0) ? - patchColumnData[firstColumn].topDelta - yOffset : 0;
+		int sl = floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
+		int el = std::min(floor((patchColumnData[firstColumn].length - y) * scale) + sl, (float)maxHeight);
+		int run = std::max(el - sl, 0);
+		int start = rowlen * sl;
 		const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-		for (int i = 0, to = 0; to < run; i++) while (to < (i + 1) * scale) buf[start + (to++) * rowlen] = from[i];
-		maxHeight -= run;
-        ++firstColumn;
-        y = 0;
+		for (int i = 0, to = 0; to < run && i < patchColumnData[firstColumn].length; i++) while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = from[i];
+		++firstColumn;
     }
 }
 

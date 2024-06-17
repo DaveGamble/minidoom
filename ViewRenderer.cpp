@@ -12,7 +12,7 @@ ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int rend
 , renderHeight(renderYSize)
 , halfRenderWidth(renderXSize / 2)
 , halfRenderHeight(renderYSize / 2)
-, distancePlayerToScreen(halfRenderWidth / tan(90 * 0.5 * M_PI / 180))	// 90 here is FOV
+, distancePlayerToScreen(halfRenderWidth)	// 90 here is FOV
 {
 	screenXToAngle.resize(renderWidth + 1);
 	for (int i = 0; i <= renderWidth; ++i)
@@ -186,21 +186,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-//		const float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
-		/*
-		 If PT = tan(pa * M_PI / 180);
-		 tan(a + b) = (tan(a) + tan(b) / (1 - tan(a)tan(b))
-		 = (tan(screenXToAngle[x] * M_PI / 180) + PT) / (1 - tan(screenXToAngle[x] * M_PI / 180) * PT);
-		 screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen) * 180 / M_PI
-		 so
-		 = (tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen) * 180 / M_PI * M_PI / 180) + PT) / (1 - tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen) * 180 / M_PI * M_PI / 180) * PT);
-		 = (tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen)) + PT) / (1 - tan(atan((halfRenderWidth - x) / (float)distancePlayerToScreen)) * PT);
-		 = (((halfRenderWidth - x) / (float)distancePlayerToScreen) + PT) / (1 - ((halfRenderWidth - x) / (float)distancePlayerToScreen)) * PT);
-		 = ((halfRenderWidth - x) + PT * distancePlayerToScreen) / (distancePlayerToScreen - ((halfRenderWidth - x) * PT));
-		 */
 		const float K = ((halfRenderWidth - x) + PT * distancePlayerToScreen) / (distancePlayerToScreen - PT * (halfRenderWidth - x));
-		
-		
 		const float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99999f);
 				
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);

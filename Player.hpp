@@ -17,6 +17,7 @@ public:
 			y = thing->y;
 			a = thing->angle * M_PI / 180;
 		}
+//		x = 2978; y = -4258;
 	}
     void moveForward() { x += cos(a) * moveSpeed; y += sin(a) * moveSpeed; }
 	void moveBackward() { x -= cos(a) * moveSpeed; y -= sin(a) * moveSpeed; }

@@ -177,7 +177,10 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
     }
 
 	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
-	
+	const float pc = cos(pa * M_PI / 180) / 64, ps = sin(pa * M_PI / 180) / 64;
+	const float vG = distancePlayerToScreen * (player->getZ() -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - player->getZ());
+	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = px / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = py / 64.f;
+
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
 		const float K = tan((screenXToAngle[x] + pa) * M_PI / 180);
@@ -191,7 +194,23 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 			float scale = (fl - cl) / (float)texture->getHeight();
 			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, texture->getWidth() * u, scale, std::max((from - cl), 0) / scale, (to - from));
 		};
-		
+
+
+		auto DrawFloor = [&](const Flat *flat, int x, int from, int to) {
+			for (int i = from; i < to; i++)
+			{
+				float z = vG / (i - halfRenderHeight);
+				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0);
+			}
+		};
+
+		auto DrawCeiling = [&](const Flat *flat, int x, int from, int to) {
+			for (int i = from; i < to; i++)
+			{
+				float z = vH / (halfRenderHeight - i);
+				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0);
+			}
+		};
 		
 		if (CurrentCeilingEnd > CurrentFloorStart)
 		{
@@ -202,8 +221,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		
         if (seg.lSector)
         {
-			for (int i = std::max(0, ceilingClipHeight[x]); i < CurrentCeilingEnd; i++)
-				seg.rSector->ceilingtexture->renderSpan(screenBuffer + i * rowlen + x, 1, 0, 0, 0, 0);
+			DrawCeiling(seg.rSector->ceilingtexture, x, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 
 			int upper = std::min(floorClipHeight[x] - 1.f, iUpperHeight);
 			int lower = std::max(iLowerHeight, ceilingClipHeight[x] + 1.f);
@@ -221,9 +239,8 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 			else if (UpdateCeiling)
 				ceilingClipHeight[x] = CurrentCeilingEnd - 1;
 
-			for (int i = CurrentFloorStart; i < floorClipHeight[x]; i++)
-				seg.rSector->floortexture->renderSpan(screenBuffer + i * rowlen + x, 1, 0, 0, 0, 0);
-			
+			DrawFloor(seg.rSector->floortexture, x, CurrentFloorStart, floorClipHeight[x]);
+
 			if (bDrawLowerSection)
 			{
 				DrawTexture(seg.linedef->rSidedef->lowertexture, x, lower, CurrentFloorStart, u, iLowerHeight, FloorStart);
@@ -235,10 +252,8 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
         else
 		{
 			DrawTexture(seg.linedef->rSidedef->middletexture, x, CurrentCeilingEnd, CurrentFloorStart, u, CeilingEnd, FloorStart);
-			for (int i = CurrentFloorStart; i < floorClipHeight[x]; i++)
-				seg.rSector->floortexture->renderSpan(screenBuffer + i * rowlen + x, 1, 0, 0, 0, 0);
-			for (int i = std::max(ceilingClipHeight[x], 0); i < CurrentCeilingEnd; i++)
-				seg.rSector->ceilingtexture->renderSpan(screenBuffer + i * rowlen + x, 1, 0, 0, 0, 0);
+			DrawFloor(seg.rSector->floortexture, x, CurrentFloorStart, floorClipHeight[x]);
+			DrawCeiling(seg.rSector->ceilingtexture, x, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}

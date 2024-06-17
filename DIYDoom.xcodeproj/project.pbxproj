@@ -172,25 +172,7 @@
 		55FEA4572C1DBCB400F9DCAC = {
 			isa = PBXGroup;
 			children = (
-				55FEA4622C1DBCB400F9DCAC /* DIYDoom */,
-				55FEA4612C1DBCB400F9DCAC /* Products */,
-				55FEA5EA2C1DBDC200F9DCAC /* Frameworks */,
-			);
-			sourceTree = "<group>";
-		};
-		55FEA4612C1DBCB400F9DCAC /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				55FEA4602C1DBCB400F9DCAC /* DIYDoom */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		55FEA4622C1DBCB400F9DCAC /* DIYDoom */ = {
-			isa = PBXGroup;
-			children = (
 				55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */,
-				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.hpp */,
 				55FEA4C72C1DBCC800F9DCAC /* Player.hpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.hpp */,
@@ -205,8 +187,18 @@
 				55FEA4BE2C1DBCC800F9DCAC /* Map.h */,
 				55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */,
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.h */,
+				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
+				55FEA4612C1DBCB400F9DCAC /* Products */,
+				55FEA5EA2C1DBDC200F9DCAC /* Frameworks */,
 			);
-			path = DIYDoom;
+			sourceTree = "<group>";
+		};
+		55FEA4612C1DBCB400F9DCAC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				55FEA4602C1DBCB400F9DCAC /* DIYDoom */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		55FEA4BC2C1DBCC800F9DCAC /* SDL2 */ = {

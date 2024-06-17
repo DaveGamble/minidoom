@@ -14,6 +14,11 @@ TODO:
 - SFX
 - Music
 - Maybe actually build some game code around it?
+- Automap?
+- A nice interface for selecting weapons and drawing firing animations?
+- Be really cool if we could do, like, doors and floor movements and stuff?
+- Event triggering?
+
 
 Build is for Xcode on Apple Silicon macs (but if you replaced the precompiled SDL binary you could do whatever)
 

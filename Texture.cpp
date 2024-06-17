@@ -43,7 +43,7 @@ void Texture::renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOf
 {
 	if (columns[c].overlap.size())
 	{
-		for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++) while (toy < (y + 1) * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = columns[c].overlap[y];
+		for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++) while (toy < (y + 1) * scale && toy < yEnd + yOffset * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = columns[c].overlap[y];
 	}
     else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale);
 }

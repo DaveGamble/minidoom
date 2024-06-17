@@ -189,7 +189,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		auto DrawTexture = [&](const Texture *texture, int x, int from, int to, float u, int cl, int fl) {
 			if (!texture || to < from || fl <= cl) return;
 			float scale = (fl - cl) / (float)texture->getHeight();
-			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, texture->getWidth() * u, scale, (from - cl) / scale, (to - from));
+			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, texture->getWidth() * u, scale, std::max((from - cl), 0) / scale, (to - from));
 		};
 		
 		

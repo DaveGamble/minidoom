@@ -19,10 +19,12 @@ protected:
 	class Player *player;
     int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 
+	struct renderLater {const Texture *texture; int x; int from; int to; float u; int cl; int fl;};
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;
     std::vector<float> screenXToAngle;
+	std::vector<renderLater> renderLaters;
 	uint8_t *screenBuffer;
 	int rowlen;
 };

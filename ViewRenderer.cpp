@@ -193,7 +193,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-		const float u = std::clamp((uA + x * uB) / (uC + x * uD), 0.f, 0.99999f);
+		const float u = std::clamp((uA + x * uB) / (uC + x * uD), 0.f, 1.f);
 
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);
         int CurrentFloorStart = std::min(FloorStart, floorClipHeight[x] - 1.f);
@@ -201,7 +201,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 		auto DrawTexture = [&](const Texture *texture, int x, int from, int to, float u, int cl, int fl) {
 			if (!texture || to < from || fl <= cl) return;
 			float scale = (fl - cl) / (float)texture->getHeight();
-			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, texture->getWidth() * u, scale, std::max((from - cl), 0) / scale, (to - from));
+			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, (texture->getWidth() - 1) * u, scale, std::max((from - cl), 0) / scale, (to - from));
 		};
 
 

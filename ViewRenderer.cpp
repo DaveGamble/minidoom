@@ -1,8 +1,8 @@
-#include "ViewRenderer.h"
+#include "ViewRenderer.hpp"
 
 #include <algorithm>
-#include "Map.h"
-#include "Texture.h"
+#include "Map.hpp"
+#include "Texture.hpp"
 
 ViewRenderer::ViewRenderer(int renderXSize, int renderYSize)
 : renderWidth(renderXSize)

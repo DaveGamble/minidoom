@@ -2,7 +2,7 @@
 
 #include <map>
 #include "DataTypes.hpp"
-#include "Texture.h"
+#include "Texture.hpp"
 #include "Flat.hpp"
 
 class WADLoader

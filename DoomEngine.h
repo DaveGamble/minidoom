@@ -1,8 +1,8 @@
 #pragma once
 
 #include <SDL.h>
-#include "Map.h"
-#include "ViewRenderer.h"
+#include "Map.hpp"
+#include "ViewRenderer.hpp"
 
 class DoomEngine
 {

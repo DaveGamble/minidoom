@@ -51,10 +51,6 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	};
 
 	float V1AngleFromPlayer = atan2f(tov1y, tov1x);
-
-	float DistanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
-	
-
 	float V2AngleFromPlayer = atan2f(tov2y, tov2x);
 	float V1ToV2Span = amod(V1AngleFromPlayer - V2AngleFromPlayer);
 
@@ -80,7 +76,11 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 //	else return;
 
 	if (solid && solidWallRanges.size() < 2) return;
-    const SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
+
+	float DistanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
+
+	
+	const SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = solidWallRanges.begin();
     while (FoundClipWall != solidWallRanges.end() && CurrentWall.start - 1 > FoundClipWall->end) ++FoundClipWall;
 

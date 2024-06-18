@@ -179,15 +179,58 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
     }
 
 	const float PT = tan(pa * M_PI / 180);
-	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
+	const float uA = (distancePlayerToScreen - PT * halfRenderWidth) * (py - seg.linedef->start.y)
+						   + (halfRenderWidth + PT * distancePlayerToScreen) * (seg.linedef->start.x - px),
+			   uB = PT * (py - seg.linedef->start.y) + px - seg.linedef->start.x,
+			uC = (distancePlayerToScreen - PT * halfRenderWidth) * (seg.linedef->end.y - seg.linedef->start.y)
+			+ (halfRenderWidth + PT * distancePlayerToScreen) * (seg.linedef->start.x - seg.linedef->end.x),
+					  uD = PT * (seg.linedef->end.y - seg.linedef->start.y) + seg.linedef->end.x - seg.linedef->start.x;
+					  
+//	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
 	const float pc = cos(pa * M_PI / 180) / 64, ps = sin(pa * M_PI / 180) / 64;
 	const float vG = distancePlayerToScreen * (player->getZ() -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - player->getZ());
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = px / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = py / 64.f;
 
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {
-		const float K = ((halfRenderWidth - x) + PT * distancePlayerToScreen) / (distancePlayerToScreen - PT * (halfRenderWidth - x));
-		const float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99999f);
+//		const float K = ((halfRenderWidth - x) + PT * distancePlayerToScreen) / (distancePlayerToScreen - PT * (halfRenderWidth - x));
+//		const float u = std::clamp((uA + K * uB) / (uC + K * uD), 0.f, 0.99999f);
+		const float u = std::clamp((uA + x * uB) / (uC + x * uD), 0.f, 0.99999f);
+		
+		/*
+		const float u = (uA + K * uB ) / (uC + K * uD).
+		 But there's a divide in K, so not that.
+		 const float uA = py - seg.linedef->start.y,
+		 uB = seg.linedef->start.x - px,
+		 uC = seg.linedef->end.y - seg.linedef->start.y,
+		 uD = seg.linedef->start.x - seg.linedef->end.x;
+
+		 so float u =
+		 (((distancePlayerToScreen - PT * (halfRenderWidth - x) * (py - seg.linedef->start.y) +
+		 ((halfRenderWidth - x) + PT * distancePlayerToScreen)  * (seg.linedef->start.x - px))
+		 / (
+		 (distancePlayerToScreen - PT * (halfRenderWidth - x)) * (seg.linedef->end.y - seg.linedef->start.y)
+		 + ((halfRenderWidth - x) + PT * distancePlayerToScreen) * (seg.linedef->start.x - seg.linedef->end.x))
+		 )
+
+		 and i want to boil x out:
+		 (((distancePlayerToScreen - PT * halfRenderWidth * (py - seg.linedef->start.y) +
+		 (halfRenderWidth + PT * distancePlayerToScreen)  * (seg.linedef->start.x - px)
+		 + x * (PT * (py - seg.linedef->start.y) + px - seg.linedef->start.x)
+		 ) / (
+		 (distancePlayerToScreen - PT * halfRenderWidth) * (seg.linedef->end.y - seg.linedef->start.y)
+		 + (halfRenderWidth + PT * distancePlayerToScreen) * (seg.linedef->start.x - seg.linedef->end.x))
+		 + x * (PT * (seg.linedef->end.y - seg.linedef->start.y) + seg.linedef->end.x - seg.linesef->start.x)
+		 )
+		 
+		 so let's let uA = (distancePlayerToScreen - PT * halfRenderWidth * (py - seg.linedef->start.y)
+						+ halfRenderWidth + PT * distancePlayerToScreen * (seg.linedef->start.x - px)
+			uB = (PT * (py - seg.linedef->start.y) + px - seg-linedef->start.x
+		 uC =distancePlayerToScreen - PT * halfRenderWidth) * (seg.linedef->end.y - seg.linedef->start.y)
+		 + (halfRenderWidth + PT * distancePlayerToScreen) * (seg.linedef->start.x - seg.linedef->end.x)
+		 uD = (PT * (seg.linedef->end.y - seg.linedef->start.y) + seg.linedef->end.x - seg.linedef->start.x)
+		 and then u = (uA + x * uB) / (uC + x * uD)
+*/
 				
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);
         int CurrentFloorStart = std::min(FloorStart, floorClipHeight[x] - 1.f);

@@ -52,8 +52,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 	float V1AngleFromPlayer = atan2f(tov1y, tov1x);
 
-	float DistanceToNormal = sin(atan2f(toV1y, toV1x) - seg.slopeAngle) * sqrt(toV1x * toV1x + toV1y * toV1y); // Calculate the distance between the player an the vertex.
-//	|a||bT|sin(ang_a - ang_b) = a . bT
+	float DistanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
 	
 
 	float V2AngleFromPlayer = atan2f(tov2y, tov2x);

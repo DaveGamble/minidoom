@@ -8,13 +8,13 @@ class ViewRenderer
 public:
     ViewRenderer(class Map *map, int renderXSize, int renderYSize);
 	~ViewRenderer() {}
-    void render(uint8_t *pScreenBuffer, int iBufferPitch, int px, int py, int pz, float pa);
-    void addWallInFOV(Seg &seg, int px, int py, int pz, float pa);
+    void render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint &v);
+	void addWallInFOV(Seg &seg, const Viewpoint &v);
 
 protected:
     struct SolidSegmentRange { int XStart, XEnd; };
 
-    void storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, int px, int py, int pz, float pa);
+    void storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, const Viewpoint &v);
 	class Map *map;
     int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 

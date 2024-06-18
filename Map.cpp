@@ -63,23 +63,23 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, Things *_things, W
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 }
 
-void Map::renderBSPNodes(int iNodeID, int px, int py, int pz, float pa)
+void Map::renderBSPNodes(int iNodeID, const Viewpoint& v)
 {
     if (!(iNodeID & kSubsectorIdentifier)) // Masking all the bits exipt the last one to check if this is a subsector
 	{
-		if (isPointOnLeftSide(px, py, iNodeID))
+		if (isPointOnLeftSide(v, iNodeID))
 		{
-			renderBSPNodes(nodes[iNodeID].lChild, px, py, pz, pa);
-			renderBSPNodes(nodes[iNodeID].rChild, px, py, pz, pa);
+			renderBSPNodes(nodes[iNodeID].lChild, v);
+			renderBSPNodes(nodes[iNodeID].rChild, v);
 		}
 		else
 		{
-			renderBSPNodes(nodes[iNodeID].rChild, px, py, pz, pa);
-			renderBSPNodes(nodes[iNodeID].lChild, px, py, pz, pa);
+			renderBSPNodes(nodes[iNodeID].rChild, v);
+			renderBSPNodes(nodes[iNodeID].lChild, v);
 		}
 		return;
 	}
 
 	Subsector &subsector = subsectors[iNodeID & (~kSubsectorIdentifier)];
-	for (int i = 0; i < subsector.numSegs; i++) renderer->addWallInFOV(segs[subsector.firstSeg + i], px, py, pz, pa);
+	for (int i = 0; i < subsector.numSegs; i++) renderer->addWallInFOV(segs[subsector.firstSeg + i], v);
 }

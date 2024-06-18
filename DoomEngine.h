@@ -2,7 +2,6 @@
 
 #include <SDL.h>
 #include "Map.h"
-#include "Player.hpp"
 #include "ViewRenderer.h"
 
 class DoomEngine
@@ -12,8 +11,10 @@ public:
 	~DoomEngine();
 	bool Tick();
 protected:
+	static constexpr float moveSpeed = 4, rotateSpeed = 0.06981317008;
 	int m_iRenderWidth {960}, m_iRenderHeight {600};
 	bool m_bIsOver {false};
+
 	// SDL
 	SDL_Surface *m_pScreenBuffer {nullptr}, *m_pRGBBuffer {nullptr};
 	SDL_Color m_ColorPalette[256];
@@ -22,9 +23,10 @@ protected:
 	SDL_Texture *m_pTexture {nullptr};
 	// SDL
 	
+	Viewpoint view;
 	WADLoader m_WADLoader;
 	ViewRenderer m_ViewRenderer;
 	Things m_Things;
-	Player m_Player;
     Map m_Map;
+	Patch *weapon {nullptr};
 };

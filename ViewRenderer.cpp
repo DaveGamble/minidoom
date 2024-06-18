@@ -17,7 +17,7 @@ ViewRenderer::ViewRenderer(Map *pMap, int renderXSize, int renderYSize)
 }
 
 
-void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, int viewX, int viewY, int viewZ, float viewAng)
+void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint& view)
 {
 	screenBuffer = pScreenBuffer;
 	rowlen = iBufferPitch;
@@ -27,7 +27,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, int viewX, i
 	solidWallRanges.push_back({renderWidth, INT_MAX});
 	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
-	map->render3DView(viewX, viewY, viewZ, viewAng);
+	map->render3DView(view);
 
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{
@@ -37,20 +37,20 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, int viewX, i
 	}
 }
 
-void ViewRenderer::addWallInFOV(Seg &seg, int px, int py, int pz, float pa)
+void ViewRenderer::addWallInFOV(Seg &seg, const Viewpoint &v)
 {
 	auto amod = [](float a) {
 		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
 	};
 
-	int toV1x = seg.start.x - px, toV1y = seg.start.y - py, toV2x = seg.end.x - px, toV2y = seg.end.y - py;
+	int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
 	float V1Angle = atan2f(toV1y, toV1x);
 	float V2Angle = atan2f(toV2y, toV2x);
 	float V1ToV2Span = amod(V1Angle - V2Angle);
 
 	if (V1ToV2Span >= M_PI) return;
-	float V1AngleFromPlayer = amod(V1Angle - pa); // Rotate every thing.
-	float V2AngleFromPlayer = amod(V2Angle - pa);
+	float V1AngleFromPlayer = amod(V1Angle - v.angle); // Rotate every thing.
+	float V2AngleFromPlayer = amod(V2Angle - v.angle);
 	if (amod(V1AngleFromPlayer + M_PI_4) > M_PI_2)
 	{
 		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
@@ -81,11 +81,11 @@ void ViewRenderer::addWallInFOV(Seg &seg, int px, int py, int pz, float pa)
     {
         if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
         {
-            storeWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle, px, py, pz, pa); //All of the wall is visible, so insert it
+            storeWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(FoundClipWall, CurrentWall);
             return;
         }
-        storeWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle, px, py, pz, pa); // The end is already included, just update start
+        storeWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle, v); // The end is already included, just update start
         if (solid) FoundClipWall->XStart = CurrentWall.XStart;
     }
     
@@ -93,7 +93,7 @@ void ViewRenderer::addWallInFOV(Seg &seg, int px, int py, int pz, float pa)
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
     while (CurrentWall.XEnd >= next(NextWall, 1)->XStart - 1)
     {
-        storeWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle, px, py, pz, pa); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle, v); // partialy clipped by other walls, store each fragment
         ++NextWall;
         if (CurrentWall.XEnd <= NextWall->XEnd)
         {
@@ -105,7 +105,7 @@ void ViewRenderer::addWallInFOV(Seg &seg, int px, int py, int pz, float pa)
             return;
         }
     }
-    storeWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle, px, py, pz, pa);
+    storeWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle, v);
 	if (solid)
 	{
 		FoundClipWall->XEnd = CurrentWall.XEnd;
@@ -113,41 +113,41 @@ void ViewRenderer::addWallInFOV(Seg &seg, int px, int py, int pz, float pa)
 	}
 }
 
-void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, int px, int py, int pz, float pa)
+void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, const Viewpoint &v)
 {
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
-	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y)); // Calculate the distance between the player an the vertex.
+	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((v.x - seg.start.x) * (v.x - seg.start.x) + (v.y - seg.start.y) * (v.y - seg.start.y)); // Calculate the distance between the player an the vertex.
 
 	auto GetScaleFactor = [&](int VXScreen) {
 		float screenAng = atan((halfRenderWidth - VXScreen) / (float)distancePlayerToScreen);
-		float SkewAngle = screenAng + pa - seg.slopeAngle;
+		float SkewAngle = screenAng + v.angle - seg.slopeAngle;
 		return std::clamp((distancePlayerToScreen * sinf(SkewAngle)) / (DistanceToNormal * cosf(screenAng)), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(V1XScreen);
     float Steps = (GetScaleFactor(V2XScreen) - V1ScaleFactor) / (V2XScreen - V1XScreen);
 
-    float RightSectorCeiling = seg.rSector->ceilingHeight - pz;
-	float RightSectorFloor = seg.rSector->floorHeight - pz;
+    float RightSectorCeiling = seg.rSector->ceilingHeight - v.z;
+	float RightSectorFloor = seg.rSector->floorHeight - v.z;
 
     float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(halfRenderHeight - RightSectorCeiling * V1ScaleFactor);
     float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(halfRenderHeight - RightSectorFloor * V1ScaleFactor);
 
     if (seg.lSector)
     {
-		float LeftSectorCeiling = seg.lSector->ceilingHeight - pz;
-		float LeftSectorFloor = seg.lSector->floorHeight - pz;
+		float LeftSectorCeiling = seg.lSector->ceilingHeight - v.z;
+		float LeftSectorFloor = seg.lSector->floorHeight - v.z;
 
 		UpdateCeiling = (LeftSectorCeiling != RightSectorCeiling);
 		UpdateFloor = (LeftSectorFloor != RightSectorFloor);
 
 		if (seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight) // closed door
 			UpdateCeiling = UpdateFloor = true;
-		if (seg.rSector->ceilingHeight <= pz) // below view plane
+		if (seg.rSector->ceilingHeight <= v.z) // below view plane
 			UpdateCeiling = false;
-		if (seg.rSector->floorHeight >= pz) // above view plane
+		if (seg.rSector->floorHeight >= v.z) // above view plane
 			UpdateFloor = false;
 
         if (LeftSectorCeiling < RightSectorCeiling)
@@ -164,17 +164,17 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
     }
 
 	const int dx = seg.linedef->end.x - seg.linedef->start.x, dy = seg.linedef->end.y - seg.linedef->start.y;
-	const int sx = px - seg.linedef->start.x, sy = py - seg.linedef->start.y;
-	const float PT = tan(pa);
+	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
+	const float PT = tan(v.angle);
 	const float uA = halfRenderWidth * ((1 - PT) * sy - (1 + PT) * sx),
 				uB = PT * sy + sx,
 				uC = halfRenderWidth * ((1 - PT) * dy - (1 + PT) * dx),
 				uD = PT * dy + dx;
 					  
 //	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
-	const float pc = cos(pa) / 64, ps = sin(pa) / 64;
-	const float vG = distancePlayerToScreen * (pz -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - pz);
-	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = px / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = py / 64.f;
+	const float pc = cos(v.angle) / 64, ps = sin(v.angle) / 64;
+	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
+	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
 
 	for (int x = V1XScreen; x <= V2XScreen; x++)
     {

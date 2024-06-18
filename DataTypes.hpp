@@ -15,6 +15,7 @@ struct Seg { Vertex start, end; float slopeAngle; const Linedef *linedef; uint16
 struct Subsector { uint16_t numSegs, firstSeg; };
 struct BBox { int16_t top, bottom, left, right; };
 struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
+struct Viewpoint { int16_t x, y, z; float angle; };
 
 struct Thing { int16_t x, y; uint16_t angle, type, flags; };
 class Things

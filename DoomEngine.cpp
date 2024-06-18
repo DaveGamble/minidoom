@@ -17,7 +17,15 @@ DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
-    m_Player.init((m_Map.getThings())->GetID(m_Player.getID()), &m_WADLoader);
+	weapon = m_WADLoader.getPatch("PISGA0");
+	Thing* t = m_Map.getThings()->GetID(1);
+	if (t)
+	{
+		view.x = t->x;
+		view.y = t->y;
+		view.angle = t->angle * M_PI / 180;
+	}
+	view.z = 41;
 }
 
 DoomEngine::~DoomEngine()
@@ -29,37 +37,38 @@ DoomEngine::~DoomEngine()
 
 bool DoomEngine::Tick()
 {
+	auto rotateBy = [&](float dt) {
+		view.angle += (dt * rotateSpeed); view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
+	};
+	
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
 		{
-			case SDL_MOUSEMOTION:	m_Player.rotateBy(-0.1*event.motion.xrel);	break;
+			case SDL_MOUSEMOTION:	rotateBy(-0.1*event.motion.xrel);	break;
 			case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) m_bIsOver = true;	break;
 			case SDL_QUIT:		m_bIsOver = true;	break;
 		}
 	}
 	
 	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
-	if (KeyStates[SDL_SCANCODE_W]) m_Player.moveForward();
-	if (KeyStates[SDL_SCANCODE_A]) m_Player.strafeLeft();
-	if (KeyStates[SDL_SCANCODE_D]) m_Player.strafeRight();
-	if (KeyStates[SDL_SCANCODE_S]) m_Player.moveBackward();
-	if (KeyStates[SDL_SCANCODE_Q]) m_Player.rotateLeft();
-	if (KeyStates[SDL_SCANCODE_E]) m_Player.rotateRight();
-	if (KeyStates[SDL_SCANCODE_Z]) m_Player.fly();
-	if (KeyStates[SDL_SCANCODE_X]) m_Player.sink();
+	if (KeyStates[SDL_SCANCODE_W]) { view.x += cos(view.angle) * moveSpeed; view.y += sin(view.angle) * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_A]) { view.x -= sin(view.angle) * moveSpeed; view.y += cos(view.angle) * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_D]) { view.x += sin(view.angle) * moveSpeed; view.y -= cos(view.angle) * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_S]) { view.x -= cos(view.angle) * moveSpeed; view.y -= sin(view.angle) * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_Q]) rotateBy(0.1875f);
+	if (KeyStates[SDL_SCANCODE_E]) rotateBy(-0.1875f);
 	
 	// Update
-	m_Player.think(m_Map.getPlayerSubSectorHeight(m_Player.getX(), m_Player.getY()));
+	view.z = m_Map.getPlayerSubSectorHeight(view) + 41;
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
-		m_ViewRenderer.render(pScreenBuffer, m_iRenderWidth, m_Player.getX(), m_Player.getY(), m_Player.getZ(), m_Player.getAngle());
-//		m_Player.render(pScreenBuffer, m_iRenderWidth);
-//		m_WADLoader.getTexture("BROWNPIP")->render(pScreenBuffer, m_iRenderWidth, 10, 10, 4);
+		m_ViewRenderer.render(pScreenBuffer, m_iRenderWidth, view);
+// 		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, 3);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);

@@ -59,7 +59,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
 		V1AngleFromPlayer = M_PI_4; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
 	}
-	if (amod(M_PI_4 - V2AngleFromPlayer) > M_PI_2) V2AngleFromPlayer = -M_PI_4; // Validate and Clip V2 // Is V2 outside the FOV?
+	if (tov2x + tov2y < 0) V2AngleFromPlayer = - M_PI_4;	// Is V2 outside the FOV?
 	
 	auto AngleToScreen = [&](float angle) {
 		return distancePlayerToScreen - round(tanf(angle) * halfRenderWidth);

@@ -39,7 +39,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
-	int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
+	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
 	if (toV1x * toV2y - toV1y * toV2x >= 0) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view.
 
 	const float ca = cos(v.angle), sa = sin(v.angle);

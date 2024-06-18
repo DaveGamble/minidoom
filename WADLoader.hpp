@@ -77,7 +77,7 @@ public:
 		}
 		return patches[name].get();
 	}
-	Patch *getPatch(int index) { return getPatch(pnames[index]); }
+	Patch *getPatch(int index) override { return getPatch(pnames[index]); }
 	Texture *getTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
 	Flat *getFlat(const std::string &name) { return flats[name].get(); }
 protected:

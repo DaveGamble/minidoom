@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include "Map.hpp"
 #include "ViewRenderer.hpp"
+#include "WADLoader.hpp"
 
 class DoomEngine
 {

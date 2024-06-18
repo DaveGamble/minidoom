@@ -1,11 +1,13 @@
 #pragma once
 
-#include "WADLoader.hpp"
+#include "DataTypes.hpp"
+#include <vector>
+#include <string>
 
 class Map
 {
 public:
-    Map(const std::string &mapName, WADLoader& wad);
+    Map(const std::string &mapName, class WADLoader& wad);
 	~Map() {}
 
 	void render3DView(const Viewpoint &v, class ViewRenderer *render) { renderBSPNodes((int)nodes.size() - 1, v, render); }

@@ -1,4 +1,5 @@
 #include "Map.hpp"
+#include "WADLoader.hpp"
 #include "ViewRenderer.hpp"
 
 Map::Map(const std::string &mapName, WADLoader &wad)

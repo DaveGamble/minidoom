@@ -43,14 +43,20 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
 	};
 
+	const float ca = cos(v.angle), sa = sin(v.angle);
 	int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
-	float V1Angle = atan2f(toV1y, toV1x);
-	float V2Angle = atan2f(toV2y, toV2x);
+	float tov1x = toV1x * ca + toV1y * sa, tov1y = -toV1x * sa + toV1y * ca, tov2x = toV2x * ca + toV2y * sa, tov2y = -toV2x * sa + toV2y * ca;
+
+	float V1Angle = amod(atan2f(tov1y, tov1x));
+
+	float DistanceToNormal = sin(V1Angle - seg.slopeAngle + v.angle) * sqrt(toV1x * toV1x + toV1y * toV1y); // Calculate the distance between the player an the vertex.
+
+	float V2Angle = amod(atan2f(tov2y, tov2x));
 	float V1ToV2Span = amod(V1Angle - V2Angle);
 
 	if (V1ToV2Span >= M_PI) return;
-	float V1AngleFromPlayer = amod(V1Angle - v.angle); // Rotate every thing.
-	float V2AngleFromPlayer = amod(V2Angle - v.angle);
+	float V1AngleFromPlayer = V1Angle; // Rotate every thing.
+	float V2AngleFromPlayer = V2Angle;
 	if (amod(V1AngleFromPlayer + M_PI_4) > M_PI_2)
 	{
 		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
@@ -81,11 +87,11 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     {
         if (CurrentWall.end < FoundClipWall->start - 1)
         {
-            storeWallRange(seg, CurrentWall.start, CurrentWall.end, V1Angle, V2Angle, v); //All of the wall is visible, so insert it
+            storeWallRange(seg, CurrentWall.start, CurrentWall.end, DistanceToNormal, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(FoundClipWall, CurrentWall);
             return;
         }
-        storeWallRange(seg, CurrentWall.start, FoundClipWall->start - 1, V1Angle, V2Angle, v); // The end is already included, just update start
+        storeWallRange(seg, CurrentWall.start, FoundClipWall->start - 1, DistanceToNormal, v); // The end is already included, just update start
         if (solid) FoundClipWall->start = CurrentWall.start;
     }
     
@@ -93,7 +99,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
     while (CurrentWall.end >= next(NextWall, 1)->start - 1)
     {
-        storeWallRange(seg, NextWall->end + 1, next(NextWall, 1)->start - 1, V1Angle, V2Angle, v); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, NextWall->end + 1, next(NextWall, 1)->start - 1, DistanceToNormal, v); // partialy clipped by other walls, store each fragment
         ++NextWall;
         if (CurrentWall.end <= NextWall->end)
         {
@@ -105,7 +111,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
             return;
         }
     }
-    storeWallRange(seg, NextWall->end + 1, CurrentWall.end, V1Angle, V2Angle, v);
+    storeWallRange(seg, NextWall->end + 1, CurrentWall.end, DistanceToNormal, v);
 	if (solid)
 	{
 		FoundClipWall->end = CurrentWall.end;
@@ -113,12 +119,10 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	}
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int V1XScreen, int V2XScreen, float DistanceToNormal, const Viewpoint &v)
 {
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
-
-	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((v.x - seg.start.x) * (v.x - seg.start.x) + (v.y - seg.start.y) * (v.y - seg.start.y)); // Calculate the distance between the player an the vertex.
 
 	auto GetScaleFactor = [&](int VXScreen) {
 		float screenAng = atan((halfRenderWidth - VXScreen) / (float)distancePlayerToScreen);

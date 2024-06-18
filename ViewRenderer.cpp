@@ -39,11 +39,11 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
-	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
-	if (toV1x * toV2y - toV1y * toV2x >= 0) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view.
+	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;	// Vectors from origin to segment ends.
+	if (toV1x * toV2y - toV1y * toV2x >= 0) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view. (It's behind us)
 
 	const float ca = cos(v.angle), sa = sin(v.angle);
-	float tov1x = toV1x * ca + toV1y * sa, tov1y = -toV1x * sa + toV1y * ca, tov2x = toV2x * ca + toV2y * sa, tov2y = -toV2x * sa + toV2y * ca;
+	float tov1x = toV1x * ca + toV1y * sa, tov1y = -toV1x * sa + toV1y * ca, tov2x = toV2x * ca + toV2y * sa, tov2y = -toV2x * sa + toV2y * ca;	// Rotate vectors to be in front of us.
 
 
 	auto amod = [](float a) {

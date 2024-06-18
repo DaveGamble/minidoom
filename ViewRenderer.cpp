@@ -124,8 +124,6 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 
 void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle)
 {
-	auto amod = [](float a) { return a - M_PI * 2 * floor(a * 0.5 * M_1_PI); };
-
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
@@ -133,8 +131,8 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		float SkewAngle = amod(screenXToAngle[VXScreen] + pa - seg.slopeAngle - M_PI_2);
-		return std::clamp((distancePlayerToScreen * cosf(SkewAngle)) / (DistanceToNormal * cosf(screenXToAngle[VXScreen])), 0.00390625f, 64.0f);
+		float SkewAngle = screenXToAngle[VXScreen] + pa - seg.slopeAngle;
+		return std::clamp((distancePlayerToScreen * sinf(SkewAngle)) / (DistanceToNormal * cosf(screenXToAngle[VXScreen])), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(V1XScreen);

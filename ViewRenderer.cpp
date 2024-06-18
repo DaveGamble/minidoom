@@ -129,13 +129,11 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
-	float SegToNormalAngle = amod(seg.slopeAngle + M_PI_2);
-
 	const float px = player->getX(), py = player->getY(), pa = player->getAngle();     // Calculate the distance between the player an the vertex.
 	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		float SkewAngle = amod(screenXToAngle[VXScreen] + pa - SegToNormalAngle);
+		float SkewAngle = amod(screenXToAngle[VXScreen] + pa - seg.slopeAngle - M_PI_2);
 		return std::clamp((distancePlayerToScreen * cosf(SkewAngle)) / (DistanceToNormal * cosf(screenXToAngle[VXScreen])), 0.00390625f, 64.0f);
 	};
 

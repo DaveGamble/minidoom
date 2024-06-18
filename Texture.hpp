@@ -36,8 +36,6 @@ public:
 		}
 	}
 
-	~Texture() {}
-
     void render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale = 1.0) const
 	{
 		buf += rowlen * screeny + screenx;

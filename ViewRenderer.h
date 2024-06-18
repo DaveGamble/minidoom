@@ -6,9 +6,9 @@
 class ViewRenderer
 {
 public:
-    ViewRenderer(class Map *map, int renderXSize, int renderYSize);
+    ViewRenderer(int renderXSize, int renderYSize);
 	~ViewRenderer() {}
-    void render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint &v);
+    void render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint &v, class Map &map);
 	void addWallInFOV(Seg &seg, const Viewpoint &v);
 
 protected:

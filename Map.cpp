@@ -1,14 +1,14 @@
 #include "Map.h"
+#include "ViewRenderer.h"
 
-Map::Map(ViewRenderer *_renderer, const std::string &mapName, WADLoader *wad)
-: renderer(_renderer)
+Map::Map(const std::string &mapName, WADLoader &wad)
 {
-	int li = wad->findLumpByName(mapName);
+	int li = wad.findLumpByName(mapName);
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;
 	size_t size;
 	auto seek = [&](const std::string& name) {
-		data = wad->getLumpNamed(name, li);
+		data = wad.getLumpNamed(name, li);
 		ptr = data.data();
 		size = data.size();
 		return ptr;
@@ -24,7 +24,7 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, WADLoader *wad)
 		char floorname[9] {}, ceilname[9] {};
 		memcpy(floorname, ws->floorTexture, 8);
 		memcpy(ceilname, ws->ceilingTexture, 8);
-		sectors.push_back({ws->fh, ws->ch, wad->getFlat(floorname), wad->getFlat(ceilname), ws->lightlevel, ws->type, ws->tag});
+		sectors.push_back({ws->fh, ws->ch, wad.getFlat(floorname), wad.getFlat(ceilname), ws->lightlevel, ws->type, ws->tag});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
@@ -35,7 +35,7 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, WADLoader *wad)
 		memcpy(uname, ws->upperTexture, 8);
 		memcpy(lname, ws->lowerTexture, 8);
 		memcpy(mname, ws->middleTexture, 8);
-		sidedefs.push_back({ws->dx, ws->dy, wad->getTexture(uname), wad->getTexture(mname), wad->getTexture(lname), sectors.data() + ws->sector});
+		sidedefs.push_back({ws->dx, ws->dy, wad.getTexture(uname), wad.getTexture(mname), wad.getTexture(lname), sectors.data() + ws->sector});
 	}
 
 	struct WADLinedef { uint16_t start, end, flags, type, sectorTag, rSidedef, lSidedef; }; // Sidedef 0xFFFF means there is no sidedef
@@ -63,16 +63,16 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, WADLoader *wad)
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 }
 
-void Map::renderBSPNodes(int iNodeID, const Viewpoint& v)
+void Map::renderBSPNodes(int iNodeID, const Viewpoint& v, ViewRenderer *render)
 {
     if (!(iNodeID & kSubsectorIdentifier)) // Masking all the bits exipt the last one to check if this is a subsector
 	{
 		bool left = isPointOnLeftSide(v, iNodeID);
-		renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild, v);
-		renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild, v);
+		renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild, v, render);
+		renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild, v, render);
 		return;
 	}
 
 	Subsector &subsector = subsectors[iNodeID & (~kSubsectorIdentifier)];
-	for (int i = 0; i < subsector.numSegs; i++) renderer->addWallInFOV(segs[subsector.firstSeg + i], v);
+	for (int i = 0; i < subsector.numSegs; i++) render->addWallInFOV(segs[subsector.firstSeg + i], v);
 }

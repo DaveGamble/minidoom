@@ -4,9 +4,8 @@
 #include "Map.h"
 #include "Texture.h"
 
-ViewRenderer::ViewRenderer(Map *pMap, int renderXSize, int renderYSize)
-: map(pMap)
-, renderWidth(renderXSize)
+ViewRenderer::ViewRenderer(int renderXSize, int renderYSize)
+: renderWidth(renderXSize)
 , renderHeight(renderYSize)
 , halfRenderWidth(renderXSize / 2)
 , halfRenderHeight(renderYSize / 2)
@@ -17,7 +16,7 @@ ViewRenderer::ViewRenderer(Map *pMap, int renderXSize, int renderYSize)
 }
 
 
-void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint& view)
+void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint& view, Map &map)
 {
 	screenBuffer = pScreenBuffer;
 	rowlen = iBufferPitch;
@@ -27,7 +26,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	solidWallRanges.push_back({renderWidth, INT_MAX});
 	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
-	map->render3DView(view);
+	map.render3DView(view, this);
 
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{

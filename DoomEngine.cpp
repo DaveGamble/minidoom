@@ -2,8 +2,8 @@
 
 DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
 : wad(wadname)
-, map(&renderer, mapName, &wad)
-, renderer(&map, m_iRenderWidth, m_iRenderHeight)
+, map(mapName, wad)
+, renderer(m_iRenderWidth, m_iRenderHeight)
 {
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -67,7 +67,7 @@ bool DoomEngine::Tick()
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
-		renderer.render(pScreenBuffer, m_iRenderWidth, view);
+		renderer.render(pScreenBuffer, m_iRenderWidth, view, map);
 // 		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, 3);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);

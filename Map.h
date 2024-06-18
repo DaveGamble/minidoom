@@ -1,15 +1,14 @@
 #pragma once
 
-#include "ViewRenderer.h"
 #include "WADLoader.hpp"
 
 class Map
 {
 public:
-    Map(ViewRenderer *renderer, const std::string &mapName, WADLoader *wad);
+    Map(const std::string &mapName, WADLoader& wad);
 	~Map() {}
 
-	void render3DView(const Viewpoint &v) { renderBSPNodes((int)nodes.size() - 1, v); }
+	void render3DView(const Viewpoint &v, class ViewRenderer *render) { renderBSPNodes((int)nodes.size() - 1, v, render); }
 
     int getPlayerSubSectorHeight(const Viewpoint &v)
 	{
@@ -29,7 +28,7 @@ public:
 protected:
 	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 
-    void renderBSPNodes(int iNodeID, const Viewpoint &v);
+    void renderBSPNodes(int iNodeID, const Viewpoint &v, class ViewRenderer *render);
 
     bool isPointOnLeftSide(const Viewpoint &v, int node) const
 	{
@@ -43,5 +42,4 @@ protected:
     std::vector<Seg> segs;
     std::vector<Subsector> subsectors;
     std::vector<Node> nodes;
-    ViewRenderer *renderer;
 };

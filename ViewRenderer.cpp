@@ -75,40 +75,40 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	if (solid && solidWallRanges.size() < 2) return;
     const SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = solidWallRanges.begin();
-    while (FoundClipWall != solidWallRanges.end() && CurrentWall.XStart - 1 > FoundClipWall->XEnd) ++FoundClipWall;
+    while (FoundClipWall != solidWallRanges.end() && CurrentWall.start - 1 > FoundClipWall->end) ++FoundClipWall;
 
-    if (CurrentWall.XStart < FoundClipWall->XStart)
+    if (CurrentWall.start < FoundClipWall->start)
     {
-        if (CurrentWall.XEnd < FoundClipWall->XStart - 1)
+        if (CurrentWall.end < FoundClipWall->start - 1)
         {
-            storeWallRange(seg, CurrentWall.XStart, CurrentWall.XEnd, V1Angle, V2Angle, v); //All of the wall is visible, so insert it
+            storeWallRange(seg, CurrentWall.start, CurrentWall.end, V1Angle, V2Angle, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(FoundClipWall, CurrentWall);
             return;
         }
-        storeWallRange(seg, CurrentWall.XStart, FoundClipWall->XStart - 1, V1Angle, V2Angle, v); // The end is already included, just update start
-        if (solid) FoundClipWall->XStart = CurrentWall.XStart;
+        storeWallRange(seg, CurrentWall.start, FoundClipWall->start - 1, V1Angle, V2Angle, v); // The end is already included, just update start
+        if (solid) FoundClipWall->start = CurrentWall.start;
     }
     
-    if (CurrentWall.XEnd <= FoundClipWall->XEnd) return; // This part is already occupied
+    if (CurrentWall.end <= FoundClipWall->end) return; // This part is already occupied
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
-    while (CurrentWall.XEnd >= next(NextWall, 1)->XStart - 1)
+    while (CurrentWall.end >= next(NextWall, 1)->start - 1)
     {
-        storeWallRange(seg, NextWall->XEnd + 1, next(NextWall, 1)->XStart - 1, V1Angle, V2Angle, v); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, NextWall->end + 1, next(NextWall, 1)->start - 1, V1Angle, V2Angle, v); // partialy clipped by other walls, store each fragment
         ++NextWall;
-        if (CurrentWall.XEnd <= NextWall->XEnd)
+        if (CurrentWall.end <= NextWall->end)
         {
 			if (solid)
 			{
-				FoundClipWall->XEnd = NextWall->XEnd;
+				FoundClipWall->end = NextWall->end;
 				if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
 			}
             return;
         }
     }
-    storeWallRange(seg, NextWall->XEnd + 1, CurrentWall.XEnd, V1Angle, V2Angle, v);
+    storeWallRange(seg, NextWall->end + 1, CurrentWall.end, V1Angle, V2Angle, v);
 	if (solid)
 	{
-		FoundClipWall->XEnd = CurrentWall.XEnd;
+		FoundClipWall->end = CurrentWall.end;
 		if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
 	}
 }

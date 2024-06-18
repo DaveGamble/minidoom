@@ -12,7 +12,7 @@ public:
 	void addWallInFOV(const Seg &seg, const Viewpoint &v);
 
 protected:
-    struct SolidSegmentRange { int XStart, XEnd; };
+    struct SolidSegmentRange { int start, end; };
 
     void storeWallRange(const Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, const Viewpoint &v);
 

@@ -13,6 +13,7 @@ TODO:
 - Skybox
 - SFX
 - Music
+- FREELOOK
 - Maybe actually build some game code around it?
 - Automap?
 - A nice interface for selecting weapons and drawing firing animations?

@@ -5,7 +5,7 @@
 #include "Texture.hpp"
 #include "Flat.hpp"
 
-class WADLoader : public PatchProvider
+class WADLoader
 {
 public:
 	WADLoader(const std::string &filename)
@@ -43,7 +43,7 @@ public:
 			for (int i = 0; i < numTextures; ++i)
 			{
 				char name[9] {}; memcpy(name, data.data() + asint[i + 1], 8);
-				textures[name] = std::unique_ptr<Texture>(new Texture(data.data() + asint[i + 1], this));
+				textures[name] = std::unique_ptr<Texture>(new Texture(data.data() + asint[i + 1], [&](int idx) { return getPatch(pnames[idx]); }));
 			}
 		}
 		
@@ -77,7 +77,6 @@ public:
 		}
 		return patches[name].get();
 	}
-	Patch *getPatch(int index) override { return getPatch(pnames[index]); }
 	Texture *getTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
 	Flat *getFlat(const std::string &name) { return flats[name].get(); }
 protected:

@@ -4,7 +4,7 @@
 class Texture
 {
 public:
-    Texture(const uint8_t *ptr, PatchProvider *wad)
+    template<typename F> Texture(const uint8_t *ptr, F&& getPatch)
 	{
 		struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; };// ColumnDirectory Unused value.
 		WADTextureData *textureData = (WADTextureData*)ptr;
@@ -18,7 +18,7 @@ public:
 
 		for (int i = 0; i < textureData->patchCount; ++i)
 		{
-			const Patch *patch = wad->getPatch(texturePatch[i].pnameIndex);	// Get the patch
+			const Patch *patch = getPatch(texturePatch[i].pnameIndex);	// Get the patch
 			for (int x = std::max(texturePatch[i].dx, (int16_t)0); x < std::min(width, texturePatch[i].dx + patch->getWidth()); x++)
 			{
 				if (columns[x].patch)	// This column already has something in

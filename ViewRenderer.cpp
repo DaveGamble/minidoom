@@ -133,7 +133,7 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 
 	float SegToNormalAngle = amod(seg.slopeAngle + 90);
 
-	float px = player->getX(), py = player->getY(), pa = player->getAngle();     // Calculate the distance between the player an the vertex.
+	const float px = player->getX(), py = player->getY(), pa = player->getAngle();     // Calculate the distance between the player an the vertex.
 	float DistanceToNormal = sin(M_PI * (V1Angle - seg.slopeAngle) / 180) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
 	auto GetScaleFactor = [&](int VXScreen) {

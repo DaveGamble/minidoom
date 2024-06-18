@@ -1,23 +1,22 @@
 #pragma once
 
-#include "Player.hpp"
 #include "ViewRenderer.h"
 #include "WADLoader.hpp"
 
 class Map
 {
 public:
-    Map(ViewRenderer *renderer, const std::string &mapName, Player *player, Things *things, WADLoader *wad);
+    Map(ViewRenderer *renderer, const std::string &mapName, Things *things, WADLoader *wad);
 	~Map() {}
 
-	void render3DView() { renderBSPNodes((int)nodes.size() - 1); }
+	void render3DView(int px, int py, int pz, float pa) { renderBSPNodes((int)nodes.size() - 1, px, py, pz, pa); }
 
-    int getPlayerSubSectorHeight()
+    int getPlayerSubSectorHeight(int px, int py)
 	{
 		int subsector = (int)(nodes.size() - 1);
 		while (!(subsector & kSubsectorIdentifier))
 		{
-			if (isPointOnLeftSide(player->getX(), player->getY(), subsector))
+			if (isPointOnLeftSide(px, py, subsector))
 				subsector = nodes[subsector].lChild;
 			else
 				subsector = nodes[subsector].rChild;
@@ -30,7 +29,7 @@ public:
 protected:
 	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 
-    void renderBSPNodes(int iNodeID);
+    void renderBSPNodes(int iNodeID, int px, int py, int pz, float pa);
 
     bool isPointOnLeftSide(int x, int y, int node) const
 	{
@@ -43,7 +42,6 @@ protected:
     std::vector<Seg> segs;
     std::vector<Subsector> subsectors;
     std::vector<Node> nodes;
-    Player *player;
     Things *things;
     ViewRenderer *renderer;
 };

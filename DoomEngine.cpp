@@ -2,8 +2,8 @@
 
 DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 : m_WADLoader(wad)
-, m_Map(&m_ViewRenderer, mapName, &m_Player, &m_Things, &m_WADLoader)
-, m_ViewRenderer(&m_Map, &m_Player, m_iRenderWidth, m_iRenderHeight)
+, m_Map(&m_ViewRenderer, mapName, &m_Things, &m_WADLoader)
+, m_ViewRenderer(&m_Map, m_iRenderWidth, m_iRenderHeight)
 {
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -51,13 +51,13 @@ bool DoomEngine::Tick()
 	if (KeyStates[SDL_SCANCODE_X]) m_Player.sink();
 	
 	// Update
-	m_Player.think(m_Map.getPlayerSubSectorHeight());
+	m_Player.think(m_Map.getPlayerSubSectorHeight(m_Player.getX(), m_Player.getY()));
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
-		m_ViewRenderer.render(pScreenBuffer, m_iRenderWidth);
+		m_ViewRenderer.render(pScreenBuffer, m_iRenderWidth, m_Player.getX(), m_Player.getY(), m_Player.getZ(), m_Player.getAngle());
 //		m_Player.render(pScreenBuffer, m_iRenderWidth);
 //		m_WADLoader.getTexture("BROWNPIP")->render(pScreenBuffer, m_iRenderWidth, 10, 10, 4);
 	}

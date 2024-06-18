@@ -1,7 +1,7 @@
 #include "Map.h"
 
-Map::Map(ViewRenderer *_renderer, const std::string &mapName, Player *_player, Things *_things, WADLoader *wad)
-: player(_player), things(_things), renderer(_renderer)
+Map::Map(ViewRenderer *_renderer, const std::string &mapName, Things *_things, WADLoader *wad)
+: things(_things), renderer(_renderer)
 {
 	int li = wad->findLumpByName(mapName);
 	std::vector<uint8_t> data;
@@ -63,23 +63,23 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, Player *_player, T
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 }
 
-void Map::renderBSPNodes(int iNodeID)
+void Map::renderBSPNodes(int iNodeID, int px, int py, int pz, float pa)
 {
     if (!(iNodeID & kSubsectorIdentifier)) // Masking all the bits exipt the last one to check if this is a subsector
 	{
-		if (isPointOnLeftSide(player->getX(), player->getY(), iNodeID))
+		if (isPointOnLeftSide(px, py, iNodeID))
 		{
-			renderBSPNodes(nodes[iNodeID].lChild);
-			renderBSPNodes(nodes[iNodeID].rChild);
+			renderBSPNodes(nodes[iNodeID].lChild, px, py, pz, pa);
+			renderBSPNodes(nodes[iNodeID].rChild, px, py, pz, pa);
 		}
 		else
 		{
-			renderBSPNodes(nodes[iNodeID].rChild);
-			renderBSPNodes(nodes[iNodeID].lChild);
+			renderBSPNodes(nodes[iNodeID].rChild, px, py, pz, pa);
+			renderBSPNodes(nodes[iNodeID].lChild, px, py, pz, pa);
 		}
 		return;
 	}
 
 	Subsector &subsector = subsectors[iNodeID & (~kSubsectorIdentifier)];
-	for (int i = 0; i < subsector.numSegs; i++) renderer->addWallInFOV(segs[subsector.firstSeg + i]);
+	for (int i = 0; i < subsector.numSegs; i++) renderer->addWallInFOV(segs[subsector.firstSeg + i], px, py, pz, pa);
 }

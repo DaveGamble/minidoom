@@ -6,17 +6,16 @@
 class ViewRenderer
 {
 public:
-    ViewRenderer(class Map *map, class Player *player, int renderXSize, int renderYSize);
+    ViewRenderer(class Map *map, int renderXSize, int renderYSize);
 	~ViewRenderer() {}
-    void render(uint8_t *pScreenBuffer, int iBufferPitch);
-    void addWallInFOV(Seg &seg);
+    void render(uint8_t *pScreenBuffer, int iBufferPitch, int px, int py, int pz, float pa);
+    void addWallInFOV(Seg &seg, int px, int py, int pz, float pa);
 
 protected:
     struct SolidSegmentRange { int XStart, XEnd; };
 
-    void storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle);
+    void storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, int px, int py, int pz, float pa);
 	class Map *map;
-	class Player *player;
     int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 
 	struct renderLater {const Texture *texture; int x; int from; int to; float u; int cl; int fl;};

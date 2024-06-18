@@ -39,24 +39,26 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
+	int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
+	if (toV1x * toV2y - toV1y * toV2x >= 0) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view.
+
+	const float ca = cos(v.angle), sa = sin(v.angle);
+	float tov1x = toV1x * ca + toV1y * sa, tov1y = -toV1x * sa + toV1y * ca, tov2x = toV2x * ca + toV2y * sa, tov2y = -toV2x * sa + toV2y * ca;
+
+
 	auto amod = [](float a) {
 		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
 	};
 
-	const float ca = cos(v.angle), sa = sin(v.angle);
-	int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;
-	float tov1x = toV1x * ca + toV1y * sa, tov1y = -toV1x * sa + toV1y * ca, tov2x = toV2x * ca + toV2y * sa, tov2y = -toV2x * sa + toV2y * ca;
+	float V1AngleFromPlayer = atan2f(tov1y, tov1x);
 
-	float V1Angle = amod(atan2f(tov1y, tov1x));
+	float DistanceToNormal = sin(atan2f(toV1y, toV1x) - seg.slopeAngle) * sqrt(toV1x * toV1x + toV1y * toV1y); // Calculate the distance between the player an the vertex.
+//	|a||bT|sin(ang_a - ang_b) = a . bT
+	
 
-	float DistanceToNormal = sin(V1Angle - seg.slopeAngle + v.angle) * sqrt(toV1x * toV1x + toV1y * toV1y); // Calculate the distance between the player an the vertex.
+	float V2AngleFromPlayer = atan2f(tov2y, tov2x);
+	float V1ToV2Span = amod(V1AngleFromPlayer - V2AngleFromPlayer);
 
-	float V2Angle = amod(atan2f(tov2y, tov2x));
-	float V1ToV2Span = amod(V1Angle - V2Angle);
-
-	if (V1ToV2Span >= M_PI) return;
-	float V1AngleFromPlayer = V1Angle; // Rotate every thing.
-	float V2AngleFromPlayer = V2Angle;
 	if (amod(V1AngleFromPlayer + M_PI_4) > M_PI_2)
 	{
 		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?

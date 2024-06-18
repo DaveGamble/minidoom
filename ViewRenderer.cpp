@@ -1,6 +1,7 @@
 #include "ViewRenderer.hpp"
 
 #include <algorithm>
+#include <assert.h>
 #include "Map.hpp"
 #include "Texture.hpp"
 #include "Flat.hpp"
@@ -66,6 +67,9 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	};
 
     const int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
+	assert(V1XScreen >= 0 && V1XScreen <= renderWidth);
+	assert(V2XScreen >= 0 && V2XScreen <= renderWidth);
+
     if (V1XScreen == V2XScreen) return; // Skip same pixel wall
 	bool solid = false;
     if (!seg.lSector) solid = true; // Handle solid walls

@@ -16,3 +16,5 @@ struct BBox { int16_t top, bottom, left, right; };
 struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
 struct Viewpoint { int16_t x, y, z; float angle; };
 struct Thing { int16_t x, y; uint16_t angle, type, flags; };
+
+struct PatchProvider { virtual const class Patch *getPatch(int index) = 0; };

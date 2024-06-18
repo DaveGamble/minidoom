@@ -5,7 +5,7 @@
 #include "Texture.hpp"
 #include "Flat.hpp"
 
-class WADLoader
+class WADLoader : public PatchProvider
 {
 public:
 	WADLoader(const std::string &filename)

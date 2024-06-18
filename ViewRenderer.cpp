@@ -3,6 +3,7 @@
 #include <algorithm>
 #include "Map.hpp"
 #include "Texture.hpp"
+#include "Flat.hpp"
 
 ViewRenderer::ViewRenderer(int renderXSize, int renderYSize)
 : renderWidth(renderXSize)

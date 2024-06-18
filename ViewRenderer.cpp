@@ -54,7 +54,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	float V2AngleFromPlayer = atan2f(tov2y, tov2x);
 	float V1ToV2Span = amod(V1AngleFromPlayer - V2AngleFromPlayer);
 
-	if (tov1x < 0)
+	if (amod(V1AngleFromPlayer + M_PI_4) > M_PI_2)
 	{
 		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
 		V1AngleFromPlayer = M_PI_4; // At this point V2 or part of the line should be in the FOV. We need to clip the V1

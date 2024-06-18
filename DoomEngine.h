@@ -24,9 +24,8 @@ protected:
 	// SDL
 	
 	Viewpoint view;
-	WADLoader m_WADLoader;
-	ViewRenderer m_ViewRenderer;
-	Things m_Things;
-    Map m_Map;
+	WADLoader wad;
+	ViewRenderer renderer;
+    Map map;
 	Patch *weapon {nullptr};
 };

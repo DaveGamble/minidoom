@@ -16,13 +16,4 @@ struct Subsector { uint16_t numSegs, firstSeg; };
 struct BBox { int16_t top, bottom, left, right; };
 struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
 struct Viewpoint { int16_t x, y, z; float angle; };
-
 struct Thing { int16_t x, y; uint16_t angle, type, flags; };
-class Things
-{
-public:
-	void Add(Thing &thing) {things.push_back(thing);}
-	Thing* GetID(int id) { for (auto& t : things) if (t.type == id) return &t; return nullptr; }
-protected:
-	std::vector<Thing> things;
-};

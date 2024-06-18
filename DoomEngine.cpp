@@ -1,9 +1,9 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
-: m_WADLoader(wad)
-, m_Map(&m_ViewRenderer, mapName, &m_Things, &m_WADLoader)
-, m_ViewRenderer(&m_Map, m_iRenderWidth, m_iRenderHeight)
+DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
+: wad(wadname)
+, map(&renderer, mapName, &wad)
+, renderer(&map, m_iRenderWidth, m_iRenderHeight)
 {
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -13,12 +13,12 @@ DoomEngine::DoomEngine(const std::string &wad, const std::string &mapName)
 	m_pRGBBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);
 	m_pTexture = SDL_CreateTexture(m_pRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	std::vector<uint8_t> palette = m_WADLoader.getLumpNamed("PLAYPAL");
+	std::vector<uint8_t> palette = wad.getLumpNamed("PLAYPAL");
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
 
-	weapon = m_WADLoader.getPatch("PISGA0");
-	Thing* t = m_Map.getThings()->GetID(1);
+	weapon = wad.getPatch("PISGA0");
+	const Thing* t = map.getThing(1);
 	if (t)
 	{
 		view.x = t->x;
@@ -61,13 +61,13 @@ bool DoomEngine::Tick()
 	if (KeyStates[SDL_SCANCODE_E]) rotateBy(-0.1875f);
 	
 	// Update
-	view.z = m_Map.getPlayerSubSectorHeight(view) + 41;
+	view.z = map.getPlayerSubSectorHeight(view) + 41;
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)m_pScreenBuffer->pixels;
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
-		m_ViewRenderer.render(pScreenBuffer, m_iRenderWidth, view);
+		renderer.render(pScreenBuffer, m_iRenderWidth, view);
 // 		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, 3);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);

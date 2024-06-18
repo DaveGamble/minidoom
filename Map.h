@@ -6,7 +6,7 @@
 class Map
 {
 public:
-    Map(ViewRenderer *renderer, const std::string &mapName, Things *things, WADLoader *wad);
+    Map(ViewRenderer *renderer, const std::string &mapName, WADLoader *wad);
 	~Map() {}
 
 	void render3DView(const Viewpoint &v) { renderBSPNodes((int)nodes.size() - 1, v); }
@@ -24,7 +24,7 @@ public:
 		return segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
 	}
 
-	Things* getThings() { return things; }
+	const Thing* getThing(int id) { for (auto& t : things) if (t.type == id) return &t; return nullptr; }
 
 protected:
 	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
@@ -36,12 +36,12 @@ protected:
 		return ((((v.x - nodes[node].x) * nodes[node].dy) - ((v.y - nodes[node].y) * nodes[node].dx)) <= 0);
 	}
 
+	std::vector<Thing> things;
     std::vector<Sector> sectors;
     std::vector<Sidedef> sidedefs;
     std::vector<Linedef> linedefs;
     std::vector<Seg> segs;
     std::vector<Subsector> subsectors;
     std::vector<Node> nodes;
-    Things *things;
     ViewRenderer *renderer;
 };

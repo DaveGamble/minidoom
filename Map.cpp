@@ -1,7 +1,7 @@
 #include "Map.h"
 
-Map::Map(ViewRenderer *_renderer, const std::string &mapName, Things *_things, WADLoader *wad)
-: things(_things), renderer(_renderer)
+Map::Map(ViewRenderer *_renderer, const std::string &mapName, WADLoader *wad)
+: renderer(_renderer)
 {
 	int li = wad->findLumpByName(mapName);
 	std::vector<uint8_t> data;
@@ -58,7 +58,7 @@ Map::Map(ViewRenderer *_renderer, const std::string &mapName, Things *_things, W
 		segs.push_back({vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, ws->dir, ws->offset / 65536.f,
 			(pRightSidedef) ? pRightSidedef->sector : nullptr, (pLeftSidedef) ? pLeftSidedef->sector : nullptr});
 	}
-	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) things->Add(*(Thing*)(ptr + i));
+	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) things.push_back(*(Thing*)(ptr + i));
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 }
@@ -67,16 +67,9 @@ void Map::renderBSPNodes(int iNodeID, const Viewpoint& v)
 {
     if (!(iNodeID & kSubsectorIdentifier)) // Masking all the bits exipt the last one to check if this is a subsector
 	{
-		if (isPointOnLeftSide(v, iNodeID))
-		{
-			renderBSPNodes(nodes[iNodeID].lChild, v);
-			renderBSPNodes(nodes[iNodeID].rChild, v);
-		}
-		else
-		{
-			renderBSPNodes(nodes[iNodeID].rChild, v);
-			renderBSPNodes(nodes[iNodeID].lChild, v);
-		}
+		bool left = isPointOnLeftSide(v, iNodeID);
+		renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild, v);
+		renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild, v);
 		return;
 	}
 

@@ -14,10 +14,6 @@ ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int rend
 , halfRenderHeight(renderYSize / 2)
 , distancePlayerToScreen(halfRenderWidth)	// 90 here is FOV
 {
-	screenXToAngle.resize(renderWidth + 1);
-	for (int i = 0; i <= renderWidth; ++i)
-		screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen);
-
 	ceilingClipHeight.resize(renderWidth);
 	floorClipHeight.resize(renderWidth);
 }
@@ -131,8 +127,9 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		float SkewAngle = screenXToAngle[VXScreen] + pa - seg.slopeAngle;
-		return std::clamp((distancePlayerToScreen * sinf(SkewAngle)) / (DistanceToNormal * cosf(screenXToAngle[VXScreen])), 0.00390625f, 64.0f);
+		float screenAng = atan((halfRenderWidth - VXScreen) / (float)distancePlayerToScreen);
+		float SkewAngle = screenAng + pa - seg.slopeAngle;
+		return std::clamp((distancePlayerToScreen * sinf(SkewAngle)) / (DistanceToNormal * cosf(screenAng)), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(V1XScreen);

@@ -23,7 +23,6 @@ protected:
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;
-    std::vector<float> screenXToAngle;
 	std::vector<renderLater> renderLaters;
 	uint8_t *screenBuffer;
 	int rowlen;

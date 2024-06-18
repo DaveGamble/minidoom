@@ -35,7 +35,7 @@ public:
 	int getX() const { return x; }
 	int getY() const { return y; }
 	int getZ() const { return z; }
-	float getAngle() const { return a * 180 * M_1_PI; }
+	float getAngle() const { return a; }
 protected:
 	static constexpr float moveSpeed = 4, rotateSpeed = 0.06981317008;
 	int id, x {0}, y {0}, z {41};

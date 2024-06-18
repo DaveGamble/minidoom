@@ -16,7 +16,7 @@ ViewRenderer::ViewRenderer(Map *pMap, Player *pPlayer, int renderXSize, int rend
 {
 	screenXToAngle.resize(renderWidth + 1);
 	for (int i = 0; i <= renderWidth; ++i)
-		screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen) * 180 / M_PI;
+		screenXToAngle[i] = atan((halfRenderWidth - i) / (float)distancePlayerToScreen);
 
 	ceilingClipHeight.resize(renderWidth);
 	floorClipHeight.resize(renderWidth);
@@ -49,26 +49,26 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 	const int px = player->getX(), py = player->getY();
 
 	auto amod = [](float a) {
-		return a - 360 * floor(a / 360);
+		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
 	};
 
 	int toV1x = seg.start.x - px, toV1y = seg.start.y - py, toV2x = seg.end.x - px, toV2y = seg.end.y - py;
-	float V1Angle = atan2f(toV1y, toV1x) * 180.0f * M_1_PI;
-	float V2Angle = atan2f(toV2y, toV2x) * 180.0f * M_1_PI;
+	float V1Angle = atan2f(toV1y, toV1x);
+	float V2Angle = atan2f(toV2y, toV2x);
 	float V1ToV2Span = amod(V1Angle - V2Angle);
 
-	if (V1ToV2Span >= 180) return;
+	if (V1ToV2Span >= M_PI) return;
 	float V1AngleFromPlayer = amod(V1Angle - m_Angle); // Rotate every thing.
 	float V2AngleFromPlayer = amod(V2Angle - m_Angle);
-	if (amod(V1AngleFromPlayer + 45) > 90)
+	if (amod(V1AngleFromPlayer + M_PI_4) > M_PI_2)
 	{
-		if (amod(V1AngleFromPlayer - 45) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
-		V1AngleFromPlayer = 45; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
+		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+		V1AngleFromPlayer = M_PI_4; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
 	}
-	if (amod(45 - V2AngleFromPlayer) > 90) V2AngleFromPlayer = -45; // Validate and Clip V2 // Is V2 outside the FOV?
+	if (amod(M_PI_4 - V2AngleFromPlayer) > M_PI_2) V2AngleFromPlayer = -M_PI_4; // Validate and Clip V2 // Is V2 outside the FOV?
 	
 	auto AngleToScreen = [&](float angle) {
-		return distancePlayerToScreen - round(tanf((angle) * M_PI / 180.0f) * halfRenderWidth);
+		return distancePlayerToScreen - round(tanf(angle) * halfRenderWidth);
 	};
 
     const int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
@@ -124,21 +124,19 @@ void ViewRenderer::addWallInFOV(Seg &seg)
 
 void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle)
 {
-	auto amod = [](float a) {
-		return a - 360 * floor(a / 360);
-	};
+	auto amod = [](float a) { return a - M_PI * 2 * floor(a * 0.5 * M_1_PI); };
 
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
-	float SegToNormalAngle = amod(seg.slopeAngle + 90);
+	float SegToNormalAngle = amod(seg.slopeAngle + M_PI_2);
 
 	const float px = player->getX(), py = player->getY(), pa = player->getAngle();     // Calculate the distance between the player an the vertex.
-	float DistanceToNormal = sin(M_PI * (V1Angle - seg.slopeAngle) / 180) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
+	float DistanceToNormal = sin(V1Angle - seg.slopeAngle) * sqrt((px - seg.start.x) * (px - seg.start.x) + (py - seg.start.y) * (py - seg.start.y));
 
 	auto GetScaleFactor = [&](int VXScreen) {
 		float SkewAngle = amod(screenXToAngle[VXScreen] + pa - SegToNormalAngle);
-		return std::clamp((distancePlayerToScreen * cosf(M_PI * SkewAngle / 180)) / (DistanceToNormal * cosf(M_PI * screenXToAngle[VXScreen] / 180)), 0.00390625f, 64.0f);
+		return std::clamp((distancePlayerToScreen * cosf(SkewAngle)) / (DistanceToNormal * cosf(screenXToAngle[VXScreen])), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(V1XScreen);
@@ -180,14 +178,14 @@ void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float 
 
 	const int dx = seg.linedef->end.x - seg.linedef->start.x, dy = seg.linedef->end.y - seg.linedef->start.y;
 	const int sx = px - seg.linedef->start.x, sy = py - seg.linedef->start.y;
-	const float PT = tan(pa * M_PI / 180);
+	const float PT = tan(pa);
 	const float uA = halfRenderWidth * ((1 - PT) * sy - (1 + PT) * sx),
 				uB = PT * sy + sx,
 				uC = halfRenderWidth * ((1 - PT) * dy - (1 + PT) * dx),
 				uD = PT * dy + dx;
 					  
 //	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
-	const float pc = cos(pa * M_PI / 180) / 64, ps = sin(pa * M_PI / 180) / 64;
+	const float pc = cos(pa) / 64, ps = sin(pa) / 64;
 	const float vG = distancePlayerToScreen * (player->getZ() -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - player->getZ());
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = px / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = py / 64.f;
 

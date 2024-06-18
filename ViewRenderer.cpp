@@ -27,7 +27,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	solidWallRanges.push_back({renderWidth, INT_MAX});
 	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
-	map.render3DView(view, this);
+	map.render3DView(view, [&] (const Seg &seg){ addWallInFOV(seg, view); });
 
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{
@@ -37,7 +37,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	}
 }
 
-void ViewRenderer::addWallInFOV(Seg &seg, const Viewpoint &v)
+void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
 	auto amod = [](float a) {
 		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
@@ -113,7 +113,7 @@ void ViewRenderer::addWallInFOV(Seg &seg, const Viewpoint &v)
 	}
 }
 
-void ViewRenderer::storeWallRange(Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int V1XScreen, int V2XScreen, float V1Angle, float V2Angle, const Viewpoint &v)
 {
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;

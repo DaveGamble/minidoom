@@ -68,7 +68,7 @@ public:
 		return -1;
 	}
 	
-	Patch *getPatch(const std::string &name)
+	const Patch *getPatch(const std::string &name)
 	{
 		if (!patches.count(name))
 		{
@@ -77,8 +77,8 @@ public:
 		}
 		return patches[name].get();
 	}
-	Texture *getTexture(const std::string &sTextureName) { return textures[sTextureName].get(); }
-	Flat *getFlat(const std::string &name) { return flats[name].get(); }
+	const Texture *getTexture(const std::string &name) const { return textures.count(name) ? textures.at(name).get() : nullptr; }
+	const Flat *getFlat(const std::string &name) const { return flats.count(name) ? flats.at(name).get() : nullptr; }
 protected:
 	uint8_t *data {nullptr};
 	size_t numLumps {0};

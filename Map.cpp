@@ -1,6 +1,5 @@
 #include "Map.hpp"
 #include "WADLoader.hpp"
-#include "ViewRenderer.hpp"
 
 Map::Map(const std::string &mapName, WADLoader &wad)
 {
@@ -62,18 +61,4 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) things.push_back(*(Thing*)(ptr + i));
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
-}
-
-void Map::renderBSPNodes(int iNodeID, const Viewpoint& v, ViewRenderer *render)
-{
-    if (!(iNodeID & kSubsectorIdentifier)) // Masking all the bits exipt the last one to check if this is a subsector
-	{
-		bool left = isPointOnLeftSide(v, iNodeID);
-		renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild, v, render);
-		renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild, v, render);
-		return;
-	}
-
-	Subsector &subsector = subsectors[iNodeID & (~kSubsectorIdentifier)];
-	for (int i = 0; i < subsector.numSegs; i++) render->addWallInFOV(segs[subsector.firstSeg + i], v);
 }

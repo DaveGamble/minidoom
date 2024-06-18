@@ -13,7 +13,7 @@ public:
 	bool Tick();
 protected:
 	static constexpr float moveSpeed = 4, rotateSpeed = 0.06981317008;
-	int m_iRenderWidth {960}, m_iRenderHeight {600};
+	static constexpr int m_iRenderWidth {960}, m_iRenderHeight {600};
 	bool m_bIsOver {false};
 
 	// SDL
@@ -28,5 +28,5 @@ protected:
 	WADLoader wad;
 	ViewRenderer renderer;
     Map map;
-	Patch *weapon {nullptr};
+	const Patch *weapon {nullptr};
 };

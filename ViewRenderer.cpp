@@ -51,8 +51,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	if (tov1z < abs(tov1x))
 	{
 		float det = tov1z * tov2x - tov1x * tov2z;
-		if ((tov1z > -tov1x || tov2z < -tov2x || (det < 0)) && (tov1z > tov1x || tov2z < tov2x || (det > 0))) return;
-
+		if (!(tov1z < -tov1x && tov2z > -tov2x && (det > 0)) && !(tov1z < tov1x && tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
+		
 		tov1z = 1; tov1x = -1;
 	}
 	if (tov2z < tov2x) {tov2z = tov2x = 1;}	// Is V2 outside the FOV?

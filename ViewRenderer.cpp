@@ -41,28 +41,30 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
 	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;	// Vectors from origin to segment ends.
-	if (toV1x * toV2y - toV1y * toV2x >= 0) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view. (It's behind us)
+	if (toV1x * toV2y >= toV1y * toV2x) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view. (It's behind us)
 
 	const float ca = cos(v.angle), sa = sin(v.angle);
-	float tov1x = toV1x * ca + toV1y * sa, tov1y = -toV1x * sa + toV1y * ca, tov2x = toV2x * ca + toV2y * sa, tov2y = -toV2x * sa + toV2y * ca;	// Rotate vectors to be in front of us.
-
+	float tov1z = toV1x * ca + toV1y * sa, tov1x = toV1x * sa - toV1y * ca, tov2z = toV2x * ca + toV2y * sa, tov2x = toV2x * sa - toV2y * ca;	// Rotate vectors to be in front of us.
+	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
+	// x = position left to right. left = -1, right = 1.
 
 	auto amod = [](float a) {
 		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
 	};
 
-	if (tov1x < abs(tov1y))
+	if (tov1z < abs(tov1x))
 	{
-		if (amod(atan2f(tov1y, tov1x) - M_PI_4) >= amod(atan2f(tov1y, tov1x) - atan2f(tov2y, tov2x))) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
-		tov1x = tov1y = 1;
+		if (amod(atan2f(-tov1x, tov1z) - M_PI_4) >= amod(atan2f(-tov1x, tov1z) - atan2f(-tov2x, tov2z))) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+//		if (atan2f(tov1y - tov1x, tov1x + tov1y) + 2 * M_PI  + atan2f(tov2y, tov2x) >= atan2f(tov1y, tov1x)) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+		tov1z = 1; tov1x = -1;
 	}
-	if (tov2x + tov2y < 0) {tov2x = -1; tov2y = 1;}	// Is V2 outside the FOV?
+	if (tov2z < tov2x) {tov2z = tov2x = 1;}	// Is V2 outside the FOV?
 	
-	auto AngleToScreen = [&](float dx, float dy) {
-		return distancePlayerToScreen - round(dy * halfRenderWidth / dx);
+	auto AngleToScreen = [&](float dz, float dx) {
+		return distancePlayerToScreen + round(dx * halfRenderWidth / dz);
 	};
 
-	const int V1XScreen = AngleToScreen(tov1x, tov1y), V2XScreen = AngleToScreen(tov2x, tov2y); // Find Wall X Coordinates
+	const int V1XScreen = AngleToScreen(tov1z, tov1x), V2XScreen = AngleToScreen(tov2z, tov2x); // Find Wall X Coordinates
 	assert(V1XScreen >= 0 && V1XScreen <= renderWidth);
 	assert(V2XScreen >= 0 && V2XScreen <= renderWidth);
 

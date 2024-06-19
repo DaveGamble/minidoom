@@ -50,8 +50,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 	if (tov1z < abs(tov1x))
 	{
-		if (   (tov1z > -tov1x || tov2z < -tov2x || (tov1z * tov2x < tov1x * tov2z))
-			&& (tov1z >  tov1x || tov2z <  tov2x || (tov1z * tov2x > tov1x * tov2z))) return;
+		float det = tov1z * tov2x - tov1x * tov2z;
+		if ((tov1z > -tov1x || tov2z < -tov2x || (det < 0)) && (tov1z > tov1x || tov2z < tov2x || (det > 0))) return;
 
 		tov1z = 1; tov1x = -1;
 	}

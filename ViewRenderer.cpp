@@ -51,22 +51,18 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 		return a - M_PI * 2 * floor(a * 0.5 * M_1_PI);
 	};
 
-	float V1AngleFromPlayer = atan2f(tov1y, tov1x);
-	float V2AngleFromPlayer = atan2f(tov2y, tov2x);
-	float V1ToV2Span = amod(V1AngleFromPlayer - V2AngleFromPlayer);
-
 	if (tov1x < abs(tov1y))
 	{
-		if (amod(V1AngleFromPlayer - M_PI_4) >= V1ToV2Span) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
-		V1AngleFromPlayer = M_PI_4; // At this point V2 or part of the line should be in the FOV. We need to clip the V1
+		if (amod(atan2f(tov1y, tov1x) - M_PI_4) >= amod(atan2f(tov1y, tov1x) - atan2f(tov2y, tov2x))) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+		tov1x = tov1y = 1;
 	}
-	if (tov2x + tov2y < 0) V2AngleFromPlayer = - M_PI_4;	// Is V2 outside the FOV?
+	if (tov2x + tov2y < 0) {tov2x = -1; tov2y = 1;}	// Is V2 outside the FOV?
 	
-	auto AngleToScreen = [&](float angle) {
-		return distancePlayerToScreen - round(tanf(angle) * halfRenderWidth);
+	auto AngleToScreen = [&](float dx, float dy) {
+		return distancePlayerToScreen - round(dy * halfRenderWidth / dx);
 	};
 
-    const int V1XScreen = AngleToScreen(V1AngleFromPlayer), V2XScreen = AngleToScreen(V2AngleFromPlayer); // Find Wall X Coordinates
+	const int V1XScreen = AngleToScreen(tov1x, tov1y), V2XScreen = AngleToScreen(tov2x, tov2y); // Find Wall X Coordinates
 	assert(V1XScreen >= 0 && V1XScreen <= renderWidth);
 	assert(V2XScreen >= 0 && V2XScreen <= renderWidth);
 

@@ -54,7 +54,19 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 	if (tov1z < abs(tov1x))
 	{
-		if (amod(atan2f(-tov1x, tov1z) - M_PI_4) >= amod(atan2f(-tov1x, tov1z) - atan2f(-tov2x, tov2z))) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
+		// ok, this is complicated, but we want to know if the line intersects either FOV marker, and if not, we reject.
+		// so the segment is [z = tov1z + t * (tov2z - tov1z), x = tov1x + t * (tov2x - tov1x)], and the fov markers are  z + x = 0 and z - x = 0, for z +ve
+		// ok, so test case 1 is
+		// tov1z + t * (tov2z - tov1z) + tov1x + t * (tov2x - tov1x) = 0, solve for t, establish that it's in the range 0<1, and that the z value is +ve.
+		// test case 2 is
+		// tov1z + t * (tov2z - tov1z) - tov1x + t * (tov2x - tov1x) = 0, solve for t, establish that it's in the range 0<1, and that the z value is +ve.
+		//
+		// case 1: tov1z + tov1x + t * (tov2z - tov1z + tov2x - tov1x) = 0, so t = -(tov1z + tov1x) / (tov2z - tov1z + tov2x - tov1x)
+		// case 2: tov1z - tov1x + t * (tov2z - tov1z - tov2x + tov1x) = 0, so t = (tov1z - tov1x) / (tov2z - tov1z - tov2x + tov1x)
+		double t1 = -(tov1z + tov1x) / (tov2z - tov1z + tov2x - tov1x), t2 = (-tov1z + tov1x) / (tov2z - tov1z - tov2x + tov1x);
+		if ((t1 < 0 || t1 > 1 || (tov1z + t1 * (tov2z - tov1z) < 0)) && (t2 < 0 || t2 > 1 || (tov1z + t2 * (tov2z - tov1z) < 0))) return;
+
+//		if (amod(atan2f(-tov1x, tov1z) - M_PI_4) >= amod(atan2f(-tov1x, tov1z) - atan2f(-tov2x, tov2z))) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
 //		if (atan2f(tov1y - tov1x, tov1x + tov1y) + 2 * M_PI  + atan2f(tov2y, tov2x) >= atan2f(tov1y, tov1x)) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
 		tov1z = 1; tov1x = -1;
 	}

@@ -63,8 +63,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 		//
 		// case 1: tov1z + tov1x + t * (tov2z - tov1z + tov2x - tov1x) = 0, so t = -(tov1z + tov1x) / (tov2z - tov1z + tov2x - tov1x)
 		// case 2: tov1z - tov1x + t * (tov2z - tov1z - tov2x + tov1x) = 0, so t = (tov1z - tov1x) / (tov2z - tov1z - tov2x + tov1x)
-		if ((tov1z + tov1x > 0 || 0 > tov2z + tov2x || (tov1z * (tov2z + tov2x) < (tov1z + tov1x) * tov2z))
-			&& (tov1x < tov1z || tov2x > tov2z  || (tov1z * (tov2z - tov2x) < (tov1z - tov1x) * tov2z))) return;
+		if ((tov1z > -tov1x || tov2z < -tov2x || (tov1z * tov2x < tov1x * tov2z))
+			&& (tov1z > tov1x || tov2x > tov2z  || (tov1z * tov2x > tov1x * tov2z))) return;
 
 //		if (amod(atan2f(-tov1x, tov1z) - M_PI_4) >= amod(atan2f(-tov1x, tov1z) - atan2f(-tov2x, tov2z))) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?
 //		if (atan2f(tov1y - tov1x, tov1x + tov1y) + 2 * M_PI  + atan2f(tov2y, tov2x) >= atan2f(tov1y, tov1x)) return; // now we know that V1, is outside the left side of the FOV But we need to check is Also V2 is outside. Lets find out what is the size of the angle outside the FOV // Are both V1 and V2 outside?

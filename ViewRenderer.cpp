@@ -106,11 +106,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float distance
 {
 	const float sinv = sin(v.angle), cosv = cos(v.angle);
 	
-	const float sins = (seg.end.y - seg.start.y);
-	const float coss = (seg.end.x - seg.start.x);
-	
-	const float sinb = sinv * coss - cosv * sins;
-	const float cosb = cosv * coss + sinv * sins;
+	const float sinb = sinv * (seg.end.x - seg.start.x) - cosv * (seg.end.y - seg.start.y);
+	const float cosb = cosv * (seg.end.x - seg.start.x) + sinv * (seg.end.y - seg.start.y);
 	
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
@@ -158,14 +155,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float distance
 
 	const int dx = seg.linedef->end.x - seg.linedef->start.x, dy = seg.linedef->end.y - seg.linedef->start.y;
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
-	const float PT = tan(v.angle);
-	const float uA = halfRenderWidth * ((1 - PT) * sy - (1 + PT) * sx),
-				uB = PT * sy + sx,
-				uC = halfRenderWidth * ((1 - PT) * dy - (1 + PT) * dx),
-				uD = PT * dy + dx;
+	const float uA = halfRenderWidth * ((cosv - sinv) * sy - (cosv + sinv) * sx),
+				uB = sinv * sy + sx * cosv,
+				uC = halfRenderWidth * ((cosv - sinv) * dy - (cosv + sinv) * dx),
+				uD = sinv * dy + dx * cosv;
 					  
 //	const float uA = py - seg.linedef->start.y, uB = seg.linedef->start.x - px, uC = seg.linedef->end.y - seg.linedef->start.y, uD = seg.linedef->start.x - seg.linedef->end.x;
-	const float pc = cos(v.angle) / 64, ps = sin(v.angle) / 64;
+	const float pc = cosv / 64, ps = sinv / 64;
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
 

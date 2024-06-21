@@ -152,6 +152,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 
 	const int dx = seg.linedef->end.x - seg.linedef->start.x, dy = seg.linedef->end.y - seg.linedef->start.y;
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
+	const float sinv = v.sina, cosv = v.cosa;
 	const float uA = halfRenderWidth * ((cosv - sinv) * sy - (cosv + sinv) * sx),
 				uB = sinv * sy + sx * cosv,
 				uC = halfRenderWidth * ((cosv - sinv) * dy - (cosv + sinv) * dx),

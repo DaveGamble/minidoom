@@ -70,29 +70,28 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	float DistanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
 
 	
-	const SolidSegmentRange CurrentWall = { V1XScreen, V2XScreen }; // Find clip window
     std::list<SolidSegmentRange>::iterator FoundClipWall = solidWallRanges.begin();
-    while (FoundClipWall != solidWallRanges.end() && CurrentWall.start - 1 > FoundClipWall->end) ++FoundClipWall;
+    while (FoundClipWall != solidWallRanges.end() && V1XScreen - 1 > FoundClipWall->end) ++FoundClipWall;
 
-    if (CurrentWall.start < FoundClipWall->start)
+    if (V1XScreen < FoundClipWall->start)
     {
-        if (CurrentWall.end < FoundClipWall->start - 1)
+        if (V2XScreen < FoundClipWall->start - 1)
         {
-            storeWallRange(seg, CurrentWall.start, CurrentWall.end, DistanceToNormal, v); //All of the wall is visible, so insert it
-            if (solid) solidWallRanges.insert(FoundClipWall, CurrentWall);
+            storeWallRange(seg, V1XScreen, V2XScreen, DistanceToNormal, v); //All of the wall is visible, so insert it
+            if (solid) solidWallRanges.insert(FoundClipWall, {V1XScreen, V2XScreen});
             return;
         }
-        storeWallRange(seg, CurrentWall.start, FoundClipWall->start - 1, DistanceToNormal, v); // The end is already included, just update start
-        if (solid) FoundClipWall->start = CurrentWall.start;
+        storeWallRange(seg, V1XScreen, FoundClipWall->start - 1, DistanceToNormal, v); // The end is already included, just update start
+        if (solid) FoundClipWall->start = V1XScreen;
     }
     
-    if (CurrentWall.end <= FoundClipWall->end) return; // This part is already occupied
+    if (V2XScreen <= FoundClipWall->end) return; // This part is already occupied
     std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
-    while (CurrentWall.end >= next(NextWall, 1)->start - 1)
+    while (V2XScreen >= next(NextWall, 1)->start - 1)
     {
         storeWallRange(seg, NextWall->end + 1, next(NextWall, 1)->start - 1, DistanceToNormal, v); // partialy clipped by other walls, store each fragment
         ++NextWall;
-        if (CurrentWall.end <= NextWall->end)
+        if (V2XScreen <= NextWall->end)
         {
 			if (solid)
 			{
@@ -102,10 +101,10 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
             return;
         }
     }
-    storeWallRange(seg, NextWall->end + 1, CurrentWall.end, DistanceToNormal, v);
+    storeWallRange(seg, NextWall->end + 1, V2XScreen, DistanceToNormal, v);
 	if (solid)
 	{
-		FoundClipWall->end = CurrentWall.end;
+		FoundClipWall->end = V2XScreen;
 		if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
 	}
 }

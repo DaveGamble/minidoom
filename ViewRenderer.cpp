@@ -106,9 +106,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float dtn, con
 {
 	const float sinv = sin(v.angle), cosv = cos(v.angle);
 	
-//	const float sins = (seg.end.y - seg.start.y) / sqrt((seg.end.y - seg.start.y) * (seg.end.y - seg.start.y) + (seg.end.x - seg.start.x) * (seg.end.x - seg.start.x));
-//	const float coss = (seg.end.x - seg.start.x) / sqrt((seg.end.y - seg.start.y) * (seg.end.y - seg.start.y) + (seg.end.x - seg.start.x) * (seg.end.x - seg.start.x));
-	const float sins = sin(seg.slopeAngle), coss = cos(seg.slopeAngle);
+	const float sins = (seg.end.y - seg.start.y);
+	const float coss = (seg.end.x - seg.start.x);
 
 	const float tov1x = seg.start.x - v.x, tov1y = seg.start.y - v.y;
 
@@ -118,7 +117,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float dtn, con
 
 	auto GetScaleFactor = [&](int VXScreen) {
 		float vx = VXScreen / (float) halfRenderWidth;
-		return std::clamp(distancePlayerToScreen * ((sinv * coss - cosv * sins) + (1 - vx) * (cosv * coss + sinv * sins)) / (tov1y * coss -tov1x * sins), 0.00390625f, 64.0f);
+		return std::clamp(distancePlayerToScreen * ((sinv * coss - cosv * sins) + (1 - vx) * (cosv * coss + sinv * sins)) / (tov1y * coss - tov1x * sins), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(x1);

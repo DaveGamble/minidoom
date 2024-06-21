@@ -105,9 +105,15 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float dtn, const Viewpoint &v)
 {
 	const float sinv = sin(v.angle), cosv = cos(v.angle);
-	const float sinb = sin(v.angle - seg.slopeAngle), cosb = cos(v.angle - seg.slopeAngle);
+	
+//	const float sins = (seg.end.y - seg.start.y) / sqrt((seg.end.y - seg.start.y) * (seg.end.y - seg.start.y) + (seg.end.x - seg.start.x) * (seg.end.x - seg.start.x));
+//	const float coss = (seg.end.x - seg.start.x) / sqrt((seg.end.y - seg.start.y) * (seg.end.y - seg.start.y) + (seg.end.x - seg.start.x) * (seg.end.x - seg.start.x));
+	const float sins = sin(seg.slopeAngle), coss = cos(seg.slopeAngle);
 
-	float distanceToNormal = -(seg.start.x - v.x) * sin(seg.slopeAngle) + (seg.start.y - v.y) * cos(seg.slopeAngle);
+	const float sinb = sinv * coss - cosv * sins, cosb = cosv * coss + sinv * sins;
+
+
+	float distanceToNormal = -(seg.start.x - v.x) * sins + (seg.start.y - v.y) * coss;
 
 	
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;

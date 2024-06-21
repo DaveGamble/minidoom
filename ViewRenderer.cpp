@@ -48,13 +48,27 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
 	// x = position left to right. left = -1, right = 1.
 
-	if (tov1z < abs(tov1x))
+	float det = tov1z * tov2x - tov1x * tov2z;
+//	if (tov1z < abs(tov1x) && !(tov1z < -tov1x && tov2z > -tov2x && (det > 0)) && !(tov1z < tov1x && tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
+	if (det < 0)
 	{
-		float det = tov1z * tov2x - tov1x * tov2z;
-		if (!(tov1z < -tov1x && tov2z > -tov2x && (det > 0)) && !(tov1z < tov1x && tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
-		
-		tov1z = 1; tov1x = -1;
+		if (tov1z < tov1x && tov2z > tov2x) return;	// Is the segment entirely outside of the FOV?
+		if (tov1z < -tov1x && tov1z > tov1x) return;	// Is the segment entirely outside of the FOV?
+		if (tov1z < -tov1x && tov2z < tov2x) return;	// Is the segment entirely outside of the FOV?
 	}
+	else
+	{
+		if (tov1z < tov1x && tov2z < -tov2x) return;	// Is the segment entirely outside of the FOV?
+		if (tov1z < tov1x && tov1z > -tov1x) return;	// Is the segment entirely outside of the FOV?
+		if (tov1z < -tov1x && tov2z < -tov2x) return;	// Is the segment entirely outside of the FOV?
+
+	}
+//	if (tov1z < tov1x)
+//		if (!(tov1z < -tov1x && tov2z > -tov2x && (det > 0)) && !(tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
+//	if (tov1z < -tov1x)
+//		if (!(tov2z > -tov2x && (det > 0)) && !(tov1z < tov1x && tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
+
+	if (tov1z < -tov1x) {tov1z = 1; tov1x = -1;}
 	if (tov2z < tov2x) {tov2z = tov2x = 1;}	// Is V2 outside the FOV?
 	
 	auto AngleToScreen = [&](float dz, float dx) {

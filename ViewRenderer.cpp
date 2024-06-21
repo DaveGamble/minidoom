@@ -65,7 +65,9 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 	if (solid && solidWallRanges.size() < 2) return;
 
-	float distanceToNormal = -toV1x * (seg.end.y - seg.start.y) + toV1y * (seg.end.x - seg.start.x);
+	const float idistanceToNormal = 1.0 / (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
+	const float d2 = -(ca * (seg.end.x - seg.start.x) + sa * (seg.end.y - seg.start.y)) * idistanceToNormal;
+	const float d1 = distancePlayerToScreen * (sa * (seg.end.x - seg.start.x) - ca * (seg.end.y - seg.start.y)) * idistanceToNormal - halfRenderWidth * d2;
 
     auto f = solidWallRanges.begin(); while (x1 - 1 > f->end) ++f;
 
@@ -73,11 +75,11 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     {
         if (x2 < f->start - 1)
         {
-            storeWallRange(seg, x1, x2, distanceToNormal, v); //All of the wall is visible, so insert it
+            storeWallRange(seg, x1, x2, d1, d2, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(f, {x1, x2});
             return;
         }
-        storeWallRange(seg, x1, f->start - 1, distanceToNormal, v); // The end is already included, just update start
+        storeWallRange(seg, x1, f->start - 1, d1, d2, v); // The end is already included, just update start
         if (solid) f->start = x1;
     }
     
@@ -85,7 +87,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     std::list<SolidSegmentRange>::iterator nextWall = f;
     while (x2 >= next(nextWall, 1)->start - 1)
     {
-        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, distanceToNormal, v); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, d1, d2, v); // partialy clipped by other walls, store each fragment
 		if (x2 > (++nextWall)->end) continue;
 		if (solid)
 		{
@@ -94,7 +96,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 		}
 		return;
     }
-    storeWallRange(seg, nextWall->end + 1, x2, distanceToNormal, v);
+    storeWallRange(seg, nextWall->end + 1, x2, d1, d2, v);
 	if (solid)
 	{
 		f->end = x2;
@@ -102,19 +104,14 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	}
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float distanceToNormal, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, float d2, const Viewpoint &v)
 {
-	const float sinv = v.sina, cosv = v.cosa;
-	
-	const float sinb = sinv * (seg.end.x - seg.start.x) - cosv * (seg.end.y - seg.start.y);
-	const float cosb = cosv * (seg.end.x - seg.start.x) + sinv * (seg.end.y - seg.start.y);
+	auto GetScaleFactor = [&](int x) { return std::clamp(d1 + x * d2, 0.00390625f, 64.0f); };
+
 	
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
-	auto GetScaleFactor = [&](int VXScreen) {
-		return std::clamp((distancePlayerToScreen * sinb + (halfRenderWidth - VXScreen) * cosb) / distanceToNormal, 0.00390625f, 64.0f);
-	};
 
     float V1ScaleFactor = GetScaleFactor(x1);
     float Steps = (GetScaleFactor(x2) - V1ScaleFactor) / (x2 - x1);

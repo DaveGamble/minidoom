@@ -59,8 +59,6 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	};
 
 	const int x1 = AngleToScreen(tov1z, tov1x), x2 = AngleToScreen(tov2z, tov2x); // Find Wall X Coordinates
-	assert(x1 >= 0 && x1 <= renderWidth);
-	assert(x2 >= 0 && x2 <= renderWidth);
 
     if (x1 == x2) return; // Skip same pixel wall
 	bool solid =  (!seg.lSector || seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight); // Handle walls and closed door
@@ -69,9 +67,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 	float distanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
 
-	
-    std::list<SolidSegmentRange>::iterator f = solidWallRanges.begin();
-    while (f != solidWallRanges.end() && x1 - 1 > f->end) ++f;
+    auto f = solidWallRanges.begin(); while (x1 - 1 > f->end) ++f;
 
     if (x1 < f->start)
     {
@@ -90,16 +86,13 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     while (x2 >= next(nextWall, 1)->start - 1)
     {
         storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, distanceToNormal, v); // partialy clipped by other walls, store each fragment
-        ++nextWall;
-        if (x2 <= nextWall->end)
-        {
-			if (solid)
-			{
-				f->end = nextWall->end;
-				if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
-			}
-            return;
-        }
+		if (x2 > (++nextWall)->end) continue;
+		if (solid)
+		{
+			f->end = nextWall->end;
+			solidWallRanges.erase(++f, ++nextWall);
+		}
+		return;
     }
     storeWallRange(seg, nextWall->end + 1, x2, distanceToNormal, v);
 	if (solid)

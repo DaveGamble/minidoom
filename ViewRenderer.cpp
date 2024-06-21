@@ -43,7 +43,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;	// Vectors from origin to segment ends.
 	if (toV1x * toV2y >= toV1y * toV2x) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view. (It's behind us)
 
-	const float ca = cos(v.angle), sa = sin(v.angle);
+	const float ca = v.cosa, sa = v.sina;
 	float tov1z = toV1x * ca + toV1y * sa, tov1x = toV1x * sa - toV1y * ca, tov2z = toV2x * ca + toV2y * sa, tov2x = toV2x * sa - toV2y * ca;	// Rotate vectors to be in front of us.
 	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
 	// x = position left to right. left = -1, right = 1.
@@ -104,7 +104,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float distanceToNormal, const Viewpoint &v)
 {
-	const float sinv = sin(v.angle), cosv = cos(v.angle);
+	const float sinv = v.sina, cosv = v.cosa;
 	
 	const float sinb = sinv * (seg.end.x - seg.start.x) - cosv * (seg.end.y - seg.start.y);
 	const float cosb = cosv * (seg.end.x - seg.start.x) + sinv * (seg.end.y - seg.start.y);

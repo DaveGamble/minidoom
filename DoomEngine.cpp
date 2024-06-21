@@ -24,6 +24,8 @@ DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
 		view.x = t->x;
 		view.y = t->y;
 		view.angle = t->angle * M_PI / 180;
+		view.cosa = cos(view.angle);
+		view.sina = sin(view.angle);
 	}
 	view.z = 41;
 }
@@ -38,7 +40,10 @@ DoomEngine::~DoomEngine()
 bool DoomEngine::Tick()
 {
 	auto rotateBy = [&](float dt) {
-		view.angle += (dt * rotateSpeed); view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
+		view.angle += (dt * rotateSpeed);
+		view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
+		view.cosa = cos(view.angle);
+		view.sina = sin(view.angle);
 	};
 	
 	SDL_Event event;
@@ -53,10 +58,10 @@ bool DoomEngine::Tick()
 	}
 	
 	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
-	if (KeyStates[SDL_SCANCODE_W]) { view.x += cos(view.angle) * moveSpeed; view.y += sin(view.angle) * moveSpeed; }
-	if (KeyStates[SDL_SCANCODE_A]) { view.x -= sin(view.angle) * moveSpeed; view.y += cos(view.angle) * moveSpeed; }
-	if (KeyStates[SDL_SCANCODE_D]) { view.x += sin(view.angle) * moveSpeed; view.y -= cos(view.angle) * moveSpeed; }
-	if (KeyStates[SDL_SCANCODE_S]) { view.x -= cos(view.angle) * moveSpeed; view.y -= sin(view.angle) * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_W]) { view.x += view.cosa * moveSpeed; view.y += view.sina * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_A]) { view.x -= view.sina * moveSpeed; view.y += view.cosa * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_D]) { view.x += view.sina * moveSpeed; view.y -= view.cosa * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_S]) { view.x -= view.cosa * moveSpeed; view.y -= view.sina * moveSpeed; }
 	if (KeyStates[SDL_SCANCODE_Q]) rotateBy(0.1875f);
 	if (KeyStates[SDL_SCANCODE_E]) rotateBy(-0.1875f);
 	

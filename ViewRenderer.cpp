@@ -67,9 +67,6 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     if (!seg.lSector) solid = true; // Handle solid walls
     else if (seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight) // Handle closed door
         solid = true;
-//    else if (seg.rSector->ceilingHeight != seg.lSector->ceilingHeight || seg.rSector->floorHeight != seg.lSector->floorHeight) // Windowed walls
-//        solid = false;
-//	else return;
 
 	if (solid && solidWallRanges.size() < 2) return;
 

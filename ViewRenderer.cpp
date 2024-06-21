@@ -48,11 +48,10 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
 	// x = position left to right. left = -1, right = 1.
 
-	float det = (tov1z * tov2x < tov1x * tov2z) ? 1 : -1;
 //	if (tov1z < abs(tov1x) && !(tov1z < -tov1x && tov2z > -tov2x && (det > 0)) && !(tov1z < tov1x && tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
-	if (tov1z < tov1x && det * tov2z > tov2x) return;	// Is the segment entirely outside of the FOV?
-	if (tov1z < -det * tov1x && tov1z > det * tov1x) return;	// Is the segment entirely outside of the FOV?
-	if (tov1z < -tov1x && tov2z < det * tov2x) return;	// Is the segment entirely outside of the FOV?
+	if (tov1z < tov1x && -tov2z > tov2x) return;	// Is the segment entirely outside of the FOV?
+	if (tov1z < tov1x && tov1z > -tov1x) return;	// Is the segment entirely outside of the FOV?
+	if (tov1z < -tov1x && tov2z < -tov2x) return;	// Is the segment entirely outside of the FOV?
 //	if (tov1z < tov1x)
 //		if (!(tov1z < -tov1x && tov2z > -tov2x && (det > 0)) && !(tov2z > tov2x && (det < 0))) return;	// Is the segment entirely outside of the FOV?
 //	if (tov1z < -tov1x)

@@ -110,17 +110,15 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float dtn, con
 //	const float coss = (seg.end.x - seg.start.x) / sqrt((seg.end.y - seg.start.y) * (seg.end.y - seg.start.y) + (seg.end.x - seg.start.x) * (seg.end.x - seg.start.x));
 	const float sins = sin(seg.slopeAngle), coss = cos(seg.slopeAngle);
 
-	const float sinb = sinv * coss - cosv * sins, cosb = cosv * coss + sinv * sins;
-
-
-	float distanceToNormal = -(seg.start.x - v.x) * sins + (seg.start.y - v.y) * coss;
+	const float tov1x = seg.start.x - v.x, tov1y = seg.start.y - v.y;
 
 	
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		return std::clamp((distancePlayerToScreen * sinb + (halfRenderWidth - VXScreen) * cosb) / (distanceToNormal), 0.00390625f, 64.0f);
+		float vx = VXScreen / (float) halfRenderWidth;
+		return std::clamp(distancePlayerToScreen * ((sinv * coss - cosv * sins) + (1 - vx) * (cosv * coss + sinv * sins)) / (tov1y * coss -tov1x * sins), 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(x1);

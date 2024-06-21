@@ -65,7 +65,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 	if (solid && solidWallRanges.size() < 2) return;
 
-	float distanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
+	float distanceToNormal = -toV1x * (seg.end.y - seg.start.y) + toV1y * (seg.end.x - seg.start.x);
 
     auto f = solidWallRanges.begin(); while (x1 - 1 > f->end) ++f;
 
@@ -102,22 +102,21 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	}
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float dtn, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float distanceToNormal, const Viewpoint &v)
 {
 	const float sinv = sin(v.angle), cosv = cos(v.angle);
 	
 	const float sins = (seg.end.y - seg.start.y);
 	const float coss = (seg.end.x - seg.start.x);
-
-	const float tov1x = seg.start.x - v.x, tov1y = seg.start.y - v.y;
-
+	
+	const float sinb = sinv * coss - cosv * sins;
+	const float cosb = cosv * coss + sinv * sins;
 	
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		float vx = VXScreen / (float) halfRenderWidth;
-		return std::clamp(distancePlayerToScreen * ((sinv * coss - cosv * sins) + (1 - vx) * (cosv * coss + sinv * sins)) / (tov1y * coss - tov1x * sins), 0.00390625f, 64.0f);
+		return std::clamp((distancePlayerToScreen * sinb + (halfRenderWidth - VXScreen) * cosb) / distanceToNormal, 0.00390625f, 64.0f);
 	};
 
     float V1ScaleFactor = GetScaleFactor(x1);

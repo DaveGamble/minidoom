@@ -48,6 +48,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
 	// x = position left to right. left = -1, right = 1.
 
+	if (tov1z < tov1x && tov2z < -tov2x) return;	// V1 is right of FOV and V2 is left of FOV
 	if (tov1z < -tov1x && tov2z < -tov2x) return;	// Both points are to the left.
 	if (tov1z < tov1x && tov1z > -tov1x) return;	// V1 is within 45 degrees of the X axis (it's on your right hand side, out of the FOV). Both points are to the right.
 

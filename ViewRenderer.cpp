@@ -58,54 +58,54 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 		return distancePlayerToScreen + round(dx * halfRenderWidth / dz);
 	};
 
-	const int V1XScreen = AngleToScreen(tov1z, tov1x), V2XScreen = AngleToScreen(tov2z, tov2x); // Find Wall X Coordinates
-	assert(V1XScreen >= 0 && V1XScreen <= renderWidth);
-	assert(V2XScreen >= 0 && V2XScreen <= renderWidth);
+	const int x1 = AngleToScreen(tov1z, tov1x), x2 = AngleToScreen(tov2z, tov2x); // Find Wall X Coordinates
+	assert(x1 >= 0 && x1 <= renderWidth);
+	assert(x2 >= 0 && x2 <= renderWidth);
 
-    if (V1XScreen == V2XScreen) return; // Skip same pixel wall
+    if (x1 == x2) return; // Skip same pixel wall
 	bool solid =  (!seg.lSector || seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight); // Handle walls and closed door
 
 	if (solid && solidWallRanges.size() < 2) return;
 
-	float DistanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
+	float distanceToNormal = -toV1x * sin(seg.slopeAngle) + toV1y * cos(seg.slopeAngle);
 
 	
-    std::list<SolidSegmentRange>::iterator FoundClipWall = solidWallRanges.begin();
-    while (FoundClipWall != solidWallRanges.end() && V1XScreen - 1 > FoundClipWall->end) ++FoundClipWall;
+    std::list<SolidSegmentRange>::iterator f = solidWallRanges.begin();
+    while (f != solidWallRanges.end() && x1 - 1 > f->end) ++f;
 
-    if (V1XScreen < FoundClipWall->start)
+    if (x1 < f->start)
     {
-        if (V2XScreen < FoundClipWall->start - 1)
+        if (x2 < f->start - 1)
         {
-            storeWallRange(seg, V1XScreen, V2XScreen, DistanceToNormal, v); //All of the wall is visible, so insert it
-            if (solid) solidWallRanges.insert(FoundClipWall, {V1XScreen, V2XScreen});
+            storeWallRange(seg, x1, x2, distanceToNormal, v); //All of the wall is visible, so insert it
+            if (solid) solidWallRanges.insert(f, {x1, x2});
             return;
         }
-        storeWallRange(seg, V1XScreen, FoundClipWall->start - 1, DistanceToNormal, v); // The end is already included, just update start
-        if (solid) FoundClipWall->start = V1XScreen;
+        storeWallRange(seg, x1, f->start - 1, distanceToNormal, v); // The end is already included, just update start
+        if (solid) f->start = x1;
     }
     
-    if (V2XScreen <= FoundClipWall->end) return; // This part is already occupied
-    std::list<SolidSegmentRange>::iterator NextWall = FoundClipWall;
-    while (V2XScreen >= next(NextWall, 1)->start - 1)
+    if (x2 <= f->end) return; // This part is already occupied
+    std::list<SolidSegmentRange>::iterator nextWall = f;
+    while (x2 >= next(nextWall, 1)->start - 1)
     {
-        storeWallRange(seg, NextWall->end + 1, next(NextWall, 1)->start - 1, DistanceToNormal, v); // partialy clipped by other walls, store each fragment
-        ++NextWall;
-        if (V2XScreen <= NextWall->end)
+        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, distanceToNormal, v); // partialy clipped by other walls, store each fragment
+        ++nextWall;
+        if (x2 <= nextWall->end)
         {
 			if (solid)
 			{
-				FoundClipWall->end = NextWall->end;
-				if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
+				f->end = nextWall->end;
+				if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 			}
             return;
         }
     }
-    storeWallRange(seg, NextWall->end + 1, V2XScreen, DistanceToNormal, v);
+    storeWallRange(seg, nextWall->end + 1, x2, distanceToNormal, v);
 	if (solid)
 	{
-		FoundClipWall->end = V2XScreen;
-		if (NextWall != FoundClipWall) solidWallRanges.erase(++FoundClipWall, ++NextWall);
+		f->end = x2;
+		if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 	}
 }
 

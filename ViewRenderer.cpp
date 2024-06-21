@@ -102,19 +102,23 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	}
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int V1XScreen, int V2XScreen, float DistanceToNormal, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float dtn, const Viewpoint &v)
 {
+	const float sinv = sin(v.angle), cosv = cos(v.angle);
+	const float sinb = sin(v.angle - seg.slopeAngle), cosb = cos(v.angle - seg.slopeAngle);
+
+	float distanceToNormal = -(seg.start.x - v.x) * sin(seg.slopeAngle) + (seg.start.y - v.y) * cos(seg.slopeAngle);
+
+	
 	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
 	auto GetScaleFactor = [&](int VXScreen) {
-		float screenAng = atan((halfRenderWidth - VXScreen) / (float)distancePlayerToScreen);
-		float SkewAngle = screenAng + v.angle - seg.slopeAngle;
-		return std::clamp((distancePlayerToScreen * sinf(SkewAngle)) / (DistanceToNormal * cosf(screenAng)), 0.00390625f, 64.0f);
+		return std::clamp((distancePlayerToScreen * sinb + (halfRenderWidth - VXScreen) * cosb) / (distanceToNormal), 0.00390625f, 64.0f);
 	};
 
-    float V1ScaleFactor = GetScaleFactor(V1XScreen);
-    float Steps = (GetScaleFactor(V2XScreen) - V1ScaleFactor) / (V2XScreen - V1XScreen);
+    float V1ScaleFactor = GetScaleFactor(x1);
+    float Steps = (GetScaleFactor(x2) - V1ScaleFactor) / (x2 - x1);
 
     float RightSectorCeiling = seg.rSector->ceilingHeight - v.z;
 	float RightSectorFloor = seg.rSector->floorHeight - v.z;
@@ -163,7 +167,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int V1XScreen, int V2XScreen, 
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
 
-	for (int x = V1XScreen; x <= V2XScreen; x++)
+	for (int x = x1; x <= x2; x++)
     {
 		const float u = std::clamp((uA + x * uB) / (uC + x * uD), 0.f, 1.f);
 

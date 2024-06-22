@@ -46,6 +46,11 @@ bool DoomEngine::Tick()
 		view.cosa = cos(view.angle);
 		view.sina = sin(view.angle);
 	};
+	auto moveBy = [&](float dx, float dy) {
+		if (map.doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
+		view.x += dx;
+		view.y += dy;
+	};
 	
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
@@ -59,10 +64,10 @@ bool DoomEngine::Tick()
 	}
 	
 	const Uint8* KeyStates = SDL_GetKeyboardState(NULL);
-	if (KeyStates[SDL_SCANCODE_W]) { view.x += view.cosa * moveSpeed; view.y += view.sina * moveSpeed; }
-	if (KeyStates[SDL_SCANCODE_A]) { view.x -= view.sina * moveSpeed; view.y += view.cosa * moveSpeed; }
-	if (KeyStates[SDL_SCANCODE_D]) { view.x += view.sina * moveSpeed; view.y -= view.cosa * moveSpeed; }
-	if (KeyStates[SDL_SCANCODE_S]) { view.x -= view.cosa * moveSpeed; view.y -= view.sina * moveSpeed; }
+	if (KeyStates[SDL_SCANCODE_W]) { moveBy(view.cosa * moveSpeed, view.sina * moveSpeed); }
+	if (KeyStates[SDL_SCANCODE_A]) { moveBy(-view.sina * moveSpeed, view.cosa * moveSpeed); }
+	if (KeyStates[SDL_SCANCODE_D]) { moveBy(view.sina * moveSpeed, -view.cosa * moveSpeed); }
+	if (KeyStates[SDL_SCANCODE_S]) { moveBy(-view.cosa * moveSpeed, -view.sina * moveSpeed); }
 	if (KeyStates[SDL_SCANCODE_Q]) rotateBy(0.1875f);
 	if (KeyStates[SDL_SCANCODE_E]) rotateBy(-0.1875f);
 	

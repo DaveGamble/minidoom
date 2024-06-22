@@ -109,6 +109,14 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoint &v)
 {
+	const int16_t flags = seg.linedef->flags;
+	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;
+	const float lHeight = seg.lSector ? seg.lSector->floorHeight - seg.lSector->ceilingHeight : 0;
+	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
+	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
+	const float tdX = seg.linedef->rSidedef->dx, tdY = seg.linedef->rSidedef->dy;
+
+	// Fixme
 	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
 	const float ca = v.cosa, sa = v.sina;
 	const float idistanceToNormal = 1.0 / (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
@@ -117,25 +125,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 
     const float x1z = x1 * d2 + d1;
 	const float dx = std::clamp(d2, -64.f, 64.f);
-
-	const int16_t flags = seg.linedef->flags;
-	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;
-	const float lHeight = seg.lSector ? seg.lSector->floorHeight - seg.lSector->ceilingHeight : 0;
-	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
-	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
-	const float tdX = seg.linedef->rSidedef->dx, tdY = seg.linedef->rSidedef->dy;
-
-	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
-	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
-	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
-	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
-
-	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
-
-	float yCeiling = horizon - (seg.rSector->ceilingHeight - v.z) * x1z;
-	float yFloor = horizon - (seg.rSector->floorHeight - v.z) * x1z;
-	float yUpper = seg.lSector ? horizon - ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
-	float yLower = seg.lSector ? horizon - ((seg.lSector->floorHeight - v.z) * x1z) : 0;
 
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
 	const float distanceToNormal = sx * (seg.linedef->end.y - seg.linedef->start.y) - sy * (seg.linedef->end.x - seg.linedef->start.x);
@@ -149,7 +138,23 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
   
 	const float pc = cosv / 64, ps = sinv / 64;
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
-	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f + 1 / 128.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f + 1 / 128.f;
+	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f - 5 / 64.f;
+	
+	// Calculations I am doing: ((uA + x * uB) / (uC + x * uD))
+	// vH / (horizon - i); and z * (vA + vB * x) + vC, z * (vD + vE * x) + vF
+	//
+	
+	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
+	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
+	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
+	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
+
+	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
+
+	float yCeiling = horizon - (seg.rSector->ceilingHeight - v.z) * x1z;
+	float yFloor = horizon - (seg.rSector->floorHeight - v.z) * x1z;
+	float yUpper = seg.lSector ? horizon - ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
+	float yLower = seg.lSector ? horizon - ((seg.lSector->floorHeight - v.z) * x1z) : 0;
 	
 	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];
 

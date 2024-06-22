@@ -142,7 +142,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
   
 	const float pc = cosv / 64, ps = sinv / 64;
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
-	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
+	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f + 1 / 128.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f + 1 / 128.f;
 	
 	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];
 

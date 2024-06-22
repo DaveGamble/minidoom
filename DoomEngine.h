@@ -28,5 +28,6 @@ protected:
 	WADLoader wad;
 	ViewRenderer renderer;
     Map map;
+	uint8_t lighting[34][256];
 	const Patch *weapon {nullptr};
 };

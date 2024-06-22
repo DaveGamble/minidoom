@@ -6,12 +6,13 @@
 #include "Texture.hpp"
 #include "Flat.hpp"
 
-ViewRenderer::ViewRenderer(int renderXSize, int renderYSize)
+ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[34][256])
 : renderWidth(renderXSize)
 , renderHeight(renderYSize)
 , halfRenderWidth(renderXSize / 2)
 , halfRenderHeight(renderYSize / 2)
 , distancePlayerToScreen(halfRenderWidth)	// 90 here is FOV
+, lights(l)
 {
 	ceilingClipHeight.resize(renderWidth);
 	floorClipHeight.resize(renderWidth);
@@ -34,9 +35,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	{
 		renderLater& r = renderLaters[i];
 		float scale = (r.fl - r.cl) / (float)r.texture->getHeight();
-		uint8_t lut[256];for (int i = 0; i < 256; i++) lut[i] = i;
-
-		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from), lut);
+		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from), lights[r.light]);
 	}
 }
 
@@ -161,7 +160,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
 
-	uint8_t lut[256];for (int i = 0; i < 256; i++) lut[i] = i;
+	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];
 
 	for (int x = x1; x <= x2; x++)
     {
@@ -205,7 +204,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			int upper = std::min(floorClipHeight[x] - 1.f, iUpperHeight);
 			int lower = std::max(iLowerHeight, ceilingClipHeight[x] + 1.f);
 			if (seg.linedef->rSidedef->middletexture && CurrentFloorStart > CurrentCeilingEnd && FloorStart > CeilingEnd)
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, std::max(CurrentCeilingEnd, 0), std::min(CurrentFloorStart, renderHeight - 1), u, (int)CeilingEnd, (int)FloorStart});
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, std::max(CurrentCeilingEnd, 0), std::min(CurrentFloorStart, renderHeight - 1), u, (int)CeilingEnd, (int)FloorStart, seg.rSector->lightlevel});
 
 			iUpperHeight += UpperHeightStep;
 			iLowerHeight += LowerHeightStep;

@@ -3,7 +3,7 @@
 DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
 : wad(wadname)
 , map(mapName, wad)
-, renderer(m_iRenderWidth, m_iRenderHeight)
+, renderer(m_iRenderWidth, m_iRenderHeight, lighting)
 {
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
@@ -16,6 +16,9 @@ DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
 	std::vector<uint8_t> palette = wad.getLumpNamed("PLAYPAL");
 	for (int i = 0; i < 256; ++i) m_ColorPalette[i] = {palette[i * 3 + 0], palette[i * 3 + 1], palette[i * 3 + 2], 255};
 	// SDL
+
+	std::vector<uint8_t> lights = wad.getLumpNamed("COLORMAP");
+	for (int i = 0; i < 34; i++) memcpy(lighting[i], lights.data() + 256 * i, 256);
 
 	weapon = wad.getPatch("PISGA0");
 	const Thing* t = map.getThing(1);
@@ -79,8 +82,7 @@ bool DoomEngine::Tick()
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
 		renderer.render(pScreenBuffer, m_iRenderWidth, view, map);
-		uint8_t lut[256];for (int i = 0; i < 256; i++) lut[i] = i;
-		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lut, 3);
+//		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lighting[0], 3);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);

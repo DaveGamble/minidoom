@@ -112,30 +112,20 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 {
 	auto GetScaleFactor = [&](int x) { return std::clamp(d1 + x * d2, 0.00390625f, 64.0f); };
 
-    const float V1ScaleFactor = GetScaleFactor(x1);
-    const float Steps = (GetScaleFactor(x2) - V1ScaleFactor) / (x2 - x1);
+    const float x1z = GetScaleFactor(x1);
+    const float dx = (GetScaleFactor(x2) - x1z) / (x2 - x1);
 
-    float RightSectorCeiling = seg.rSector->ceilingHeight - v.z;
-	float RightSectorFloor = seg.rSector->floorHeight - v.z;
-	
-	float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
+	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 
-    float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(horizon - RightSectorCeiling * V1ScaleFactor);
-    float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(horizon - RightSectorFloor * V1ScaleFactor);
+	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
+	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
+	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
+	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
 
-	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
-
-    if (seg.lSector)
-    {
-		float LeftSectorCeiling = seg.lSector->ceilingHeight - v.z;
-		float LeftSectorFloor = seg.lSector->floorHeight - v.z;
-
-		UpperHeightStep = -(LeftSectorCeiling * Steps);
-		iUpperHeight = round(horizon - (LeftSectorCeiling * V1ScaleFactor));
-
-		LowerHeightStep = -(LeftSectorFloor * Steps);
-		iLowerHeight = round(horizon - (LeftSectorFloor * V1ScaleFactor));
-    }
+	float yCeiling = horizon - (seg.rSector->ceilingHeight - v.z) * x1z;
+	float yFloor = horizon - (seg.rSector->floorHeight - v.z) * x1z;
+	float yUpper = seg.lSector ? horizon - ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
+	float yLower = seg.lSector ? horizon - ((seg.lSector->floorHeight - v.z) * x1z) : 0;
 
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
 	const float distanceToNormal = sx * (seg.linedef->end.y - seg.linedef->start.y) - sy * (seg.linedef->end.x - seg.linedef->start.x);
@@ -190,11 +180,11 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			}
 		};
 		
-		int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);
-		int CurrentFloorStart = std::min(FloorStart, floorClipHeight[x] - 1.f);
+		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f);
+		int CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);
 
-		int upper = std::min(floorClipHeight[x] - 1.f, iUpperHeight);
-		int lower = std::max(iLowerHeight, ceilingClipHeight[x] + 1.f);
+		int upper = std::min(floorClipHeight[x] - 1.f, yUpper);
+		int lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
 
 		int ceiltop = std::max(0, ceilingClipHeight[x]);
 		int ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart);
@@ -209,34 +199,34 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		
         if (seg.lSector)
         {
-			if (seg.linedef->rSidedef->middletexture && midtop < midbot && FloorStart > CeilingEnd)
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, (int)CeilingEnd, (int)FloorStart, lut});
+			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, (int)yCeiling, (int)yFloor, lut});
 
 			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, uppertop, upperbot);
-			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, CeilingEnd, iUpperHeight);
+			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, yCeiling, yUpper);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 
-			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, iLowerHeight, FloorStart);
+			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, yLower, yFloor);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
-			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, CeilingEnd, FloorStart);
+			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor);
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}
-		iUpperHeight += UpperHeightStep;
-		iLowerHeight += LowerHeightStep;
-        CeilingEnd += CeilingStep;
-        FloorStart += FloorStep;
+		yUpper += dyUpper;
+		yLower += dyLower;
+        yCeiling += dyCeiling;
+        yFloor += dyFloor;
     }
 }
 

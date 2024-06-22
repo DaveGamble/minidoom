@@ -90,38 +90,34 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     {
         storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, d1, d2, v); // partialy clipped by other walls, store each fragment
 		if (x2 > (++nextWall)->end) continue;
-		if (solid)
-		{
-			f->end = nextWall->end;
-			solidWallRanges.erase(++f, ++nextWall);
-		}
+		if (!solid) return;
+		f->end = nextWall->end;
+		solidWallRanges.erase(++f, ++nextWall);
 		return;
     }
     storeWallRange(seg, nextWall->end + 1, x2, d1, d2, v);
-	if (solid)
-	{
-		f->end = x2;
-		if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
-	}
+	if (!solid) return;
+	f->end = x2;
+	if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 }
 
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, float d2, const Viewpoint &v)
 {
 	auto GetScaleFactor = [&](int x) { return std::clamp(d1 + x * d2, 0.00390625f, 64.0f); };
 
-	
-	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
-	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
-
-
-    float V1ScaleFactor = GetScaleFactor(x1);
-    float Steps = (GetScaleFactor(x2) - V1ScaleFactor) / (x2 - x1);
+    const float V1ScaleFactor = GetScaleFactor(x1);
+    const float Steps = (GetScaleFactor(x2) - V1ScaleFactor) / (x2 - x1);
 
     float RightSectorCeiling = seg.rSector->ceilingHeight - v.z;
 	float RightSectorFloor = seg.rSector->floorHeight - v.z;
+	
+	float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 
-    float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(halfRenderHeight - RightSectorCeiling * V1ScaleFactor);
-    float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(halfRenderHeight - RightSectorFloor * V1ScaleFactor);
+    float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(horizon - RightSectorCeiling * V1ScaleFactor);
+    float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(horizon - RightSectorFloor * V1ScaleFactor);
+
+	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
+	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
     if (seg.lSector)
     {
@@ -142,13 +138,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
             bDrawUpperSection = true;
 
 		UpperHeightStep = -(LeftSectorCeiling * Steps);
-		iUpperHeight = round(halfRenderHeight - (LeftSectorCeiling * V1ScaleFactor));
+		iUpperHeight = round(horizon - (LeftSectorCeiling * V1ScaleFactor));
 
         if (LeftSectorFloor > RightSectorFloor)
             bDrawLowerSection = true;
 
 		LowerHeightStep = -(LeftSectorFloor * Steps);
-		iLowerHeight = round(halfRenderHeight - (LeftSectorFloor * V1ScaleFactor));
+		iLowerHeight = round(horizon - (LeftSectorFloor * V1ScaleFactor));
     }
 
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
@@ -170,17 +166,16 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
         int CurrentCeilingEnd = std::max(CeilingEnd, ceilingClipHeight[x] + 1.f);
         int CurrentFloorStart = std::min(FloorStart, floorClipHeight[x] - 1.f);
 
-		auto DrawTexture = [&](const Texture *texture, int x, int from, int to, float u, int cl, int fl) {
+		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl) {
 			if (!texture || to < from || fl <= cl) return;
 			float scale = (fl - cl) / (float)texture->getHeight();
 			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, (texture->getWidth() - 1) * u, scale, std::max((from - cl), 0) / scale, (to - from));
 		};
 
-
 		auto DrawFloor = [&](const Flat *flat, int x, int from, int to) {
 			for (int i = from; i < to; i++)
 			{
-				float z = vG / (i - halfRenderHeight);
+				float z = vG / (i - horizon);
 				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0);
 			}
 		};
@@ -188,7 +183,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		auto DrawCeiling = [&](const Flat *flat, int x, int from, int to) {
 			for (int i = from; i < to; i++)
 			{
-				float z = vH / (halfRenderHeight - i);
+				float z = vH / (horizon - i);
 				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0);
 			}
 		};
@@ -215,7 +210,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 
 			if (bDrawUpperSection)
 			{
-				DrawTexture(seg.linedef->rSidedef->uppertexture, x, CurrentCeilingEnd, upper, u, CeilingEnd, iUpperHeight);
+				DrawTexture(seg.linedef->rSidedef->uppertexture, CurrentCeilingEnd, upper, CeilingEnd, iUpperHeight);
 				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			}
 			else if (UpdateCeiling) ceilingClipHeight[x] = CurrentCeilingEnd - 1;
@@ -224,14 +219,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 
 			if (bDrawLowerSection)
 			{
-				DrawTexture(seg.linedef->rSidedef->lowertexture, x, lower, CurrentFloorStart, u, iLowerHeight, FloorStart);
+				DrawTexture(seg.linedef->rSidedef->lowertexture, lower, CurrentFloorStart, iLowerHeight, FloorStart);
 				floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 			}
 			else if (UpdateFloor) floorClipHeight[x] = CurrentFloorStart + 1;
 		}
         else
 		{
-			DrawTexture(seg.linedef->rSidedef->middletexture, x, CurrentCeilingEnd, CurrentFloorStart, u, CeilingEnd, FloorStart);
+			DrawTexture(seg.linedef->rSidedef->middletexture, CurrentCeilingEnd, CurrentFloorStart, CeilingEnd, FloorStart);
 			DrawFloor(seg.rSector->floortexture, x, CurrentFloorStart, floorClipHeight[x]);
 			DrawCeiling(seg.rSector->ceilingtexture, x, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 			ceilingClipHeight[x] = renderHeight;

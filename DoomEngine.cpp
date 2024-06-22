@@ -28,6 +28,7 @@ DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
 		view.sina = sin(view.angle);
 	}
 	view.z = 41;
+	view.pitch = 0;
 }
 
 DoomEngine::~DoomEngine()
@@ -51,7 +52,7 @@ bool DoomEngine::Tick()
 	{
 		switch (event.type)
 		{
-			case SDL_MOUSEMOTION:	rotateBy(-0.1*event.motion.xrel);	break;
+			case SDL_MOUSEMOTION:	rotateBy(-0.1*event.motion.xrel);	view.pitch = std::clamp(view.pitch - 0.01 * event.motion.yrel, -1.0, 1.0); break;
 			case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) m_bIsOver = true;	break;
 			case SDL_QUIT:		m_bIsOver = true;	break;
 		}

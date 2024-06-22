@@ -45,24 +45,12 @@ public:
 	}
 
 
-    void render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale = 1) const
+    void render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale = 1) const
 	{
 		buf += rowlen * screeny + screenx;
-		for (int x = 0, tox = 0; x < width; x++)
-		{
-			while (tox < (x + 1) * scale)
-			{
-				for (int column = columnIndices[x]; patchColumnData[column].topDelta != 0xFF; column++)
-				{
-					int off = floor(scale * patchColumnData[column].topDelta) * rowlen + tox;
-					uint8_t *from = patchColumnData[column].columnData;
-					for (int y = 0, to = 0; y < patchColumnData[column].length; y++) while (to < (y + 1) * scale) buf[off + (to++) * rowlen] = from[y];
-				}
-				tox++;
-			}
-		}
+		for (int x = 0, tox = 0; x < width; x++) while (tox < (x + 1) * scale) renderColumn(buf + tox++, rowlen, columnIndices[x], INT_MAX, 0, scale, lut);
 	}
-    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale = 1) const
+    void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale, const uint8_t *lut) const
 	{
 		if (scale < 0) return;
 		while (patchColumnData[firstColumn].topDelta != 0xFF)
@@ -73,7 +61,7 @@ public:
 			int run = std::max(el - sl, 0);
 			int start = rowlen * sl;
 			const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-			for (int i = 0, to = 0; to < run && i < patchColumnData[firstColumn].length; i++) while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = from[i];
+			for (int i = 0, to = 0; to < run && i < patchColumnData[firstColumn].length; i++) while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[from[i]];
 			++firstColumn;
 		}
 	}

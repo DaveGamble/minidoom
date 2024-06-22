@@ -36,18 +36,13 @@ public:
 		}
 	}
 
-    void render(uint8_t *buf, int rowlen, int screenx, int screeny, float scale = 1.0) const
-	{
-		buf += rowlen * screeny + screenx;
-		for (int column = 0, tox = 0; column < width; ++column) while (tox < (column + 1) * scale) {renderColumn(buf + tox, rowlen, column, scale, 0, height * scale); tox++;}
-	}
-    void renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset, int yEnd) const
+	void renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset, int yEnd, const uint8_t *lut) const
 	{
 		if (columns[c].overlap.size())
 		{
-			for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++) while (toy < (y + 1) * scale && toy < yEnd + yOffset * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = columns[c].overlap[y];
+			for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++) while (toy < (y + 1) * scale && toy < yEnd + yOffset * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = lut[columns[c].overlap[y]];
 		}
-		else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale);
+		else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale, lut);
 	}
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }

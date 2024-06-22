@@ -34,7 +34,9 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	{
 		renderLater& r = renderLaters[i];
 		float scale = (r.fl - r.cl) / (float)r.texture->getHeight();
-		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from));
+		uint8_t lut[256];for (int i = 0; i < 256; i++) lut[i] = i;
+
+		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from), lut);
 	}
 }
 
@@ -159,6 +161,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
 
+	uint8_t lut[256];for (int i = 0; i < 256; i++) lut[i] = i;
+
 	for (int x = x1; x <= x2; x++)
     {
 		const float u = std::clamp((uA + x * uB) / (uC + x * uD), 0.f, 1.f);
@@ -169,14 +173,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl) {
 			if (!texture || to < from || fl <= cl) return;
 			float scale = (fl - cl) / (float)texture->getHeight();
-			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, (texture->getWidth() - 1) * u, scale, std::max((from - cl), 0) / scale, (to - from));
+			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, (texture->getWidth() - 1) * u, scale, std::max((from - cl), 0) / scale, (to - from), lut);
 		};
 
 		auto DrawFloor = [&](const Flat *flat, int x, int from, int to) {
 			for (int i = from; i < to; i++)
 			{
 				float z = vG / (i - horizon);
-				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0);
+				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0, lut);
 			}
 		};
 
@@ -184,7 +188,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			for (int i = from; i < to; i++)
 			{
 				float z = vH / (horizon - i);
-				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0);
+				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0, lut);
 			}
 		};
 		

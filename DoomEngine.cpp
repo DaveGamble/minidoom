@@ -79,7 +79,8 @@ bool DoomEngine::Tick()
 	SDL_FillRect(m_pScreenBuffer, NULL, 0);
 	{
 		renderer.render(pScreenBuffer, m_iRenderWidth, view, map);
-// 		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, 3);
+		uint8_t lut[256];for (int i = 0; i < 256; i++) lut[i] = i;
+		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lut, 3);
 	}
 	SDL_SetPaletteColors(m_pScreenBuffer->format->palette, m_ColorPalette, 0, 256);
 	SDL_BlitSurface(m_pScreenBuffer, nullptr, m_pRGBBuffer, nullptr);

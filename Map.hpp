@@ -18,6 +18,27 @@ public:
 		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(v, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
 		return segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
 	}
+	
+	bool doesLineIntersect(int x1, int y1, int x2, int y2) const
+	{
+		std::vector<const Linedef *> tests = getBlock(x1, y1);
+		if (x1 >> 7 != x2 >> 7 || y1 >> 7 != y2 >> 7)
+		{
+			std::vector<const Linedef *> tests2 = getBlock(x2, y2);
+			tests.insert(tests.end(), tests2.begin(), tests2.end());
+		}
+		for (const Linedef *l : tests)	// https://en.wikipedia.org/wiki/Line–line_intersection
+		{
+			if (l->lSidedef && !(l->flags & 1)) continue;
+			const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
+			float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
+			if (den > 0) { if (tn < 0 || tn > den) continue; } else if (tn > 0 || tn < den) continue;
+			float un = Ax * Cy - Ay * Cx;
+			if (den > 0) { if (un < 0 || un > den) continue; } else if (un > 0 || un < den) continue;
+			return true;
+		}
+		return false;
+	}
 
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 

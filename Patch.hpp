@@ -78,6 +78,7 @@ public:
 	}
 
 	int getWidth() const { return width; }
+	int getHeight() const { return height; }
 	int getXOffset() const { return xoffset; }
 	int getYOffset() const { return yoffset; }
 	int getColumnDataIndex(int iIndex) const { return columnIndices[iIndex]; }

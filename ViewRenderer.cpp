@@ -36,7 +36,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 		renderLater& r = renderLaters[i];
 		for (int y = r.from; y < r.to; y++)
 		{
-			uint16_t p = r.texture->pixel(r.u, r.dv * y + r.v);
+			uint16_t p = r.texture->pixel(r.u, r.dv * (y + r.v) + r.voff);
 			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
 		}
 	}
@@ -148,13 +148,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 
 	for (int x = x1; x <= x2; x++)
     {
-		const float u = ((uA + x * uB) / (uC + x * uD));
+		const float u = ((uA + x * uB) / (uC + x * uD)) + seg.linedef->rSidedef->dx;
 
-		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl, int dy) {
-			if (!texture || to < from || fl <= cl) return;
+		auto DrawTexture = [&](const Texture *texture, int from, int to, float v, float dv) {
+			if (!texture) return;
 			for (int y = from; y < to; y++)
 			{
-				uint16_t p = texture->pixel(u + seg.linedef->rSidedef->dx, dy * (y - cl) / (float(fl - cl)) + seg.linedef->rSidedef->dy);
+				uint16_t p = texture->pixel(u, (y + v) * dv + seg.linedef->rSidedef->dy);
 				if (p != 256) screenBuffer[rowlen * y + x] = lut[p];
 			}
 		};
@@ -201,25 +201,24 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
         if (seg.lSector)
         {
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u + seg.linedef->rSidedef->dx, 
-					(seg.lSector->ceilingHeight - seg.lSector->floorHeight) * (-yCeiling) / (float(yFloor - yCeiling)) + seg.linedef->rSidedef->dy,
-					(float)(seg.lSector->ceilingHeight - seg.lSector->floorHeight) / (float(yFloor - yCeiling)), lut});
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, -yCeiling,
+					(float)(seg.lSector->ceilingHeight - seg.lSector->floorHeight) / (float(yFloor - yCeiling)), (float)seg.linedef->rSidedef->dy, lut});
 
 			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, uppertop, upperbot);
-			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, yCeiling, yUpper, (seg.rSector->ceilingHeight - seg.lSector->ceilingHeight));
+			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, -yCeiling, (seg.rSector->ceilingHeight - seg.lSector->ceilingHeight) / (float)(yUpper - yCeiling));
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 
-			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, yLower, yFloor, (seg.lSector->floorHeight - seg.rSector->floorHeight));
+			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, -yLower, (seg.lSector->floorHeight - seg.rSector->floorHeight) / (float)(yFloor - yLower));
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
-			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor, (seg.rSector->ceilingHeight - seg.rSector->floorHeight));
+			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, -yCeiling, (seg.rSector->ceilingHeight - seg.rSector->floorHeight) / (float)(yFloor - yCeiling));
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);

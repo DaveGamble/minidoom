@@ -123,7 +123,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
     float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(horizon - RightSectorCeiling * V1ScaleFactor);
     float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(horizon - RightSectorFloor * V1ScaleFactor);
 
-	bool bDrawUpperSection = false, bDrawLowerSection = false;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
     if (seg.lSector)
@@ -131,14 +130,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		float LeftSectorCeiling = seg.lSector->ceilingHeight - v.z;
 		float LeftSectorFloor = seg.lSector->floorHeight - v.z;
 
-        if (LeftSectorCeiling < RightSectorCeiling)
-            bDrawUpperSection = true;
-
 		UpperHeightStep = -(LeftSectorCeiling * Steps);
 		iUpperHeight = round(horizon - (LeftSectorCeiling * V1ScaleFactor));
-
-        if (LeftSectorFloor > RightSectorFloor)
-            bDrawLowerSection = true;
 
 		LowerHeightStep = -(LeftSectorFloor * Steps);
 		iLowerHeight = round(horizon - (LeftSectorFloor * V1ScaleFactor));
@@ -222,17 +215,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 
-			if (bDrawUpperSection)
-			{
-				if (seg.lSector->sky)	DrawSky(seg.lSector->sky, uppertop, upperbot);
-				else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, CeilingEnd, iUpperHeight);
-			}
+			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, uppertop, upperbot);
+			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, CeilingEnd, iUpperHeight);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 
-			if (bDrawLowerSection)
-				DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, iLowerHeight, FloorStart);
+			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, iLowerHeight, FloorStart);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else

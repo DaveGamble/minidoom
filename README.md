@@ -5,12 +5,13 @@ It's in a very rough state, and includes SDL2 directly.
 Tidying is for later. Although maybe it'll end up as an stb style library. Which would rock.
 
 TODO:
-- Clip detection
-- Lighting
+- What's going on with texture positioning?
+- Animated lighting / textures!!
+- Is there a simpler way to do clip detection?
+- Skybox
 - Optimise floor/ceiling drawing
 - Render sprites
 - View bob?
-- Skybox
 - SFX
 - Music
 - Maybe actually build some game code around it?

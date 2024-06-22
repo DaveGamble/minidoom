@@ -175,7 +175,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, (texture->getWidth() - 1) * u, scale, std::max((from - cl), 0) / scale, (to - from), lut);
 		};
 
-		auto DrawFloor = [&](const Flat *flat, int x, int from, int to) {
+		auto DrawFloor = [&](const Flat *flat, int from, int to) {
 			for (int i = from; i < to; i++)
 			{
 				float z = vG / (i - horizon);
@@ -183,7 +183,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			}
 		};
 
-		auto DrawCeiling = [&](const Flat *flat, int x, int from, int to) {
+		auto DrawCeiling = [&](const Flat *flat, int from, int to) {
 			for (int i = from; i < to; i++)
 			{
 				float z = vH / (horizon - i);
@@ -208,7 +208,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			iUpperHeight += UpperHeightStep;
 			iLowerHeight += LowerHeightStep;
 
-			DrawCeiling(seg.rSector->ceilingtexture, x, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
+				DrawCeiling(seg.rSector->ceilingtexture, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 
 			if (bDrawUpperSection)
 			{
@@ -217,7 +217,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			}
 			else if (UpdateCeiling || 1) ceilingClipHeight[x] = CurrentCeilingEnd - 1;
 
-			DrawFloor(seg.rSector->floortexture, x, CurrentFloorStart, floorClipHeight[x]);
+			DrawFloor(seg.rSector->floortexture, CurrentFloorStart, floorClipHeight[x]);
 
 			if (bDrawLowerSection)
 			{
@@ -229,8 +229,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
         else
 		{
 			DrawTexture(seg.linedef->rSidedef->middletexture, CurrentCeilingEnd, CurrentFloorStart, CeilingEnd, FloorStart);
-			DrawFloor(seg.rSector->floortexture, x, CurrentFloorStart, floorClipHeight[x]);
-			DrawCeiling(seg.rSector->ceilingtexture, x, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
+			DrawFloor(seg.rSector->floortexture, CurrentFloorStart, floorClipHeight[x]);
+				DrawCeiling(seg.rSector->ceilingtexture, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}

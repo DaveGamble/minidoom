@@ -123,23 +123,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
     float CeilingStep = -(RightSectorCeiling * Steps), CeilingEnd = round(horizon - RightSectorCeiling * V1ScaleFactor);
     float FloorStep = -(RightSectorFloor * Steps), FloorStart = round(horizon - RightSectorFloor * V1ScaleFactor);
 
-	bool bDrawUpperSection = false, bDrawLowerSection = false, UpdateFloor = false, UpdateCeiling = false;;
+	bool bDrawUpperSection = false, bDrawLowerSection = false;
 	float UpperHeightStep = 0, iUpperHeight = 0, LowerHeightStep = 0, iLowerHeight = 0;
 
     if (seg.lSector)
     {
 		float LeftSectorCeiling = seg.lSector->ceilingHeight - v.z;
 		float LeftSectorFloor = seg.lSector->floorHeight - v.z;
-
-		UpdateCeiling = (LeftSectorCeiling != RightSectorCeiling);
-		UpdateFloor = (LeftSectorFloor != RightSectorFloor);
-
-		if (seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight) // closed door
-			UpdateCeiling = UpdateFloor = true;
-		if (seg.rSector->ceilingHeight <= v.z) // below view plane
-			UpdateCeiling = false;
-		if (seg.rSector->floorHeight >= v.z) // above view plane
-			UpdateFloor = false;
 
         if (LeftSectorCeiling < RightSectorCeiling)
             bDrawUpperSection = true;
@@ -236,18 +226,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			{
 				if (seg.lSector->sky)	DrawSky(seg.lSector->sky, uppertop, upperbot);
 				else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, CeilingEnd, iUpperHeight);
-				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			}
-			else if (UpdateCeiling || 1) ceilingClipHeight[x] = CurrentCeilingEnd - 1;
+			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 
 			if (bDrawLowerSection)
-			{
 				DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, iLowerHeight, FloorStart);
-				floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
-			}
-			else if (UpdateFloor || 1) floorClipHeight[x] = CurrentFloorStart + 1;
+			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{

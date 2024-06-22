@@ -68,7 +68,7 @@ public:
 	uint16_t pixel(int x, int y) const
 	{
 		while (patchColumnData[x].topDelta != 0xff && patchColumnData[x].topDelta + patchColumnData[x].length < y) x++;
-		if (patchColumnData[x].topDelta != 0xff && (y - patchColumnData[x].topDelta) < patchColumnData[x].length && y > patchColumnData[x].topDelta)
+		if (patchColumnData[x].topDelta != 0xff && (y - patchColumnData[x].topDelta) < patchColumnData[x].length && y >= patchColumnData[x].topDelta)
 			return patchColumnData[x].columnData[y - patchColumnData[x].topDelta];
 		return 256;
 	}

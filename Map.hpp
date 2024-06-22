@@ -41,6 +41,10 @@ protected:
 	{
 		return ((((v.x - nodes[node].x) * nodes[node].dy) - ((v.y - nodes[node].y) * nodes[node].dx)) <= 0);
 	}
+	
+	struct Subsector { uint16_t numSegs, firstSeg; };
+	struct BBox { int16_t top, bottom, left, right; };
+	struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
 
 	std::vector<Thing> things;
     std::vector<Sector> sectors;

@@ -110,10 +110,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, float d2, const Viewpoint &v)
 {
-	auto GetScaleFactor = [&](int x) { return std::clamp(d1 + x * d2, 0.00390625f, 64.0f); };
-
-    const float x1z = GetScaleFactor(x1);
-    const float dx = (GetScaleFactor(x2) - x1z) / (x2 - x1);
+    const float x1z = x1 * d2 + d1;
+	const float dx = std::clamp(d2, -64.f, 64.f);
 
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 

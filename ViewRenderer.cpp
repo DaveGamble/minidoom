@@ -191,6 +191,18 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			}
 		};
 		
+		auto DrawSky = [&](const Patch *sky, int from, int to) {
+			float tx = fmodf((x / (float)renderWidth - 2 * v.angle / M_PI) * sky->getWidth(), sky->getWidth());
+			if (tx < 0) tx += sky->getWidth();
+			for (int i = from; i < to; i++)
+			{
+				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() / (float)renderHeight, -1.f, sky->getHeight() - 1.f);
+				float tx2 = tx;
+				if (ty == -1) tx2 = ty = 0;
+				sky->renderColumn(screenBuffer + rowlen * i + x, rowlen, sky->getColumnDataIndex((int)tx2), 1, -(int)ty, 1, lut);
+			}
+		};
+		
 		if (CurrentCeilingEnd > CurrentFloorStart)
 		{
 			CeilingEnd += CeilingStep;
@@ -208,6 +220,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			iUpperHeight += UpperHeightStep;
 			iLowerHeight += LowerHeightStep;
 
+			if (seg.rSector->sky)
+				DrawSky(seg.rSector->sky, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
+			else
 				DrawCeiling(seg.rSector->ceilingtexture, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 
 			if (bDrawUpperSection)
@@ -230,6 +245,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		{
 			DrawTexture(seg.linedef->rSidedef->middletexture, CurrentCeilingEnd, CurrentFloorStart, CeilingEnd, FloorStart);
 			DrawFloor(seg.rSector->floortexture, CurrentFloorStart, floorClipHeight[x]);
+			if (seg.rSector->sky)
+				DrawSky(seg.rSector->sky, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
+			else
 				DrawCeiling(seg.rSector->ceilingtexture, std::max(0, ceilingClipHeight[x]), CurrentCeilingEnd);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;

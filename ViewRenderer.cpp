@@ -226,7 +226,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		
         if (seg.lSector)
         {
-			if (seg.linedef->rSidedef->middletexture && midtop > midbot && FloorStart > CeilingEnd)
+			if (seg.linedef->rSidedef->middletexture && midtop < midbot && FloorStart > CeilingEnd)
 				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, (int)CeilingEnd, (int)FloorStart, lut});
 
 			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);

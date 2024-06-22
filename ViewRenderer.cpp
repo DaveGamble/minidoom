@@ -36,7 +36,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 		renderLater& r = renderLaters[i];
 		for (int y = r.from; y < r.to; y++)
 		{
-			uint16_t p = r.texture->pixel(r.u, r.dv * (y + r.v) + r.voff);
+			uint16_t p = r.texture->pixel(r.u, r.dv * y + r.v);
 			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
 		}
 	}
@@ -206,8 +206,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
         if (seg.lSector)
         {
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, -yCeiling,
-					(float)(seg.lSector->ceilingHeight - seg.lSector->floorHeight) / (float(yFloor - yCeiling)), (float)seg.linedef->rSidedef->dy, lut});
+			{
+				float dv = (seg.lSector->ceilingHeight - seg.lSector->floorHeight), a = yCeiling, b = yFloor;
+				dv /= (b - a);
+				float v = -a * dv;
+				if (seg.linedef->flags & 16) {v = -b * dv - (seg.rSector->floorHeight - seg.rSector->ceilingHeight);}
+				v += seg.linedef->rSidedef->dy;
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, v, dv, lut});
+			}
 
 			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);

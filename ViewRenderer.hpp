@@ -18,7 +18,7 @@ protected:
 
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 
-	struct renderLater {const Texture *texture; int x; int from, to; float u, v, dv, voff; const uint8_t *light;};
+	struct renderLater {const Texture *texture; int x; int from, to; float u, v, dv; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;

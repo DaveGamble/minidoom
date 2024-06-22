@@ -23,12 +23,10 @@ public:
 		dirs = (const Directory*)(data + ((const uint32_t*)data)[2]);
 
 		std::vector<uint8_t> lump = getLumpNamed("PNAMES");
-		
 		int32_t count = *(int32_t*)lump.data();
-		char Name[9] {};
 		for (int i = 0; i < count; ++i)
 		{
-			memcpy(Name, lump.data() + 4 + 8 * i, 8);
+			char Name[9] {}; memcpy(Name, lump.data() + 4 + 8 * i, 8);
 			pnames.push_back(Name);
 		}
 		

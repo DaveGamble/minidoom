@@ -58,10 +58,10 @@ public:
 			int y = (patchColumnData[firstColumn].topDelta + yOffset < 0) ? - patchColumnData[firstColumn].topDelta - yOffset : 0;
 			int sl = floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
 			int el = std::min(floor((patchColumnData[firstColumn].length - y) * scale) + sl, (float)maxHeight);
-			int run = std::max(el - sl, 0);
-			int start = rowlen * sl;
+			int run = std::max(el - sl, 0), start = rowlen * sl;
 			const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-			for (int i = 0, to = 0; to < run && i < patchColumnData[firstColumn].length; i++) while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[from[i]];
+			for (int i = 0, to = 0; to < run && i < patchColumnData[firstColumn].length; i++)
+				while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[from[i]];
 			++firstColumn;
 		}
 	}

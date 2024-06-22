@@ -65,7 +65,6 @@ protected:
 		if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return {};
 		return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
 	}
-	
 
     bool isPointOnLeftSide(const Viewpoint &v, int node) const
 	{

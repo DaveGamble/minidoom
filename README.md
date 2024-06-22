@@ -5,7 +5,7 @@ It's in a very rough state, and includes SDL2 directly.
 Tidying is for later. Although maybe it'll end up as an stb style library. Which would rock.
 
 TODO:
-- What's going on with texture positioning?
+- Simplify all the maths
 - Animated lighting / textures!!
 - Is there a simpler way to do clip detection?
 - Optimise floor/ceiling drawing

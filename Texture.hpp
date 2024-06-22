@@ -13,7 +13,6 @@ public:
 
 		width = textureData->width;
 		height = textureData->height;
-
 		columns.resize(width);
 
 		for (int i = 0; i < textureData->patchCount; ++i)
@@ -30,20 +29,21 @@ public:
 					}
 					patch->composeColumn(columns[x].overlap.data(), height, patch->getColumnDataIndex(x - texturePatch[i].dx), texturePatch[i].dy);	// Render your goodies on top.
 				}
-				else
-					columns[x] = { patch->getColumnDataIndex(x - texturePatch[i].dx), texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
+				else columns[x] = { patch->getColumnDataIndex(x - texturePatch[i].dx), texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
 			}
 		}
 	}
 
-	uint16_t pixel(float u, float v) const { int x = u - width * floor(u / width), y = v - height * floor(v / height); return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset); }
+	uint16_t pixel(float u, float v) const { int x = u - width * floor(u / width), y = v - height * floor(v / height);
+		return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset);
+	}
 	void renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset, int yEnd, const uint8_t *lut) const
 	{
-		if (columns[c].overlap.size())
-		{
-			for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++) while (toy < (y + 1) * scale && toy < yEnd + yOffset * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = lut[columns[c].overlap[y]];
-		}
-		else columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale, lut);
+		if (!columns[c].overlap.size())
+			columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale, lut);
+		else
+			for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++)
+				while (toy < (y + 1) * scale && toy < yEnd + yOffset * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = lut[columns[c].overlap[y]];
 	}
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }

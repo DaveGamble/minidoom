@@ -113,12 +113,12 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
     const float x1z = x1 * d2 + d1;
 	const float dx = std::clamp(d2, -64.f, 64.f);
 
-	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
-
 	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
 	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
 	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
 	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
+
+	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 
 	float yCeiling = horizon - (seg.rSector->ceilingHeight - v.z) * x1z;
 	float yFloor = horizon - (seg.rSector->floorHeight - v.z) * x1z;
@@ -178,22 +178,15 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 			}
 		};
 		
-		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f);
-		int CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);
+		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f), CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);
 
-		int upper = std::min(floorClipHeight[x] - 1.f, yUpper);
-		int lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
+		int upper = std::min(floorClipHeight[x] - 1.f, yUpper), lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
 
-		int ceiltop = std::max(0, ceilingClipHeight[x]);
-		int ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart);
-		int floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]);
-		int floorbot = floorClipHeight[x];
-		int uppertop = ceilbot;
-		int upperbot = upper;
-		int midtop = std::max(std::max(0, ceilbot), ceilingClipHeight[x]);
-		int midbot = std::min(floortop, renderHeight - 1);
-		int lowertop = lower;
-		int lowerbot = floortop;
+		int ceiltop = std::max(0, ceilingClipHeight[x]), ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart);
+		int floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]), floorbot = floorClipHeight[x];
+		int uppertop = ceilbot, upperbot = upper;
+		int midtop = std::max(std::max(0, ceilbot), ceilingClipHeight[x]), midbot = std::min(floortop, renderHeight - 1);
+		int lowertop = lower, lowerbot = floortop;
 		
         if (seg.lSector)
         {

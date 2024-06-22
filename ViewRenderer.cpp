@@ -143,13 +143,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 
 	for (int x = x1; x <= x2; x++)
     {
-		const float u = std::clamp((uA + x * uB) / (uC + x * uD), 0.f, 1.f);
+		const float u = ((uA + x * uB) / (uC + x * uD)) * sqrt((seg.linedef->start.x - seg.linedef->end.x) * (seg.linedef->start.x - seg.linedef->end.x) + (seg.linedef->start.y - seg.linedef->end.y) * (seg.linedef->start.y - seg.linedef->end.y));
 
-		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl) {
+		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl, int dy) {
 			if (!texture || to < from || fl <= cl) return;
 			for (int y = from; y < to; y++)
 			{
-				uint16_t p = texture->pixel(u, (y - cl) / (float(fl - cl)));
+				uint16_t p = texture->pixel(u + seg.linedef->rSidedef->dx, dy * (y - cl) / (float(fl - cl)) + seg.linedef->rSidedef->dy);
 				if (p != 256) screenBuffer[rowlen * y + x] = lut[p];
 			}
 		};
@@ -202,17 +202,17 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, uppertop, upperbot);
-			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, yCeiling, yUpper);
+			else					DrawTexture(seg.linedef->rSidedef->uppertexture, uppertop, upperbot, yCeiling, yUpper, (seg.rSector->ceilingHeight - seg.lSector->ceilingHeight));
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 
-			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, yLower, yFloor);
+			DrawTexture(seg.linedef->rSidedef->lowertexture, lowertop, lowerbot, yLower, yFloor, (seg.lSector->floorHeight - seg.rSector->floorHeight));
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
-			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor);
+			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor, (seg.rSector->ceilingHeight - seg.rSector->floorHeight));
 			DrawFloor(seg.rSector->floortexture, floortop, floorbot);
 			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);

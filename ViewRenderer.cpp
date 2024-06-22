@@ -35,7 +35,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	{
 		renderLater& r = renderLaters[i];
 		float scale = (r.fl - r.cl) / (float)r.texture->getHeight();
-		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from), lights[r.light]);
+		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from), r.light);
 	}
 }
 
@@ -200,11 +200,10 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 		
         if (seg.lSector)
         {
-
 			int upper = std::min(floorClipHeight[x] - 1.f, iUpperHeight);
 			int lower = std::max(iLowerHeight, ceilingClipHeight[x] + 1.f);
 			if (seg.linedef->rSidedef->middletexture && CurrentFloorStart > CurrentCeilingEnd && FloorStart > CeilingEnd)
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, std::max(CurrentCeilingEnd, 0), std::min(CurrentFloorStart, renderHeight - 1), u, (int)CeilingEnd, (int)FloorStart, seg.rSector->lightlevel});
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, std::max(CurrentCeilingEnd, 0), std::min(CurrentFloorStart, renderHeight - 1), u, (int)CeilingEnd, (int)FloorStart, lut});
 
 			iUpperHeight += UpperHeightStep;
 			iLowerHeight += LowerHeightStep;
@@ -216,7 +215,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 				DrawTexture(seg.linedef->rSidedef->uppertexture, CurrentCeilingEnd, upper, CeilingEnd, iUpperHeight);
 				ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			}
-			else if (UpdateCeiling) ceilingClipHeight[x] = CurrentCeilingEnd - 1;
+			else if (UpdateCeiling || 1) ceilingClipHeight[x] = CurrentCeilingEnd - 1;
 
 			DrawFloor(seg.rSector->floortexture, x, CurrentFloorStart, floorClipHeight[x]);
 
@@ -225,7 +224,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 				DrawTexture(seg.linedef->rSidedef->lowertexture, lower, CurrentFloorStart, iLowerHeight, FloorStart);
 				floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 			}
-			else if (UpdateFloor) floorClipHeight[x] = CurrentFloorStart + 1;
+			else if (UpdateFloor || 1) floorClipHeight[x] = CurrentFloorStart + 1;
 		}
         else
 		{

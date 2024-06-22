@@ -6,9 +6,9 @@ class Texture
 public:
     template<typename F> Texture(const uint8_t *ptr, F &&getPatch)
 	{
-		struct WADTextureData { char textureName[8]; uint32_t flags; uint16_t width, height; uint32_t columnDirectory; uint16_t patchCount; };// ColumnDirectory Unused value.
+		struct WADTextureData { char textureName[8]; uint32_t alwayszero; uint16_t width, height; uint32_t alwayszero2; uint16_t patchCount; };
 		WADTextureData *textureData = (WADTextureData*)ptr;
-		struct WADTexturePatch { int16_t dx, dy; uint16_t pnameIndex, stepDir, colorMap; }; // StepDir, ColorMap Unused values.
+		struct WADTexturePatch { int16_t dx, dy; uint16_t pnameIndex, alwaysone, alwayszero; };
 		WADTexturePatch *texturePatch = (WADTexturePatch*)(ptr + 22);
 
 		width = textureData->width;

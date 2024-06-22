@@ -199,7 +199,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, floa
 				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() / (float)renderHeight, -1.f, sky->getHeight() - 1.f);
 				float tx2 = tx;
 				if (ty == -1) tx2 = ty = 0;
-				sky->renderColumn(screenBuffer + rowlen * i + x, rowlen, sky->getColumnDataIndex((int)tx2), 1, -(int)ty, 1, lut);
+				sky->renderColumn(screenBuffer + rowlen * i + x, rowlen, sky->getColumnDataIndex((int)tx2), 1, -(int)ty, 1, lights[0]);
 			}
 		};
 		

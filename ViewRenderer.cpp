@@ -34,8 +34,11 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{
 		renderLater& r = renderLaters[i];
-		float scale = (r.fl - r.cl) / (float)r.texture->getHeight();
-		r.texture->renderColumn(screenBuffer + rowlen * r.from + r.x, rowlen, r.texture->getWidth() * r.u, scale, (r.from - r.cl) / scale, (r.to - r.from), r.light);
+		for (int y = r.from; y < r.to; y++)
+		{
+			uint16_t p = r.texture->pixel(r.u, r.dv * y + r.v);
+			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
+		}
 	}
 }
 
@@ -130,20 +133,22 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
 	const float distanceToNormal = sx * (seg.linedef->end.y - seg.linedef->start.y) - sy * (seg.linedef->end.x - seg.linedef->start.x);
 	const float sinv = v.sina, cosv = v.cosa;
-	const float uB = sinv * sy + sx * cosv,
+	const float seglen = sqrt((seg.linedef->start.x - seg.linedef->end.x) * (seg.linedef->start.x - seg.linedef->end.x) + (seg.linedef->start.y - seg.linedef->end.y) * (seg.linedef->start.y - seg.linedef->end.y));
+
+	const float uB = (sinv * sy + sx * cosv) * seglen,
 				uD = -d2 * distanceToNormal,
-				uA = distancePlayerToScreen * (cosv * sy - sinv * sx) - halfRenderWidth * uB,
+				uA = distancePlayerToScreen * (cosv * sy - sinv * sx) * seglen - halfRenderWidth * uB,
 				uC = -d1 * distanceToNormal;
   
 	const float pc = cosv / 64, ps = sinv / 64;
 	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	const float vA = pc - ps, vB = 2 * ps / renderWidth, vC = v.x / 64.f, vD = pc + ps, vE = -2 * pc / renderWidth, vF = v.y / 64.f;
-
+	
 	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];
 
 	for (int x = x1; x <= x2; x++)
     {
-		const float u = ((uA + x * uB) / (uC + x * uD)) * sqrt((seg.linedef->start.x - seg.linedef->end.x) * (seg.linedef->start.x - seg.linedef->end.x) + (seg.linedef->start.y - seg.linedef->end.y) * (seg.linedef->start.y - seg.linedef->end.y));
+		const float u = ((uA + x * uB) / (uC + x * uD));
 
 		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl, int dy) {
 			if (!texture || to < from || fl <= cl) return;
@@ -196,7 +201,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
         if (seg.lSector)
         {
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, (int)yCeiling, (int)yFloor, lut});
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u + seg.linedef->rSidedef->dx, 
+					(seg.lSector->ceilingHeight - seg.lSector->floorHeight) * (-yCeiling) / (float(yFloor - yCeiling)) + seg.linedef->rSidedef->dy,
+					(float)(seg.lSector->ceilingHeight - seg.lSector->floorHeight) / (float(yFloor - yCeiling)), lut});
 
 			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
 			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);

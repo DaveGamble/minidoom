@@ -8,7 +8,6 @@ TODO:
 - What's going on with texture positioning?
 - Animated lighting / textures!!
 - Is there a simpler way to do clip detection?
-- Skybox
 - Optimise floor/ceiling drawing
 - Render sprites
 - View bob?

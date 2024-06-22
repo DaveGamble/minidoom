@@ -73,21 +73,17 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	
 	if (solid && solidWallRanges.size() < 2) return;
 
-	const float idistanceToNormal = 1.0 / (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
-	const float d2 = -(ca * (seg.end.x - seg.start.x) + sa * (seg.end.y - seg.start.y)) * idistanceToNormal;
-	const float d1 = distancePlayerToScreen * (sa * (seg.end.x - seg.start.x) - ca * (seg.end.y - seg.start.y)) * idistanceToNormal - halfRenderWidth * d2;
-
     auto f = solidWallRanges.begin(); while (x1 - 1 > f->end) ++f;
 
     if (x1 < f->start)
     {
         if (x2 < f->start - 1)
         {
-            storeWallRange(seg, x1, x2, d1, d2, v); //All of the wall is visible, so insert it
+            storeWallRange(seg, x1, x2, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(f, {x1, x2});
             return;
         }
-        storeWallRange(seg, x1, f->start - 1, d1, d2, v); // The end is already included, just update start
+        storeWallRange(seg, x1, f->start - 1, v); // The end is already included, just update start
         if (solid) f->start = x1;
     }
     
@@ -95,21 +91,27 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     std::list<SolidSegmentRange>::iterator nextWall = f;
     while (x2 >= next(nextWall, 1)->start - 1)
     {
-        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, d1, d2, v); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, v); // partialy clipped by other walls, store each fragment
 		if (x2 > (++nextWall)->end) continue;
 		if (!solid) return;
 		f->end = nextWall->end;
 		solidWallRanges.erase(++f, ++nextWall);
 		return;
     }
-    storeWallRange(seg, nextWall->end + 1, x2, d1, d2, v);
+    storeWallRange(seg, nextWall->end + 1, x2, v);
 	if (!solid) return;
 	f->end = x2;
 	if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float d1, float d2, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoint &v)
 {
+	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
+	const float ca = v.cosa, sa = v.sina;
+	const float idistanceToNormal = 1.0 / (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
+	const float d2 = -(ca * (seg.end.x - seg.start.x) + sa * (seg.end.y - seg.start.y)) * idistanceToNormal;
+	const float d1 = distancePlayerToScreen * (sa * (seg.end.x - seg.start.x) - ca * (seg.end.y - seg.start.y)) * idistanceToNormal - halfRenderWidth * d2;
+
     const float x1z = x1 * d2 + d1;
 	const float dx = std::clamp(d2, -64.f, 64.f);
 

@@ -27,9 +27,9 @@ public:
 			std::vector<const Linedef *> tests2 = getBlock(x2, y2);
 			tests.insert(tests.end(), tests2.begin(), tests2.end());
 		}
-		for (const Linedef *l : tests)	// https://en.wikipedia.org/wiki/Line–line_intersection
+		for (const Linedef *l : tests)	// Graphics Gems 3.
 		{
-			if (l->lSidedef && !(l->flags & 1)) continue;
+			if (l->lSidedef && !(l->flags & 1)) continue;	// Could test for doors here.
 			const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
 			float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
 			if (den > 0) { if (tn < 0 || tn > den) continue; } else if (tn > 0 || tn < den) continue;
@@ -37,6 +37,7 @@ public:
 			if (den > 0) { if (un < 0 || un > den) continue; } else if (un > 0 || un < den) continue;
 			return true;
 		}
+		// Test thing collisions here?
 		return false;
 	}
 

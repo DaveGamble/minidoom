@@ -65,6 +65,7 @@ public:
 			++firstColumn;
 		}
 	}
+	uint16_t pixel(int x, int y) const { while (patchColumnData[x].topDelta != 0xff && patchColumnData[x].topDelta + patchColumnData[x].length < y) x++; if (patchColumnData[x].topDelta != 0xff && (y - patchColumnData[x].topDelta) < patchColumnData[x].length) return patchColumnData[x].columnData[y - patchColumnData[x].topDelta]; return 256;}
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const
 	{
 		while (patchColumnData[firstColumn].topDelta != 0xFF)

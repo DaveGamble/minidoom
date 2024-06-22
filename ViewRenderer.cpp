@@ -147,15 +147,18 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 
 		auto DrawTexture = [&](const Texture *texture, int from, int to, int cl, int fl) {
 			if (!texture || to < from || fl <= cl) return;
-			float scale = (fl - cl) / (float)texture->getHeight();
-			texture->renderColumn(screenBuffer + rowlen * from + x, rowlen, (texture->getWidth() - 1) * u, scale, std::max((from - cl), 0) / scale, (to - from), lut);
+			for (int y = from; y < to; y++)
+			{
+				uint16_t p = texture->pixel(u, (y - cl) / (float(fl - cl)));
+				if (p != 256) screenBuffer[rowlen * y + x] = lut[p];
+			}
 		};
 
 		auto DrawFloor = [&](const Flat *flat, int from, int to) {
 			for (int i = from; i < to; i++)
 			{
 				float z = vG / (i - horizon);
-				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0, lut);
+				screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
 		};
 
@@ -163,7 +166,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 			for (int i = from; i < to; i++)
 			{
 				float z = vH / (horizon - i);
-				flat->renderSpan(screenBuffer + i * rowlen + x, 1, z * (vA + vB * x) + vC, z * (vD + vE * x) + vF, 0, 0, lut);
+				screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
 		};
 		

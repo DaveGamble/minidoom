@@ -35,6 +35,7 @@ public:
 	}
 
 	uint16_t pixel(float u, float v) const { int x = u - width * floor(u / width), y = v - height * floor(v / height);
+		x %= width; y %= height;
 		return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset);
 	}
 	void renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset, int yEnd, const uint8_t *lut) const

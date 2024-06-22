@@ -36,6 +36,14 @@ protected:
 		renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild, v, addWall);
 		renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild, v, addWall);
 	}
+	
+	std::vector<const Linedef *> getBlock(int x, int y) const
+	{
+		if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return {};
+		if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return {};
+		return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
+	}
+	
 
     bool isPointOnLeftSide(const Viewpoint &v, int node) const
 	{
@@ -53,4 +61,7 @@ protected:
     std::vector<Seg> segs;
     std::vector<Subsector> subsectors;
     std::vector<Node> nodes;
+	
+	std::vector<std::vector<std::vector<const Linedef *>>> blockmap;
+	int16_t blockmap_x, blockmap_y;
 };

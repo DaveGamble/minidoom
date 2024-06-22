@@ -61,4 +61,21 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) things.push_back(*(Thing*)(ptr + i));
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
+	struct WADBlockmap { int16_t x, y; uint16_t numCols, numRows; };
+	if (seek("BLOCKMAP"))
+	{
+		WADBlockmap *w = (WADBlockmap *)ptr;
+		blockmap_x = w->x;
+		blockmap_y = w->y;
+		blockmap.resize(w->numRows);
+		for (int i = 0; i < w->numRows; i++) blockmap[i].resize(w->numCols);
+		const uint16_t *u = (const uint16_t *)ptr;
+		const uint16_t *maps = u + 4;
+		for (int i = 0; i < w->numRows; i++)
+			for (int j = 0; j < w->numCols; j++)
+			{
+				const uint16_t *block = u + (*maps++) + 1;
+				while (*block != 0xffff) blockmap[i][j].push_back(&linedefs[*block++]);
+			}
+	}
 }

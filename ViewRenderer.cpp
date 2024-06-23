@@ -48,7 +48,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	if (toV1x * toV2y >= toV1y * toV2x) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view. (It's behind us)
 
 	const float ca = v.cosa, sa = v.sina;
-	float tov1z = toV1x * ca + toV1y * sa, tov1x = toV1x * sa - toV1y * ca, tov2z = toV2x * ca + toV2y * sa, tov2x = toV2x * sa - toV2y * ca;	// Rotate vectors to be in front of us.
+	const float tov1z = toV1x * ca + toV1y * sa, tov2z = toV2x * ca + toV2y * sa;
+	float tov1x = toV1x * sa - toV1y * ca, tov2x = toV2x * sa - toV2y * ca;	// Rotate vectors to be in front of us.
 	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
 	// x = position left to right. left = -1, right = 1.
 
@@ -56,8 +57,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	if (tov1z < -tov1x && tov2z < -tov2x) return;	// Both points are to the left.
 	if (tov1z < tov1x && tov1z > -tov1x) return;	// V1 is within 45 degrees of the X axis (it's on your right hand side, out of the FOV). Both points are to the right.
 
-	if (tov1z < -tov1x) {tov1z = 1; tov1x = -1;} // Clip hard left
-	if (tov2z < tov2x) {tov2z = tov2x = 1;}	// Clip hard right
+	if (tov1z < -tov1x) tov1x = -tov1z; // Clip hard left
+	if (tov2z < tov2x) tov2x = tov2z;	// Clip hard right
 	
 	auto AngleToScreen = [&](float dz, float dx) {
 		return distancePlayerToScreen + round(dx * halfRenderWidth / dz);

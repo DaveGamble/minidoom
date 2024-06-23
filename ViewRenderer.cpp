@@ -125,15 +125,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 	const float d2 = -(cosv * (seg.end.x - seg.start.x) + sinv * (seg.end.y - seg.start.y)) * idistanceToNormal;
 	const float d1 = distancePlayerToScreen * (sinv * (seg.end.x - seg.start.x) - cosv * (seg.end.y - seg.start.y)) * idistanceToNormal - halfRenderWidth * d2;
 
-    const float x1z = x1 * d2 + d1;
-	const float dx = std::clamp(d2, -64.f, 64.f);
+    const float x1z = x1 * d2 + d1;	// <- this
+	const float dx = std::clamp(d2, -64.f, 64.f);	// <- this
 
-	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
-	const float distanceToNormal = sx * (seg.linedef->end.y - seg.linedef->start.y) - sy * (seg.linedef->end.x - seg.linedef->start.x);
+	const float distanceToNormal = -toV1x * (seg.linedef->end.y - seg.linedef->start.y) + toV1y * (seg.linedef->end.x - seg.linedef->start.x);
 
-	const float uB = (sinv * sy + sx * cosv) * seglen,
+	const float uB = (sinv * -toV1y + -toV1x * cosv) * seglen,
 				uD = -d2 * distanceToNormal,
-				uA = distancePlayerToScreen * (cosv * sy - sinv * sx) * seglen - halfRenderWidth * uB,
+				uA = distancePlayerToScreen * (cosv * -toV1y + sinv * toV1x) * seglen - halfRenderWidth * uB,
 				uC = -d1 * distanceToNormal;
 	// Calculations I am doing: ((uA + x * uB) / (uC + x * uD)), * dx, * x1z
 	//

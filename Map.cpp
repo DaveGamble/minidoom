@@ -45,7 +45,8 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 		WADLinedef *wl = (WADLinedef*)(ptr + i);
 		linedefs.push_back({vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
 			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef,
-			(wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
+			(wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef,
+			sqrtf((vertices[wl->start].x - vertices[wl->end].x) * (vertices[wl->start].x - vertices[wl->end].x) + (vertices[wl->start].y - vertices[wl->end].y) * (vertices[wl->start].y - vertices[wl->end].y))
 		});
 	}
 

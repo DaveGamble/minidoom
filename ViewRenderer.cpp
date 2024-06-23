@@ -115,6 +115,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
 	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
 	const float tdX = seg.linedef->rSidedef->dx, tdY = seg.linedef->rSidedef->dy;
+	const float seglen = seg.linedef->len;
 
 	// Fixme
 	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
@@ -129,7 +130,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 	const int sx = v.x - seg.linedef->start.x, sy = v.y - seg.linedef->start.y;
 	const float distanceToNormal = sx * (seg.linedef->end.y - seg.linedef->start.y) - sy * (seg.linedef->end.x - seg.linedef->start.x);
 	const float sinv = v.sina, cosv = v.cosa;
-	const float seglen = sqrt((seg.linedef->start.x - seg.linedef->end.x) * (seg.linedef->start.x - seg.linedef->end.x) + (seg.linedef->start.y - seg.linedef->end.y) * (seg.linedef->start.y - seg.linedef->end.y));
 
 	const float uB = (sinv * sy + sx * cosv) * seglen,
 				uD = -d2 * distanceToNormal,

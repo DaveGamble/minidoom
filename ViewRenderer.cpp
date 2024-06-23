@@ -135,8 +135,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 
 	float yCeiling = horizon + (seg.rSector->ceilingHeight - v.z) * x1z;
 	float yFloor = horizon + (seg.rSector->floorHeight - v.z) * x1z;
-	float yUpper = seg.lSector ? horizon + ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
-	float yLower = seg.lSector ? horizon + ((seg.lSector->floorHeight - v.z) * x1z) : 0;
+	float yUpper = seg.lSector ? horizon + (seg.lSector->ceilingHeight - v.z) * x1z : 0;
+	float yLower = seg.lSector ? horizon + (seg.lSector->floorHeight - v.z) * x1z : 0;
 	float skyAng = x1 * dSkyAng - 2 * v.angle / M_PI;
 	
 	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];

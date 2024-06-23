@@ -10,7 +10,17 @@ public:
     Map(const std::string &mapName, class WADLoader& wad);
 	~Map() {}
 
-	template<typename F> void render3DView(const Viewpoint &v, F &&addWall) const { renderBSPNodes((int)nodes.size() - 1, v, addWall); }
+	template<typename F> void render3DView(const Viewpoint &v, F &&addWall, int frame)
+	{
+		for (Sector &sec : sectors)
+		{
+			if (!sec.type) continue;
+			if (sec.type == 2 || sec.type == 4 || sec.type == 12) sec.lightlevel = ((frame % 60) < 30) ? sec.maxlightlevel : sec.minlightlevel;
+			if (sec.type == 3 || sec.type == 13) sec.lightlevel = ((frame % 120) < 60) ? sec.maxlightlevel : sec.minlightlevel;
+			if (sec.type == 1) sec.lightlevel = (rand() & 1) ? sec.maxlightlevel : sec.minlightlevel;
+		}
+		renderBSPNodes((int)nodes.size() - 1, v, addWall);
+	}
 
     int getPlayerSubSectorHeight(const Viewpoint &v) const
 	{

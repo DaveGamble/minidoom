@@ -33,7 +33,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	solidWallRanges.push_back({renderWidth, INT_MAX});
 	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
-	map.render3DView(view, [&] (const Seg &seg){ addWallInFOV(seg, view); });
+	map.render3DView(view, [&] (const Seg &seg){ addWallInFOV(seg, view); }, frame);
 
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{

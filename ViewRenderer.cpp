@@ -198,6 +198,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 		int floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]);
 		int midtop = std::max(std::max(0, ceilbot), ceilingClipHeight[x]), midbot = std::min(floortop, renderHeight - 1);
 		
+		DrawFloor(seg.rSector->floortexture, floortop, floorClipHeight[x]);
+		DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
+
         if (seg.lSector)
         {
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
@@ -208,8 +211,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, ceilbot, upper);
 			else					DrawTexture(seg.linedef->rSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
-			DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
-			DrawFloor(seg.rSector->floortexture, floortop, floorClipHeight[x]);
 			DrawTexture(seg.linedef->rSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
@@ -217,8 +218,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
         else
 		{
 			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight);
-			DrawFloor(seg.rSector->floortexture, floortop, floorClipHeight[x]);
-			DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}

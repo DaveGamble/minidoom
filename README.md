@@ -5,19 +5,19 @@ It's in a very rough state, and includes SDL2 directly.
 Tidying is for later. Although maybe it'll end up as an stb style library. Which would rock.
 
 TODO:
-- Simplify all the maths
+Graphics:
 - Animated lighting / textures!!
+- Render sprites
+- Automap?
+Optimising:
 - Is there a simpler way to do clip detection?
 - Optimise floor/ceiling drawing
-- Render sprites
+Gamey stuff:
 - View bob?
 - SFX
 - Music
-- Maybe actually build some game code around it?
-- Automap?
 - A nice interface for selecting weapons and drawing firing animations?
 - Be really cool if we could do, like, doors and floor movements and stuff?
-- Event triggering?
 
 
 Build is for Xcode on Apple Silicon macs (but if you replaced the precompiled SDL binary you could do whatever)

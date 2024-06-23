@@ -136,26 +136,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	float yFloor = horizon + (seg.rSector->floorHeight - v.z) * x1z;
 	float yUpper = seg.lSector ? horizon + (seg.lSector->ceilingHeight - v.z) * x1z : 0;
 	float yLower = seg.lSector ? horizon + (seg.lSector->floorHeight - v.z) * x1z : 0;
-//	float z = uC + x1 * uD = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1) + x1 * z2 - x1 * z1;
-
-	/*
-xscreen = distancePlayerToScreen + halfRenderWidth * x / z
-	 and the relationship is ux1 + t * (ux2 - ux1) = x, z1 + t * (z2 - z1) = z
-	 so t = (x - ux1) / (ux2 - ux1)
-	 and  (x - ux1) (z2 - z1) = (z - z1) (ux2 - ux1)
-	 and x = ux1 + (ux2 - ux1) (z - z1) / (z2 - z1)
-	 sooooo
-	 screenx = distancePlayerToScreen + halfRenderWidth * (ux1 + (ux2 - ux1) (z - z1) / (z2 - z1)) / z
-	 screenx * z = distancePlayerToScreen * z + halfRenderWidth * (ux1 + (ux2 - ux1) (z - z1) / (z2 - z1))
-	 z (screenx - distancePlayerToScreen) = halfRenderWidth * (ux1 + (ux2 - ux1) (z - z1) / (z2 - z1))
-	 z (screenx - distancePlayerToScreen - halfRenderWidth * (ux2 - ux1) / (z2 - z1)) = halfRenderWidth * (ux1 -z1 * (ux2 - ux1) / (z2 - z1))
-	 z = halfRenderWidth * (ux1 - z1 * (ux2 - ux1) / (z2 - z1)) / ((screenx - distancePlayerToScreen - halfRenderWidth * (ux2 - ux1) / (z2 - z1)))
-	 z = halfRenderWidth * (ux1 * (z2 - z1) - z1 * (ux2 - ux1)) / ((screenx - distancePlayerToScreen) * (z2 - z1) - halfRenderWidth * (ux2 - ux1))
-	 z = halfRenderWidth * (ux1 * z2 - z1 * ux2) / ((screenx - distancePlayerToScreen) * (z2 - z1) - halfRenderWidth * (ux2 - ux1))
-	 z = -distanceToNormal * halfRenderWidth / ((screenx - distancePlayerToScreen) * (z2 - z1) - halfRenderWidth * (ux2 - ux1))
-	 z = -distanceToNormal * halfRenderWidth / (screenx * (z2 - z1) - halfRenderWidth * (z2 - z1 + ux2 - ux1))
-	 z = -distanceToNormal * halfRenderWidth / (screenx * uD + uC)
-	 */
 	float skyAng = x1 * dSkyAng - 2 * v.angle / M_PI;
 	
 	for (int x = x1; x <= x2; x++)

@@ -8,7 +8,9 @@
 
 ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[34][256])
 : renderWidth(renderXSize)
+, invRenderWidth(1.f / renderXSize)
 , renderHeight(renderYSize)
+, invRenderHeight(1.f / renderYSize)
 , halfRenderWidth(renderXSize / 2)
 , halfRenderHeight(renderYSize / 2)
 , distancePlayerToScreen(halfRenderWidth)	// 90 here is FOV
@@ -114,25 +116,20 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float seglen = seg.linedef->len;
 
 	// Fixme
-	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
-	
-//	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
-	const float idistanceToNormal = 1.0 / (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
+	const float idistanceToNormal = 1.0 / ((seg.start.y - v.y) * (seg.end.x - seg.start.x) - (seg.start.x - v.x) * (seg.end.y - seg.start.y));
+	//
 
 	const float uB = -z1 * seglen, uD = (z2 - z1), uA = distancePlayerToScreen * (ux1 + z1) * seglen, uC = -distancePlayerToScreen * ((ux2 - ux1) + (z2 - z1));
 	const float dx = -uD * idistanceToNormal, x1z = -uC * idistanceToNormal + x1 * dx;
 
-	// Calculations I am doing: ((uA + x * uB) / (uC + x * uD)), * dx, * x1z
-	//
-
 	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
-	const float vA = cosv - sinv, vB = 2 * sinv / renderWidth, vC = v.x, vD = -cosv - sinv, vE = 2 * cosv / renderWidth, vF = -v.y;
+	const float vA = cosv - sinv, vB = 2 * sinv * invRenderWidth, vC = v.x, vD = -cosv - sinv, vE = 2 * cosv * invRenderWidth, vF = -v.y;
 
 	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
 	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
 	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
 	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
-	const float dSkyAng = 1.0 / renderWidth;
+	const float dSkyAng = invRenderWidth;
 
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 
@@ -162,7 +159,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			int tx = (skyAng - floor(skyAng)) * sky->getWidth();
 			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
-				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() / (float)renderHeight, -1.f, sky->getHeight() - 1.f);
+				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() * invRenderHeight, -1.f, sky->getHeight() - 1.f);
 				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->getColumnDataIndex((ty < 0) ? 0 : tx), std::max(ty, 0.f))];
 			}
 		};

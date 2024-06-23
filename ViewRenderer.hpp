@@ -17,6 +17,7 @@ protected:
     void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &v);
 
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
+	float invRenderWidth, invRenderHeight;
 
 	struct renderLater {const Texture *texture; int x; int from, to; float u, v, dv; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;

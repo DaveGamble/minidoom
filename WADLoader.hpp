@@ -79,19 +79,39 @@ public:
 	{
 		std::vector<const Texture *> t;
 		std::string Name = toupper(name);
+		for (int i = 0; i < 13; i++)
+		{
+			if (Name != specialtextures[i][1]) continue;
+			int where = 0; while (where < pnames.size() && pnames[where] != specialtextures[i][0]) where++;
+			while (where < pnames.size() && pnames[where] != specialtextures[i][1]) t.push_back(textures.at(pnames[where++]).get());
+			break;
+		}
 		if (textures.count(Name)) t.push_back(textures.at(Name).get());
 		return t;
 	}
-	std::vector<const Flat *> getFlat(const std::string &name) const { std::vector<const Flat *> f;
-		if (flats.count(name)) f.push_back(flats.at(name).get());
+	std::vector<const Flat *> getFlat(const std::string &name) const
+	{
+		std::vector<const Flat *> f;
+		std::string Name = toupper(name);
+		for (int i = 0; i < 9; i++)
+		{
+			if (Name != specialflats[i][1]) continue;
+			int where = 0; while (where < numLumps && strncasecmp(specialflats[i][0], dirs[where].lumpName, 8)) where++;
+			while (where < numLumps && strncasecmp(Name.c_str(), dirs[where].lumpName, 8))
+			{
+				char buf[9] {}; strncpy(buf, dirs[where++].lumpName, 8); if (flats.count(buf)) f.push_back(flats.at(buf).get());
+			}
+			break;
+		}
+		if (flats.count(Name)) f.push_back(flats.at(Name).get());
 		return f;
 	}
 protected:
-	static constexpr const char *specialtextures[][2] = { {"BLODGR1", "BLODGR4"}, {"BLODRIP1", "BLODRIP4"}, {"FIREBLU1", "FIREBLU2"}, {"FIRELAV3", "FIRELAVA"},
+	static constexpr const char *specialtextures[13][2] = { {"BLODGR1", "BLODGR4"}, {"BLODRIP1", "BLODRIP4"}, {"FIREBLU1", "FIREBLU2"}, {"FIRELAV3", "FIRELAVA"},
 		{"FIREMAG1", "FIREMAG3"}, {"FIREWALA", "FIREWALL"}, {"GSTFONT1", "GSTFONT3"}, {"ROCKRED1", "ROCKRED3"}, {"SLADRIP1", "SLADRIP3"}, {"BFALL1", "BFALL4"},
 		{"SFALL1", "SFALL4"}, {"WFALL1", "WFALL4"}, {"DBRAIN1", "DBRAIN4"} }; // From UDS1.666.
 
-	static constexpr const char *specialflats[][2] = {{"NUKAGE1", "NUKAGE3"}, {"FWATER1", "FWATER4"}, {"SWATER1", "SWATER4"}, {"LAVA1", "LAVA4"},
+	static constexpr const char *specialflats[9][2] = {{"NUKAGE1", "NUKAGE3"}, {"FWATER1", "FWATER4"}, {"SWATER1", "SWATER4"}, {"LAVA1", "LAVA4"},
 		{"BLOOD1", "BLOOD3"}, {"RROCK05", "RROCK08"}, {"SLIME01", "SLIME04"}, {"SLIME05", "SLIME08"}, {"SLIME09", "SLIME12"}};
 
 	

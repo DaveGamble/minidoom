@@ -19,68 +19,64 @@ public:
 		for (int i = 0; i < width; ++i)
 		{
 			int off = columnOffsets[i];
-			columnIndices.push_back((int)patchColumnData.size());
+			index.push_back((int)cols.size());
 			PatchColumnData patchColumn;
 			do
 			{
-				patchColumn.topDelta = ptr[off++];
-				if (patchColumn.topDelta != 0xFF)
+				patchColumn.top = ptr[off++];
+				if (patchColumn.top != 0xFF)
 				{
 					patchColumn.length = ptr[off++];
 					patchColumn.paddingPre = ptr[off++];
-					patchColumn.columnData = new uint8_t[patchColumn.length];
-					memcpy(patchColumn.columnData, ptr + off, patchColumn.length);
+					patchColumn.data = new uint8_t[patchColumn.length];
+					memcpy(patchColumn.data, ptr + off, patchColumn.length);
 					off += patchColumn.length;
 					patchColumn.paddingPost = ptr[off++];
 				}
-				patchColumnData.push_back(patchColumn);
-			} while (patchColumn.topDelta != 0xFF);
+				cols.push_back(patchColumn);
+			} while (patchColumn.top != 0xFF);
 		}
 	}
 
 	~Patch()
 	{
-		for (size_t i = 0; i < patchColumnData.size(); ++i)
-			if (patchColumnData[i].topDelta != 0xFF) delete[] patchColumnData[i].columnData;
+		for (size_t i = 0; i < cols.size(); ++i)
+			if (cols[i].top != 0xFF) delete[] cols[i].data;
 	}
 
 
     void render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale = 1) const
 	{
 		buf += rowlen * screeny + screenx;
-		for (int x = 0, tox = 0; x < width; x++) while (tox < (x + 1) * scale) renderColumn(buf + tox++, rowlen, columnIndices[x], INT_MAX, 0, scale, lut);
+		for (int x = 0, tox = 0; x < width; x++) while (tox < (x + 1) * scale) renderColumn(buf + tox++, rowlen, index[x], INT_MAX, 0, scale, lut);
 	}
     void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale, const uint8_t *lut) const
 	{
 		if (scale < 0) return;
-		while (patchColumnData[firstColumn].topDelta != 0xFF)
+		while (cols[firstColumn].top != 0xFF)
 		{
-			int y = (patchColumnData[firstColumn].topDelta + yOffset < 0) ? - patchColumnData[firstColumn].topDelta - yOffset : 0;
-			int sl = floor(scale * (patchColumnData[firstColumn].topDelta + y + yOffset));
-			int el = std::min(floor((patchColumnData[firstColumn].length - y) * scale) + sl, (float)maxHeight);
+			int y = (cols[firstColumn].top + yOffset < 0) ? - cols[firstColumn].top - yOffset : 0;
+			int sl = floor(scale * (cols[firstColumn].top + y + yOffset));
+			int el = std::min(floor((cols[firstColumn].length - y) * scale) + sl, (float)maxHeight);
 			int run = std::max(el - sl, 0), start = rowlen * sl;
-			const uint8_t *from = patchColumnData[firstColumn].columnData + y;
-			for (int i = 0, to = 0; to < run && i < patchColumnData[firstColumn].length; i++)
+			const uint8_t *from = cols[firstColumn].data + y;
+			for (int i = 0, to = 0; to < run && i < cols[firstColumn].length; i++)
 				while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[from[i]];
 			++firstColumn;
 		}
 	}
 	uint16_t pixel(int x, int y) const
 	{
-		for ( ; patchColumnData[x].topDelta != 0xff && patchColumnData[x].topDelta < y; x++)
-		{
-			int o = y - patchColumnData[x].topDelta; if (o >= 0 && o < patchColumnData[x].length) return patchColumnData[x].columnData[o];
-		}
-		return 256;
+		for ( ; cols[x].top != 0xff && cols[x].top < y; x++) { int o = y - cols[x].top; if (o >= 0 && o < cols[x].length) return cols[x].data[o]; } return 256;
 	}
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const
 	{
-		while (patchColumnData[firstColumn].topDelta != 0xFF)
+		while (cols[firstColumn].top != 0xFF)
 		{
-			int y = yOffset + patchColumnData[firstColumn].topDelta, iMaxRun = patchColumnData[firstColumn].length;
+			int y = yOffset + cols[firstColumn].top, iMaxRun = cols[firstColumn].length;
 			if (y < 0) { iMaxRun += y; y = 0; }
 			if (iMaxRun > iHeight - y) iMaxRun = iHeight - y;
-			if (iMaxRun > 0) memcpy(buf + y, patchColumnData[firstColumn].columnData, iMaxRun);
+			if (iMaxRun > 0) memcpy(buf + y, cols[firstColumn].data, iMaxRun);
 			++firstColumn;
 		}
 	}
@@ -89,13 +85,13 @@ public:
 	int getHeight() const { return height; }
 	int getXOffset() const { return xoffset; }
 	int getYOffset() const { return yoffset; }
-	int getColumnDataIndex(int iIndex) const { return columnIndices[iIndex]; }
+	int getColumnDataIndex(int x) const { return index[x]; }
 
 protected:
 	int height {0}, width {0}, xoffset {0}, yoffset {0};
-	struct PatchColumnData { uint8_t topDelta, length, paddingPre, *columnData, paddingPost; };
+	struct PatchColumnData { uint8_t top, length, paddingPre, *data, paddingPost; };
 
-    std::vector<PatchColumnData> patchColumnData;
-    std::vector<int> columnIndices;
+    std::vector<PatchColumnData> cols;
+    std::vector<int> index;
 };
 

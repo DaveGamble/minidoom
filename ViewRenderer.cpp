@@ -66,11 +66,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     if (x1 == x2) return; // Skip same pixel wall
 	bool solid =  (!seg.lSector || seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight); // Handle walls and closed door
 
-	if (!solid && (seg.lSector->sky && seg.lSector->sky == seg.rSector->sky)
-		&& seg.lSector->floortexture == seg.rSector->floortexture && seg.lSector->lightlevel == seg.rSector->lightlevel
-//		&& seg.lSector->ceilingHeight == seg.rSector->ceilingHeight
-		&& seg.lSector->floorHeight == seg.rSector->floorHeight
-		&& !seg.linedef->rSidedef->middletexture) return;
+	if (!solid && (seg.lSector->sky && seg.lSector->sky == seg.rSector->sky) && !seg.linedef->rSidedef->middletexture
+		&& seg.lSector->floortexture == seg.rSector->floortexture && seg.lSector->lightlevel == seg.rSector->lightlevel) return;
 	
 	if (solid && solidWallRanges.size() < 2) return;
 

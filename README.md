@@ -6,11 +6,10 @@ Tidying is for later. Although maybe it'll end up as an stb style library. Which
 
 TODO:
 Graphics:
-- Animated lighting / textures!!
+- Animated lighting
 - Render sprites
 - Automap?
 Optimising:
-- Is there a simpler way to do clip detection?
 - Optimise floor/ceiling drawing
 Gamey stuff:
 - View bob?

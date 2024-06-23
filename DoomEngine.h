@@ -12,7 +12,7 @@ public:
 	~DoomEngine();
 	bool Tick();
 protected:
-	static constexpr float moveSpeed = 4, rotateSpeed = 0.06981317008;
+	static constexpr float moveSpeed = 8, rotateSpeed = 0.06981317008;
 	static constexpr int m_iRenderWidth {960}, m_iRenderHeight {600};
 	bool m_bIsOver {false};
 

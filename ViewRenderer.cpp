@@ -114,8 +114,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float tdX = seg.linedef->rSidedef->dx + seg.offset, tdY = seg.linedef->rSidedef->dy;
 	const float sinv = v.sina, cosv = v.cosa;
 	const float seglen = seg.len;
-
-	const float idistanceToNormal = 1.0 / (z1 * (ux2 - ux1) - ux1 * (z2 - z1));	// Distance from origin to rotated wall segment
+	const float distanceToNormal = (z1 * ux2 - ux1 * z2);
+	const float idistanceToNormal = 1.0 / distanceToNormal;	// Distance from origin to rotated wall segment
+	const float zscalar = -distancePlayerToScreen * distanceToNormal;
 	const float uA = distancePlayerToScreen * (ux1 + z1) * seglen, uB = -z1 * seglen, uC = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1), uD = z2 - z1;
 	const float dx = uD * idistanceToNormal, x1z = uC * idistanceToNormal + x1 * dx;
 
@@ -134,13 +135,36 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	float yFloor = horizon + (seg.rSector->floorHeight - v.z) * x1z;
 	float yUpper = seg.lSector ? horizon + (seg.lSector->ceilingHeight - v.z) * x1z : 0;
 	float yLower = seg.lSector ? horizon + (seg.lSector->floorHeight - v.z) * x1z : 0;
+//	float z = uC + x1 * uD = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1) + x1 * z2 - x1 * z1;
+
+	/*
+xscreen = distancePlayerToScreen + halfRenderWidth * x / z
+	 and the relationship is ux1 + t * (ux2 - ux1) = x, z1 + t * (z2 - z1) = z
+	 so t = (x - ux1) / (ux2 - ux1)
+	 and  (x - ux1) (z2 - z1) = (z - z1) (ux2 - ux1)
+	 and x = ux1 + (ux2 - ux1) (z - z1) / (z2 - z1)
+	 sooooo
+	 screenx = distancePlayerToScreen + halfRenderWidth * (ux1 + (ux2 - ux1) (z - z1) / (z2 - z1)) / z
+	 screenx * z = distancePlayerToScreen * z + halfRenderWidth * (ux1 + (ux2 - ux1) (z - z1) / (z2 - z1))
+	 z (screenx - distancePlayerToScreen) = halfRenderWidth * (ux1 + (ux2 - ux1) (z - z1) / (z2 - z1))
+	 z (screenx - distancePlayerToScreen - halfRenderWidth * (ux2 - ux1) / (z2 - z1)) = halfRenderWidth * (ux1 -z1 * (ux2 - ux1) / (z2 - z1))
+	 z = halfRenderWidth * (ux1 - z1 * (ux2 - ux1) / (z2 - z1)) / ((screenx - distancePlayerToScreen - halfRenderWidth * (ux2 - ux1) / (z2 - z1)))
+	 z = halfRenderWidth * (ux1 * (z2 - z1) - z1 * (ux2 - ux1)) / ((screenx - distancePlayerToScreen) * (z2 - z1) - halfRenderWidth * (ux2 - ux1))
+	 z = halfRenderWidth * (ux1 * z2 - z1 * ux2) / ((screenx - distancePlayerToScreen) * (z2 - z1) - halfRenderWidth * (ux2 - ux1))
+	 z = -distanceToNormal * halfRenderWidth / ((screenx - distancePlayerToScreen) * (z2 - z1) - halfRenderWidth * (ux2 - ux1))
+	 z = -distanceToNormal * halfRenderWidth / (screenx * (z2 - z1) - halfRenderWidth * (z2 - z1 + ux2 - ux1))
+	 z = -distanceToNormal * halfRenderWidth / (screenx * uD + uC)
+	 */
 	float skyAng = x1 * dSkyAng - 2 * v.angle / M_PI;
 	
-	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];
-
 	for (int x = x1; x <= x2; x++)
     {
-		const float u = ((uA + x * uB) / (uC + x * uD)) + tdX;
+		const float iz = 1.f / (uC + x * uD);
+		const int z = zscalar * iz;
+		const float u = (uA + x * uB) * iz + tdX;
+		int light = std::min(32 - (seg.rSector->lightlevel >> 3), (z - 5) / 20);
+		
+		const uint8_t *lut = lights[std::clamp(light, 0, 31)];
 
 		auto DrawTexture = [&](const Texture *texture, int from, int to, float a, float b, float dv, bool upper = false) {
 			if (!texture) return;
@@ -162,12 +186,22 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		};
 
 		auto DrawFloor = [&](const Flat *flat, int from, int to) {
-			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++) { float z = vG / (i - horizon); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
+			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
+			{
+				float z = vG / (i - horizon);
+				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)(z - 5) / 20);
+				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
+			}
 		};
 
 		auto DrawCeiling = [&](const Flat *flat, int from, int to) {
 			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, from, to);
-			else for (int i = std::max(0, from); i < std::min(to, renderHeight); i++) { float z = vH / (horizon - i); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
+			else for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
+			{
+				float z = vH / (horizon - i);
+				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)(z - 5) / 20);
+				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
+			}
 		};
 				
 		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f), CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);

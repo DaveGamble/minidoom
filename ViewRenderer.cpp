@@ -83,11 +83,11 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     {
         if (x2 < f->start - 1)
         {
-            storeWallRange(seg, x1, x2, v); //All of the wall is visible, so insert it
+            storeWallRange(seg, x1, x2, tov1z, tov2z, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(f, {x1, x2});
             return;
         }
-        storeWallRange(seg, x1, f->start - 1, v); // The end is already included, just update start
+        storeWallRange(seg, x1, f->start - 1, tov1z, tov2z, v); // The end is already included, just update start
         if (solid) f->start = x1;
     }
     
@@ -95,20 +95,20 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     std::list<SolidSegmentRange>::iterator nextWall = f;
     while (x2 >= next(nextWall, 1)->start - 1)
     {
-        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, v); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, tov1z, tov2z, v); // partialy clipped by other walls, store each fragment
 		if (x2 > (++nextWall)->end) continue;
 		if (!solid) return;
 		f->end = nextWall->end;
 		solidWallRanges.erase(++f, ++nextWall);
 		return;
     }
-    storeWallRange(seg, nextWall->end + 1, x2, v);
+    storeWallRange(seg, nextWall->end + 1, x2, tov1z, tov2z, v);
 	if (!solid) return;
 	f->end = x2;
 	if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, float z2, const Viewpoint &v)
 {
 	const int16_t flags = seg.linedef->flags;
 	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;

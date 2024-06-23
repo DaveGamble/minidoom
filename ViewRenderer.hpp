@@ -14,7 +14,7 @@ public:
 protected:
     struct SolidSegmentRange { int start, end; };
 
-    void storeWallRange(const Seg &seg, int x1, int x2, const Viewpoint &v);
+    void storeWallRange(const Seg &seg, int x1, int x2, float z1, float z2, const Viewpoint &v);
 
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 

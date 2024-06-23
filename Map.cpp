@@ -50,8 +50,7 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 		WADLinedef *wl = (WADLinedef*)(ptr + i);
 		linedefs.push_back({vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
 			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef,
-			(wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef,
-			sqrtf((vertices[wl->start].x - vertices[wl->end].x) * (vertices[wl->start].x - vertices[wl->end].x) + (vertices[wl->start].y - vertices[wl->end].y) * (vertices[wl->start].y - vertices[wl->end].y))
+			(wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
 		});
 	}
 
@@ -62,7 +61,8 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 		const Linedef *pLinedef = &linedefs[ws->linedef];
 		const Sidedef *pRightSidedef = ws->dir ? pLinedef->lSidedef : pLinedef->rSidedef;
 		const Sidedef *pLeftSidedef = ws->dir ? pLinedef->rSidedef : pLinedef->lSidedef;
-		segs.push_back({vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, ws->dir, ws->offset / 65536.f,
+		segs.push_back({vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, ws->dir, (float)ws->offset,
+			sqrtf((vertices[ws->start].x - vertices[ws->end].x) * (vertices[ws->start].x - vertices[ws->end].x) + (vertices[ws->start].y - vertices[ws->end].y) * (vertices[ws->start].y - vertices[ws->end].y)),
 			(pRightSidedef) ? pRightSidedef->sector : nullptr, (pLeftSidedef) ? pLeftSidedef->sector : nullptr});
 	}
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(Thing)) things.push_back(*(Thing*)(ptr + i));

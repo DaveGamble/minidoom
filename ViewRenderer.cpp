@@ -111,9 +111,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float lHeight = seg.lSector ? seg.lSector->floorHeight - seg.lSector->ceilingHeight : 0;
 	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
 	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
-	const float tdX = seg.linedef->rSidedef->dx, tdY = seg.linedef->rSidedef->dy;
+	const float tdX = seg.linedef->rSidedef->dx + seg.offset, tdY = seg.linedef->rSidedef->dy;
 	const float sinv = v.sina, cosv = v.cosa;
-	const float seglen = seg.linedef->len;
+	const float seglen = seg.len;
 
 	const float idistanceToNormal = 1.0 / (z1 * (ux2 - ux1) - ux1 * (z2 - z1));	// Distance from origin to rotated wall segment
 	const float uA = distancePlayerToScreen * (ux1 + z1) * seglen, uB = -z1 * seglen, uC = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1), uD = z2 - z1;

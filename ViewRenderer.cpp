@@ -34,7 +34,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{
 		renderLater& r = renderLaters[i];
-		for (int y = r.from; y < r.to; y++)
+		for (int y = std::max(0, r.from); y < std::min(r.to, renderHeight); y++)
 		{
 			uint16_t p = r.texture->pixel(r.u, r.dv * y + r.v);
 			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
@@ -173,7 +173,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 
 		auto DrawSky = [&](const Patch *sky, int from, int to) {
 			int tx = (skyAng - floor(skyAng)) * sky->getWidth();
-			for (int i = from; i < to; i++)
+			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
 				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() / (float)renderHeight, -1.f, sky->getHeight() - 1.f);
 				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->getColumnDataIndex((ty < 0) ? 0 : tx), std::max(ty, 0.f))];
@@ -181,12 +181,12 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 		};
 
 		auto DrawFloor = [&](const Flat *flat, int from, int to) {
-			for (int i = from; i < to; i++) { float z = vG / (i - horizon); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
+			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++) { float z = vG / (i - horizon); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
 		};
 
 		auto DrawCeiling = [&](const Flat *flat, int from, int to) {
 			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, from, to);
-			else for (int i = from; i < to; i++) { float z = vH / (horizon - i); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
+			else for (int i = std::max(0, from); i < std::min(to, renderHeight); i++) { float z = vH / (horizon - i); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
 		};
 				
 		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f), CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);

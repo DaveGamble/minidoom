@@ -1,19 +1,18 @@
 This is a repo for a fork of DIYDoom [https://github.com/amroibrahim/DIYDoom/tree/master].
 
-It's in a very rough state, and includes SDL2 directly.
-
-Tidying is for later. Although maybe it'll end up as an stb style library. Which would rock.
+It's in a very rough state, and includes SDL2 directly. It may make your eyes bleed. Tidying is for later.
 
 TODO:
 Graphics:
 - Render sprites
-- Automap?
+- Better lighting effects (more like the original)
 Optimising:
 - Optimise floor/ceiling drawing
+- Memory usage
+- What can I be precomputing?
 Gamey stuff:
 - View bob?
-- SFX
-- Music
+- SFX / Music
 - A nice interface for selecting weapons and drawing firing animations?
 - Be really cool if we could do, like, doors and floor movements and stuff?
 

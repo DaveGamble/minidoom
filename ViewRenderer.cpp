@@ -207,8 +207,10 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 			}
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, ceilbot, upper);
-			else					DrawTexture(seg.linedef->rSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
-			DrawTexture(seg.linedef->rSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
+			else if (seg.linedef->rSidedef->uppertexture) DrawTexture(seg.linedef->rSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
+			else	DrawTexture(seg.linedef->lSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
+			if (seg.linedef->rSidedef->lowertexture) DrawTexture(seg.linedef->rSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
+			else DrawTexture(seg.linedef->lSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}

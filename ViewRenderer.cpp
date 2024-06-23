@@ -190,20 +190,19 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 		};
 				
 		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f), CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);
-		int ceiltop = std::max(0, ceilingClipHeight[x]), ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart);
-		int floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]);
+		int ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart), floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]);
 		int midtop = std::max(std::max(0, ceilbot), ceilingClipHeight[x]), midbot = std::min(floortop, renderHeight - 1);
 		
 		DrawFloor(seg.rSector->floortexture, floortop, floorClipHeight[x]);
-		DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
+		DrawCeiling(seg.rSector->ceilingtexture, std::max(0, ceilingClipHeight[x]), ceilbot);
 
         if (seg.lSector)
         {
 			int upper = std::min((float)CurrentFloorStart, yUpper), lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
 			{
-				float dv = lHeight / (yFloor - yCeiling);
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, ((flags & 16) ? -yFloor * dv + roomHeight :  -yCeiling * dv) + tdY, dv, lut});
+				float dv = lHeight / (yLower - yUpper);
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, upper, lower, u, ((flags & 16) ? -yLower * dv + roomHeight :  -yUpper * dv) + tdY, dv, lut});
 			}
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, ceilbot, upper);

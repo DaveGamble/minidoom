@@ -190,7 +190,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 		};
 				
 		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f), CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);
-		int upper = std::min(floorClipHeight[x] - 1.f, yUpper), lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
+		int upper = std::min(std::min(floorClipHeight[x] - 1.f, yUpper), (float)CurrentFloorStart), lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
 		int ceiltop = std::max(0, ceilingClipHeight[x]), ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart);
 		int floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]);
 		int midtop = std::max(std::max(0, ceilbot), ceilingClipHeight[x]), midbot = std::min(floortop, renderHeight - 1);

@@ -94,6 +94,7 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	}
 	for (Sector &s : sectors)
 	{
+		if (!s.type) continue;	// Skip these.
 		uint16_t minlight = s.lightlevel;
 		for (const Linedef *l : s.linedefs)
 		{

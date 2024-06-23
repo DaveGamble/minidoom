@@ -41,7 +41,7 @@ public:
 			for (int i = 0; i < numTextures; ++i)
 			{
 				char name[9] {}; memcpy(name, data.data() + asint[i + 1], 8);
-				textures[name] = std::unique_ptr<Texture>(new Texture(data.data() + asint[i + 1], [&](int idx) { return getPatch(pnames[idx]); }));
+				textures[toupper(name)] = std::unique_ptr<Texture>(new Texture(data.data() + asint[i + 1], [&](int idx) { return getPatch(pnames[idx]); }));
 			}
 		}
 		
@@ -75,9 +75,10 @@ public:
 		}
 		return patches[name].get();
 	}
-	const Texture *getTexture(const std::string &name) const { return textures.count(name) ? textures.at(name).get() : nullptr; }
+	const Texture *getTexture(const std::string &name) const { std::string Name = toupper(name); return textures.count(Name) ? textures.at(Name).get() : nullptr; }
 	const Flat *getFlat(const std::string &name) const { return flats.count(name) ? flats.at(name).get() : nullptr; }
 protected:
+	std::string toupper(const std::string &s) const {std::string S = s; std::transform(S.begin(), S.end(), S.begin(), ::toupper); return S;}
 	uint8_t *data {nullptr};
 	size_t numLumps {0};
 	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8] {}; };

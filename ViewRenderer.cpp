@@ -119,24 +119,24 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float idistanceToNormal = 1.0 / ((seg.start.y - v.y) * (seg.end.x - seg.start.x) - (seg.start.x - v.x) * (seg.end.y - seg.start.y));
 	//
 
-	const float uB = -z1 * seglen, uD = (z2 - z1), uA = distancePlayerToScreen * (ux1 + z1) * seglen, uC = -distancePlayerToScreen * ((ux2 - ux1) + (z2 - z1));
-	const float dx = -uD * idistanceToNormal, x1z = -uC * idistanceToNormal + x1 * dx;
+	const float uA = distancePlayerToScreen * (ux1 + z1) * seglen, uB = -z1 * seglen, uC = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1), uD = z2 - z1;
+	const float dx = uD * idistanceToNormal, x1z = uC * idistanceToNormal + x1 * dx;
 
 	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	const float vA = cosv - sinv, vB = 2 * sinv * invRenderWidth, vC = v.x, vD = -cosv - sinv, vE = 2 * cosv * invRenderWidth, vF = -v.y;
 
-	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
-	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
-	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
-	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
+	const float dyCeiling = (seg.rSector->ceilingHeight - v.z) * dx;
+	const float dyFloor = (seg.rSector->floorHeight - v.z) * dx;
+	const float dyUpper = seg.lSector ? (seg.lSector->ceilingHeight - v.z) * dx : 0;
+	const float dyLower = seg.lSector ? (seg.lSector->floorHeight - v.z) * dx : 0;
 	const float dSkyAng = invRenderWidth;
 
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 
-	float yCeiling = horizon - (seg.rSector->ceilingHeight - v.z) * x1z;
-	float yFloor = horizon - (seg.rSector->floorHeight - v.z) * x1z;
-	float yUpper = seg.lSector ? horizon - ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
-	float yLower = seg.lSector ? horizon - ((seg.lSector->floorHeight - v.z) * x1z) : 0;
+	float yCeiling = horizon + (seg.rSector->ceilingHeight - v.z) * x1z;
+	float yFloor = horizon + (seg.rSector->floorHeight - v.z) * x1z;
+	float yUpper = seg.lSector ? horizon + ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
+	float yLower = seg.lSector ? horizon + ((seg.lSector->floorHeight - v.z) * x1z) : 0;
 	float skyAng = x1 * dSkyAng - 2 * v.angle / M_PI;
 	
 	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];

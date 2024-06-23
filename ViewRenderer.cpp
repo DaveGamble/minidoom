@@ -148,6 +148,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;
 	const float dyUpper = seg.lSector ? -(seg.lSector->ceilingHeight - v.z) * dx : 0;
 	const float dyLower = seg.lSector ? -((seg.lSector->floorHeight - v.z) * dx) : 0;
+	const float dSkyAng = 1.0 / renderWidth;
 
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 
@@ -155,6 +156,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 	float yFloor = horizon - (seg.rSector->floorHeight - v.z) * x1z;
 	float yUpper = seg.lSector ? horizon - ((seg.lSector->ceilingHeight - v.z) * x1z) : 0;
 	float yLower = seg.lSector ? horizon - ((seg.lSector->floorHeight - v.z) * x1z) : 0;
+	float skyAng = x1 * dSkyAng - 2 * v.angle / M_PI;
 	
 	const uint8_t *lut = lights[31 - (seg.rSector->lightlevel >> 3)];
 
@@ -169,46 +171,29 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 			if (upper && !(flags & 8)) {v = -b * dv;}
 			if (!upper && (flags & 16)) {v = -b * dv + roomHeight;}
 			v += tdY;
-			for (int y = from; y < to; y++)
+			for (int y = from; y < to; y++) { uint16_t p = texture->pixel(u, v + y * dv); if (p != 256) screenBuffer[rowlen * y + x] = lut[p]; }
+		};
+
+		auto DrawSky = [&](const Patch *sky, int from, int to) {
+			int tx = (skyAng - floor(skyAng)) * sky->getWidth();
+			for (int i = from; i < to; i++)
 			{
-				uint16_t p = texture->pixel(u, v + y * dv);
-				if (p != 256) screenBuffer[rowlen * y + x] = lut[p];
+				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() / (float)renderHeight, -1.f, sky->getHeight() - 1.f);
+				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->getColumnDataIndex((ty < 0) ? 0 : tx), std::max(ty, 0.f))];
 			}
 		};
 
 		auto DrawFloor = [&](const Flat *flat, int from, int to) {
-			for (int i = from; i < to; i++)
-			{
-				float z = vG / (i - horizon);
-				screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
-			}
+			for (int i = from; i < to; i++) { float z = vG / (i - horizon); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
 		};
 
 		auto DrawCeiling = [&](const Flat *flat, int from, int to) {
-			for (int i = from; i < to; i++)
-			{
-				float z = vH / (horizon - i);
-				screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
-			}
+			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, from, to);
+			else for (int i = from; i < to; i++) { float z = vH / (horizon - i); screenBuffer[i * rowlen + x] = lut[flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)]; }
 		};
-		
-		auto DrawSky = [&](const Patch *sky, int from, int to) {
-			float tx = fmodf((x / (float)renderWidth - 2 * v.angle / M_PI), 1) * sky->getWidth();
-			if (tx < 0) tx += sky->getWidth();
-			if (tx == sky->getWidth()) tx--;
-			for (int i = from; i < to; i++)
-			{
-				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() / (float)renderHeight, -1.f, sky->getHeight() - 1.f);
-				float tx2 = tx;
-				if (ty == -1) tx2 = ty = 0;
-				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->getColumnDataIndex((int)tx2), (int)ty)];
-			}
-		};
-		
+				
 		int CurrentCeilingEnd = std::max(yCeiling, ceilingClipHeight[x] + 1.f), CurrentFloorStart = std::min(yFloor, floorClipHeight[x] - 1.f);
-
 		int upper = std::min(floorClipHeight[x] - 1.f, yUpper), lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
-
 		int ceiltop = std::max(0, ceilingClipHeight[x]), ceilbot = std::min(CurrentCeilingEnd, CurrentFloorStart);
 		int floortop = std::max(CurrentFloorStart, ceilingClipHeight[x]);
 		int midtop = std::max(std::max(0, ceilbot), ceilingClipHeight[x]), midbot = std::min(floortop, renderHeight - 1);
@@ -218,28 +203,22 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
 			{
 				float dv = lHeight / (yFloor - yCeiling);
-				float v = (flags & 16) ? -yFloor * dv + roomHeight :  -yCeiling * dv;
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, v + tdY, dv, lut});
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, midtop, midbot, u, ((flags & 16) ? -yFloor * dv + roomHeight :  -yCeiling * dv) + tdY, dv, lut});
 			}
-
-			if (seg.rSector->sky) 	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
-			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, ceilbot, upper);
 			else					DrawTexture(seg.linedef->rSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
-			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
-
+			DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 			DrawFloor(seg.rSector->floortexture, floortop, floorClipHeight[x]);
-
 			DrawTexture(seg.linedef->rSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
+			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
 			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight);
 			DrawFloor(seg.rSector->floortexture, floortop, floorClipHeight[x]);
-			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, ceiltop, ceilbot);
-			else					DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
+			DrawCeiling(seg.rSector->ceilingtexture, ceiltop, ceilbot);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}
@@ -247,6 +226,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 		yLower += dyLower;
         yCeiling += dyCeiling;
         yFloor += dyFloor;
+		skyAng += dSkyAng;
     }
 }
 

@@ -57,14 +57,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	if (tov1z < -tov1x && tov2z < -tov2x) return;	// Both points are to the left.
 	if (tov1z < tov1x && tov1z > -tov1x) return;	// V1 is within 45 degrees of the X axis (it's on your right hand side, out of the FOV). Both points are to the right.
 
-	if (tov1z < -tov1x) tov1x = -tov1z; // Clip hard left
-	if (tov2z < tov2x) tov2x = tov2z;	// Clip hard right
-	
-	auto AngleToScreen = [&](float dz, float dx) {
-		return distancePlayerToScreen + round(dx * halfRenderWidth / dz);
-	};
-
-	const int x1 = AngleToScreen(tov1z, tov1x), x2 = AngleToScreen(tov2z, tov2x); // Find Wall X Coordinates
+	const int x1 = (tov1z < -tov1x) ? 0 : distancePlayerToScreen + round(tov1x * halfRenderWidth / tov1z);
+	const int x2 = (tov2z < tov2x) ? renderWidth : distancePlayerToScreen + round(tov2x * halfRenderWidth / tov2z);
 
     if (x1 == x2) return; // Skip same pixel wall
 	bool solid =  (!seg.lSector || seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight); // Handle walls and closed door
@@ -83,11 +77,11 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     {
         if (x2 < f->start - 1)
         {
-            storeWallRange(seg, x1, x2, tov1z, tov2z, v); //All of the wall is visible, so insert it
+            storeWallRange(seg, x1, x2, tov1x, tov2x, tov1z, tov2z, v); //All of the wall is visible, so insert it
             if (solid) solidWallRanges.insert(f, {x1, x2});
             return;
         }
-        storeWallRange(seg, x1, f->start - 1, tov1z, tov2z, v); // The end is already included, just update start
+        storeWallRange(seg, x1, f->start - 1, tov1x, tov2x, tov1z, tov2z, v); // The end is already included, just update start
         if (solid) f->start = x1;
     }
     
@@ -95,20 +89,20 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     std::list<SolidSegmentRange>::iterator nextWall = f;
     while (x2 >= next(nextWall, 1)->start - 1)
     {
-        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, tov1z, tov2z, v); // partialy clipped by other walls, store each fragment
+        storeWallRange(seg, nextWall->end + 1, next(nextWall, 1)->start - 1, tov1x, tov2x, tov1z, tov2z, v); // partialy clipped by other walls, store each fragment
 		if (x2 > (++nextWall)->end) continue;
 		if (!solid) return;
 		f->end = nextWall->end;
 		solidWallRanges.erase(++f, ++nextWall);
 		return;
     }
-    storeWallRange(seg, nextWall->end + 1, x2, tov1z, tov2z, v);
+    storeWallRange(seg, nextWall->end + 1, x2, tov1x, tov2x, tov1z, tov2z, v);
 	if (!solid) return;
 	f->end = x2;
 	if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, float z2, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &v)
 {
 	const int16_t flags = seg.linedef->flags;
 	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;
@@ -120,20 +114,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 	const float seglen = seg.linedef->len;
 
 	// Fixme
-	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;	// Vectors from origin to segment ends.
-	float tov1x = toV1x * sinv - toV1y * cosv, tov2x = toV2x * sinv - toV2y * cosv;	// Rotate vectors to be in front of us.
-
-	
+	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
 	
 //	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
-	const float dd = (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
-	const float idistanceToNormal = 1.0 / dd;
-	const float d2 = -(z2 - z1) * idistanceToNormal;
+	const float idistanceToNormal = 1.0 / (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
 
-    const float x1z = (distancePlayerToScreen * ((tov2x - tov1x) + (z2 - z1)) - x1 * (z2 - z1)) * idistanceToNormal;	// <- this
-	const float dx = std::clamp(d2, -64.f, 64.f);	// <- this
+	const float uB = -z1 * seglen, uD = (z2 - z1), uA = distancePlayerToScreen * (ux1 + z1) * seglen, uC = -distancePlayerToScreen * ((ux2 - ux1) + (z2 - z1));
+	const float dx = -uD * idistanceToNormal, x1z = -uC * idistanceToNormal + x1 * dx;
 
-	const float uB = -z1 * seglen, uD = (z2 - z1), uA = distancePlayerToScreen * (tov1x + z1) * seglen, uC = -distancePlayerToScreen * ((tov2x - tov1x) + (z2 - z1));
 	// Calculations I am doing: ((uA + x * uB) / (uC + x * uD)), * dx, * x1z
 	//
 

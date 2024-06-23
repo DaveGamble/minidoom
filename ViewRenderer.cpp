@@ -120,24 +120,20 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 	const float seglen = seg.linedef->len;
 
 	// Fixme
-//	const float tov1z = toV1x * cosv + toV1y * sinv, tov2z = toV2x * cosv + toV2y * sinv;
-//	float tov1x = toV1x * sinv - toV1y * cosv, tov2x = toV2x * sinv - toV2y * cosv;	// Rotate vectors to be in front of us.
+	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;	// Vectors from origin to segment ends.
+	float tov1x = toV1x * sinv - toV1y * cosv, tov2x = toV2x * sinv - toV2y * cosv;	// Rotate vectors to be in front of us.
 
 	
 	
-	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
+//	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y;	// Vectors from origin to segment ends.
 	const float dd = (toV1y * (seg.end.x - seg.start.x) - toV1x * (seg.end.y - seg.start.y));
 	const float idistanceToNormal = 1.0 / dd;
 	const float d2 = -(z2 - z1) * idistanceToNormal;
-	const float d1 = distancePlayerToScreen * (sinv * (seg.end.x - seg.start.x) - cosv * (seg.end.y - seg.start.y)) * idistanceToNormal - halfRenderWidth * d2;
 
-    const float x1z = x1 * d2 + d1;	// <- this
+    const float x1z = (distancePlayerToScreen * ((tov2x - tov1x) + (z2 - z1)) - x1 * (z2 - z1)) * idistanceToNormal;	// <- this
 	const float dx = std::clamp(d2, -64.f, 64.f);	// <- this
 
-	const float uB = -z1 * seglen,
-				uD = (z2 - z1),
-				uA = distancePlayerToScreen * (cosv * -toV1y + sinv * toV1x) * seglen - halfRenderWidth * uB,
-				uC = -d1 * dd;
+	const float uB = -z1 * seglen, uD = (z2 - z1), uA = distancePlayerToScreen * (tov1x + z1) * seglen, uC = -distancePlayerToScreen * ((tov2x - tov1x) + (z2 - z1));
 	// Calculations I am doing: ((uA + x * uB) / (uC + x * uD)), * dx, * x1z
 	//
 

@@ -67,7 +67,7 @@ public:
 	}
 	uint16_t pixel(int x, int y) const
 	{
-		for ( ; cols[x].top != 0xff && cols[x].top < y; x++) { int o = y - cols[x].top; if (o >= 0 && o < cols[x].length) return cols[x].data[o]; } return 256;
+		for ( ; cols[x].top != 0xff && cols[x].top <= y; x++) { int o = y - cols[x].top; if (o >= 0 && o < cols[x].length) return cols[x].data[o]; } return 256;
 	}
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const
 	{

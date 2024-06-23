@@ -85,4 +85,11 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 				while (*block != 0xffff) blockmap[i][j].push_back(&linedefs[*block++]);
 			}
 	}
+	
+	auto addLinedef = [&](const Linedef &l, const Sidedef *s) { if (s && s->sector) (const_cast<Sector*>(s->sector))->linedefs.push_back(&l); };
+	for (int i = 0; i < linedefs.size(); i++)
+	{
+		addLinedef(linedefs[i], linedefs[i].rSidedef);
+		addLinedef(linedefs[i], linedefs[i].lSidedef);
+	}
 }

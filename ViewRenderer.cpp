@@ -23,6 +23,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[
 
 void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint& view, Map &map)
 {
+	frame++;
 	screenBuffer = pScreenBuffer;
 	rowlen = iBufferPitch;
 	renderLaters.clear();

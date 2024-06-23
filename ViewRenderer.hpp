@@ -26,5 +26,5 @@ protected:
 	std::vector<renderLater> renderLaters;
 	const uint8_t (&lights)[34][256];
 	uint8_t *screenBuffer;
-	int rowlen, frame {0};
+	int rowlen, frame {0}, texframe {0};
 };

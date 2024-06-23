@@ -50,7 +50,7 @@ public:
 			if (dirs[flat].lumpSize != 4096) continue;
 			char name[9] {}; memcpy(name, dirs[flat].lumpName, 8);
 			flats[name] = std::unique_ptr<Flat>(new Flat(data + dirs[flat].lumpOffset));
-	   }
+		}
 	}
 
 	~WADLoader() { delete[] data; }
@@ -75,9 +75,26 @@ public:
 		}
 		return patches[name].get();
 	}
-	const Texture *getTexture(const std::string &name) const { std::string Name = toupper(name); return textures.count(Name) ? textures.at(Name).get() : nullptr; }
-	const Flat *getFlat(const std::string &name) const { return flats.count(name) ? flats.at(name).get() : nullptr; }
+	std::vector<const Texture *> getTexture(const std::string &name) const
+	{
+		std::vector<const Texture *> t;
+		std::string Name = toupper(name);
+		if (textures.count(Name)) t.push_back(textures.at(Name).get());
+		return t;
+	}
+	std::vector<const Flat *> getFlat(const std::string &name) const { std::vector<const Flat *> f;
+		if (flats.count(name)) f.push_back(flats.at(name).get());
+		return f;
+	}
 protected:
+	static constexpr const char *specialtextures[][2] = { {"BLODGR1", "BLODGR4"}, {"BLODRIP1", "BLODRIP4"}, {"FIREBLU1", "FIREBLU2"}, {"FIRELAV3", "FIRELAVA"},
+		{"FIREMAG1", "FIREMAG3"}, {"FIREWALA", "FIREWALL"}, {"GSTFONT1", "GSTFONT3"}, {"ROCKRED1", "ROCKRED3"}, {"SLADRIP1", "SLADRIP3"}, {"BFALL1", "BFALL4"},
+		{"SFALL1", "SFALL4"}, {"WFALL1", "WFALL4"}, {"DBRAIN1", "DBRAIN4"} }; // From UDS1.666.
+
+	static constexpr const char *specialflats[][2] = {{"NUKAGE1", "NUKAGE3"}, {"FWATER1", "FWATER4"}, {"SWATER1", "SWATER4"}, {"LAVA1", "LAVA4"},
+		{"BLOOD1", "BLOOD3"}, {"RROCK05", "RROCK08"}, {"SLIME01", "SLIME04"}, {"SLIME05", "SLIME08"}, {"SLIME09", "SLIME12"}};
+
+	
 	std::string toupper(const std::string &s) const {std::string S = s; std::transform(S.begin(), S.end(), S.begin(), ::toupper); return S;}
 	uint8_t *data {nullptr};
 	size_t numLumps {0};

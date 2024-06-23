@@ -138,8 +138,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float z1, floa
 	// Calculations I am doing: ((uA + x * uB) / (uC + x * uD)), * dx, * x1z
 	//
 
-	const float vG = distancePlayerToScreen * (v.z -seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
-	const float vA = cosv - sinv, vB = 2 * sinv / renderWidth, vC = v.x, vD = cosv + sinv, vE = -2 * cosv / renderWidth, vF = v.y - 5;
+	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
+	const float vA = cosv - sinv, vB = 2 * sinv / renderWidth, vC = v.x, vD = -cosv - sinv, vE = 2 * cosv / renderWidth, vF = -v.y;
 
 	const float dyCeiling = -(seg.rSector->ceilingHeight - v.z) * dx;
 	const float dyFloor = -(seg.rSector->floorHeight - v.z) * dx;

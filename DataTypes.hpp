@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-// enum ELINEDEFFLAGS { eBLOCKING = 0, eBLOCKMONSTERS = 1, eTWOSIDED = 2, eDONTPEGTOP = 4, eDONTPEGBOTTOM = 8, eSECRET = 16, eSOUNDBLOCK = 32, eDONTDRAW = 64, eDRAW = 128 }; // Unused for now
+enum { kUpperTextureUnpeg = 8, kLowerTextureUnpeg = 16 };
 
 class Patch;
 class Texture;

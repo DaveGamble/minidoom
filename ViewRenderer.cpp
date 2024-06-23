@@ -170,8 +170,8 @@ xscreen = distancePlayerToScreen + halfRenderWidth * x / z
 			if (!texture) return;
 			dv /= (b - a);
 			float v = -a * dv;
-			if (upper && !(flags & 8)) {v = -b * dv;}
-			if (!upper && (flags & 16)) {v = -b * dv + roomHeight;}
+			if (upper && !(flags & kUpperTextureUnpeg)) {v = -b * dv;}
+			if (!upper && (flags & kLowerTextureUnpeg)) {v = -b * dv + roomHeight;}
 			v += tdY;
 			for (int y = from; y < to; y++) { screenBuffer[rowlen * y + x] = lut[texture->pixel(u, v + y * dv) & 255]; }
 		};
@@ -217,7 +217,7 @@ xscreen = distancePlayerToScreen + halfRenderWidth * x / z
 			if (seg.linedef->rSidedef->middletexture && midtop < midbot && yFloor > yCeiling)
 			{
 				float dv = lHeight / (yLower - yUpper);
-				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, upper, lower, u, ((flags & 16) ? -yLower * dv + roomHeight :  -yUpper * dv) + tdY, dv, lut});
+				renderLaters.push_back({seg.linedef->rSidedef->middletexture, x, upper, lower, u, ((flags & kLowerTextureUnpeg) ? -yLower * dv + roomHeight :  -yUpper * dv) + tdY, dv, lut});
 			}
 
 			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, ceilbot, upper);

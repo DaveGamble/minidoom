@@ -115,22 +115,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float sinv = v.sina, cosv = v.cosa;
 	const float seglen = seg.linedef->len;
 
-	// Fixme
-//	const float idistanceToNormal = 1.0 / ((seg.start.y - v.y) * (seg.end.x - seg.start.x) - (seg.start.x - v.x) * (seg.end.y - seg.start.y));
-	/*
-	ux1 * (1-t) + ux2 * t = x
-	z1 * (1-t) + z2 * t = z
-	ux1 + t * (ux2 - ux1) = x
-	 so t = (x - ux1) / (ux2 - ux1)
-	z1 + (x - ux1) / (ux2 - ux1) * (z2 - z1) = z
-	 z1 + (x - ux1) / (ux2 - ux1) * (z2 - z1) = z
-	 x * (z2 - z1) / (ux2 - ux1) - z + z1 - ux1 (z2 - z1) / (ux2 - ux1) = 0;
-	 x * (z2 - z1) + z * (ux1 - ux2) + z1 * (ux2 - ux1) - ux1 * (z2 - z1) = 0;
-	 so distance to (ux1, z1),(ux2,z1) = (z1 * (ux2 - ux1) - ux1 * (z2 - z1)) / sqrt((z2 - z1)*(z2 - z1) + (ux2 - ux1)*(ux2 - ux1));
-	*/
-	const float idistanceToNormal = (1.0 / (z1 * (ux2 - ux1) - ux1 * (z2 - z1)));
-	//
-
+	const float idistanceToNormal = 1.0 / (z1 * (ux2 - ux1) - ux1 * (z2 - z1));	// Distance from origin to rotated wall segment
 	const float uA = distancePlayerToScreen * (ux1 + z1) * seglen, uB = -z1 * seglen, uC = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1), uD = z2 - z1;
 	const float dx = uD * idistanceToNormal, x1z = uC * idistanceToNormal + x1 * dx;
 

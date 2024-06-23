@@ -34,17 +34,9 @@ public:
 		}
 	}
 
-	uint16_t pixel(float u, float v) const { int x = u - width * floor(u / width), y = v - height * floor(v / height);
+	uint16_t pixel(float u, float v) const { int x = u - width * floorf(u / width), y = v - height * floorf(v / height);
 		x %= width; y %= height;
 		return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset);
-	}
-	void renderColumn(uint8_t *buf, int rowlen, int c, float scale, int yOffset, int yEnd, const uint8_t *lut) const
-	{
-		if (!columns[c].overlap.size())
-			columns[c].patch->renderColumn(buf, rowlen, columns[c].column, yEnd, columns[c].yOffset - yOffset, scale, lut);
-		else
-			for (int y = yOffset, toy = yOffset * scale; y < height && toy < yEnd + yOffset * scale; y++)
-				while (toy < (y + 1) * scale && toy < yEnd + yOffset * scale) buf[(toy++ - (int)(yOffset * scale)) * rowlen] = lut[columns[c].overlap[y]];
 	}
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }

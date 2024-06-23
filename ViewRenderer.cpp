@@ -104,6 +104,8 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &v)
 {
+	constexpr float light_depth = 0.05;
+	
 	const int16_t flags = seg.linedef->flags;
 	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;
 	const float lHeight = seg.lSector ? seg.lSector->floorHeight - seg.lSector->ceilingHeight : 0;
@@ -158,9 +160,9 @@ xscreen = distancePlayerToScreen + halfRenderWidth * x / z
 	for (int x = x1; x <= x2; x++)
     {
 		const float iz = 1.f / (uC + x * uD);
-		const int z = zscalar * iz;
+		const float z = zscalar * iz;
 		const float u = (uA + x * uB) * iz + tdX;
-		int light = std::min(32 - (seg.rSector->lightlevel >> 3), (z - 5) / 20);
+		int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - 5) * light_depth));
 		
 		const uint8_t *lut = lights[std::clamp(light, 0, 31)];
 
@@ -187,7 +189,7 @@ xscreen = distancePlayerToScreen + halfRenderWidth * x / z
 			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
 				float z = vG / (i - horizon);
-				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)(z - 5) / 20);
+				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - 5) * light_depth));
 				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
 		};

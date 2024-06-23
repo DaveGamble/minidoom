@@ -1,7 +1,5 @@
 #include "ViewRenderer.hpp"
 
-#include <algorithm>
-#include <assert.h>
 #include "Map.hpp"
 #include "Texture.hpp"
 #include "Flat.hpp"

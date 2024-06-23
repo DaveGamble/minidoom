@@ -171,7 +171,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, const Viewpoin
 			if (upper && !(flags & 8)) {v = -b * dv;}
 			if (!upper && (flags & 16)) {v = -b * dv + roomHeight;}
 			v += tdY;
-			for (int y = from; y < to; y++) { uint16_t p = texture->pixel(u, v + y * dv); if (p != 256) screenBuffer[rowlen * y + x] = lut[p]; }
+			for (int y = from; y < to; y++) { screenBuffer[rowlen * y + x] = lut[texture->pixel(u, v + y * dv) & 255]; }
 		};
 
 		auto DrawSky = [&](const Patch *sky, int from, int to) {

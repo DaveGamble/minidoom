@@ -161,6 +161,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 
 		auto DrawSky = [&](const Patch *sky, int from, int to) {
 			int tx = (skyAng - floor(skyAng)) * sky->getWidth();
+			if (tx == sky->getWidth()) tx = 0;
 			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
 				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() * invRenderHeight, -1.f, sky->getHeight() - 1.f);

@@ -27,7 +27,7 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 //		if (!wad.getFlat(floorname).size()) printf("Didn't find flat [%s]\n", floorname);
 //		if (!wad.getFlat(ceilname).size()) printf("Didn't find flat [%s]\n", ceilname);
 		const Patch *sky = (!strncmp(ceilname, "F_SKY", 5)) ? wad.getPatch(ceilname + 2) : nullptr;
-		sectors.push_back({ws->fh, ws->ch, wad.getFlat(floorname), wad.getFlat(ceilname), ws->lightlevel, ws->type, ws->tag, sky});
+		sectors.push_back({ws->fh, ws->ch, wad.getFlat(floorname), wad.getFlat(ceilname), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
@@ -91,5 +91,15 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	{
 		addLinedef(linedefs[i], linedefs[i].rSidedef);
 		addLinedef(linedefs[i], linedefs[i].lSidedef);
+	}
+	for (Sector &s : sectors)
+	{
+		uint16_t minlight = s.lightlevel;
+		for (const Linedef *l : s.linedefs)
+		{
+			if (l->lSidedef && l->lSidedef->sector && l->lSidedef->sector != &s) minlight = std::min(minlight, l->lSidedef->sector->lightlevel);
+			if (l->rSidedef && l->rSidedef->sector && l->rSidedef->sector != &s) minlight = std::min(minlight, l->rSidedef->sector->lightlevel);
+		}
+		s.minlightlevel = (minlight == s.lightlevel) ? 0 : minlight;
 	}
 }

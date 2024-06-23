@@ -6,7 +6,6 @@ Tidying is for later. Although maybe it'll end up as an stb style library. Which
 
 TODO:
 Graphics:
-- Animated lighting
 - Render sprites
 - Automap?
 Optimising:

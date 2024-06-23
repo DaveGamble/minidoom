@@ -13,9 +13,9 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[
 , halfRenderHeight(renderYSize / 2)
 , distancePlayerToScreen(halfRenderWidth)	// 90 here is FOV
 , lights(l)
+, ceilingClipHeight(renderWidth)
+, floorClipHeight(renderWidth)
 {
-	ceilingClipHeight.resize(renderWidth);
-	floorClipHeight.resize(renderWidth);
 }
 
 

@@ -80,6 +80,18 @@ public:
 		for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, LumpName.c_str(), 8)) return (int)i;
 		return -1;
 	}
+
+	const std::vector<const Patch *> getPatchesStartingWith(const char *name)
+	{
+		std::vector<const Patch *> all;
+		for (int i = 0; i < numLumps; i++)
+		{
+			if (strncmp(name, dirs[i].lumpName, 4)) continue;
+			char name[9] {}; memcpy(name, dirs[i].lumpName, 8);
+			all.push_back(getPatch(name));
+		}
+		return all;
+	}
 	
 	const Patch *getPatch(const std::string &name)
 	{

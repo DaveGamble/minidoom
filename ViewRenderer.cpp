@@ -109,7 +109,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	
 	const int16_t flags = seg.linedef->flags;
 	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;
-	const float lHeight = seg.lSector ? seg.lSector->floorHeight - seg.lSector->ceilingHeight : 0;
 	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
 	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
 	const float tdX = seg.sidedef->dx + seg.offset, tdY = seg.sidedef->dy;

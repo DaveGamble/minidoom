@@ -104,4 +104,144 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 		}
 		s.minlightlevel = (minlight == s.lightlevel) ? 0 : minlight;
 	}
+	
+	
+	
+	struct thinginfo { int id; char name[5], anim[7]; int flags; };
+	enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
+	static std::vector<thinginfo> thinginfos = {	// UDS 1.666 list of things.
+	{    5, "BKEY", "ab    ", thing_collectible },
+	{    6, "YKEY", "ab    ", thing_collectible },
+	{    7, "SPID", "+     ", thing_obstructs },
+	{    8, "BPAK", "a     ", thing_collectible },
+	{    9, "SPOS", "+     ", thing_obstructs },
+	{   10, "PLAY", "w     ", 0 },
+	{   12, "PLAY", "w     ", 0 },
+	{   13, "RKEY", "ab    ", thing_collectible },
+	{   15, "PLAY", "n     ", 0 },
+	{   16, "CYBR", "+     ", thing_obstructs },
+	{   17, "CELP", "a     ", thing_collectible },
+	{   18, "POSS", "l     ", 0 },
+	{   19, "SPOS", "l     ", 0 },
+	{   20, "TROO", "m     ", 0 },
+	{   21, "SARG", "n     ", 0 },
+	{   22, "HEAD", "l     ", 0 },
+	{   23, "SKUL", "k     ", 0 },
+	{   24, "POL5", "a     ", 0 },
+	{   25, "POL1", "a     ", thing_obstructs },
+	{   26, "POL6", "ab    ", thing_obstructs },
+	{   27, "POL4", "a     ", thing_obstructs },
+	{   28, "POL2", "a     ", thing_obstructs },
+	{   29, "POL3", "ab    ", thing_obstructs },
+	{   30, "COL1", "a     ", thing_obstructs },
+	{   31, "COL2", "a     ", thing_obstructs },
+	{   32, "COL3", "a     ", thing_obstructs },
+	{   33, "COL4", "a     ", thing_obstructs },
+	{   34, "CAND", "a     ", 0 },
+	{   35, "CBRA", "a     ", thing_obstructs },
+	{   36, "COL5", "ab    ", thing_obstructs },
+	{   37, "COL6", "a     ", thing_obstructs },
+	{   38, "RSKU", "ab    ", thing_collectible },
+	{   39, "YSKU", "ab    ", thing_collectible },
+	{   40, "BSKU", "ab    ", thing_collectible },
+	{   41, "CEYE", "abcb  ", thing_obstructs },
+	{   42, "FSKU", "abc   ", thing_obstructs },
+	{   43, "TRE1", "a     ", thing_obstructs },
+	{   44, "TBLU", "abcd  ", thing_obstructs },
+	{   45, "TGRE", "abcd  ", thing_obstructs },
+	{   46, "TRED", "abcd  ", thing_obstructs },
+	{   47, "SMIT", "a     ", thing_obstructs },
+	{   48, "ELEC", "a     ", thing_obstructs },
+	{   49, "GOR1", "abcb  ", thing_hangs | thing_obstructs },
+	{   50, "GOR2", "a     ", thing_hangs | thing_obstructs},
+	{   51, "GOR3", "a     ", thing_hangs | thing_obstructs},
+	{   52, "GOR4", "a     ", thing_hangs | thing_obstructs},
+	{   53, "GOR5", "a     ", thing_hangs | thing_obstructs},
+	{   54, "TRE2", "a     ", thing_obstructs },
+	{   55, "SMBT", "abcd  ", thing_obstructs },
+	{   56, "SMGT", "abcd  ", thing_obstructs },
+	{   57, "SMRT", "abcd  ", thing_obstructs },
+	{   58, "SARG", "+     ", thing_obstructs },
+	{   59, "GOR2", "a     ", thing_hangs },
+	{   60, "GOR4", "a     ", thing_hangs },
+	{   61, "GOR3", "a     ", thing_hangs },
+	{   62, "GOR5", "a     ", thing_hangs },
+	{   63, "GOR1", "abcb  ", thing_hangs },
+	{   64, "VILE", "+     ", thing_obstructs },
+	{   65, "CPOS", "+     ", thing_obstructs },
+	{   66, "SKEL", "+     ", thing_obstructs },
+	{   67, "FATT", "+     ", thing_obstructs },
+	{   68, "BSPI", "+     ", thing_obstructs },
+	{   69, "BOS2", "+     ", thing_obstructs },
+	{   70, "FCAN", "abc   ", thing_obstructs },
+	{   71, "PAIN", "+     ", thing_hangs | thing_obstructs},
+	{   72, "KEEN", "a     ", thing_obstructs },	// taken out + here
+	{   73, "HDB1", "a     ", thing_hangs | thing_obstructs},
+	{   74, "HDB2", "a     ", thing_hangs | thing_obstructs},
+	{   75, "HDB3", "a     ", thing_hangs | thing_obstructs},
+	{   76, "HDB4", "a     ", thing_hangs | thing_obstructs},
+	{   77, "HDB5", "a     ", thing_hangs | thing_obstructs},
+	{   78, "HDB6", "a     ", thing_hangs | thing_obstructs},
+	{   79, "POB1", "a     ", 0 },
+	{   80, "POB2", "a     ", 0 },
+	{   81, "BRS1", "a     ", 0 },
+	{   82, "SGN2", "a     ", thing_collectible },
+	{   83, "MEGA", "abcd  ", thing_artefact },
+	{   84, "SSWV", "+     ", thing_obstructs },
+	{   85, "TLMP", "abcd  ", thing_obstructs },
+	{   86, "TLP2", "abcd  ", thing_obstructs },
+	{   88, "BBRN", "+     ", thing_obstructs },
+	{ 2001, "SHOT", "a     ", thing_collectible },
+	{ 2002, "MGUN", "a     ", thing_collectible },
+	{ 2003, "LAUN", "a     ", thing_collectible },
+	{ 2004, "PLAS", "a     ", thing_collectible },
+	{ 2005, "CSAW", "a     ", thing_collectible },
+	{ 2006, "BFUG", "a     ", thing_collectible },
+	{ 2007, "CLIP", "a     ", thing_collectible },
+	{ 2008, "SHEL", "a     ", thing_collectible },
+	{ 2010, "ROCK", "a     ", thing_collectible },
+	{ 2011, "STIM", "a     ", thing_collectible },
+	{ 2012, "MEDI", "a     ", thing_collectible },
+	{ 2013, "SOUL", "abcdcb", thing_artefact },
+	{ 2014, "BON1", "abcdcb", thing_artefact },
+	{ 2015, "BON2", "abcdcb", thing_artefact },
+	{ 2018, "ARM1", "ab    ", thing_collectible },
+	{ 2019, "ARM2", "ab    ", thing_collectible },
+	{ 2022, "PINV", "abcd  ", thing_artefact },
+	{ 2023, "PSTR", "a     ", thing_artefact },
+	{ 2024, "PINS", "abcd  ", thing_artefact },
+	{ 2025, "SUIT", "a     ", thing_artefact },
+	{ 2026, "PMAP", "abcdcb", thing_artefact },
+	{ 2028, "COLU", "a     ", thing_obstructs },
+	{ 2035, "BAR1", "ab   ", thing_obstructs },	// taken out the + here
+	{ 2045, "PVIS", "ab    ", thing_artefact },
+	{ 2046, "BROK", "a     ", thing_collectible },
+	{ 2047, "CELL", "a     ", thing_collectible },
+	{ 2048, "AMMO", "a     ", thing_collectible },
+	{ 2049, "SBOX", "a     ", thing_collectible },
+	{ 3001, "TROO", "+     ", thing_obstructs },
+	{ 3002, "SARG", "+     ", thing_obstructs },
+	{ 3003, "BOSS", "+     ", thing_obstructs },
+	{ 3004, "POSS", "+     ", thing_obstructs },
+	{ 3005, "HEAD", "+     ", thing_hangs | thing_obstructs},
+	{ 3006, "SKUL", "+     ", thing_hangs | thing_obstructs}};
+	
+	for (Thing& t : things)
+	{
+		auto info = std::lower_bound(thinginfos.begin(), thinginfos.end(), t.type, [] (const thinginfo &a, const int &b) { return a.id < b; });
+		if (info == thinginfos.end()) {printf("Unknown thing, id %d", t.type); continue;}
+		const char *basename = info->name;
+		t.attr = info->flags;
+		
+		for (const char *anim = info->anim; *anim && *anim != ' '; anim++)
+		{
+			if (*anim == '+') t.imgs = wad.getPatchesStartingWith(basename);
+			else
+			{
+				char buffer[9] {};
+				snprintf(buffer, 9, "%s%c", basename, toupper(*anim));				
+				t.imgs.push_back(wad.getPatch(buffer));
+			}
+		}
+	}
 }

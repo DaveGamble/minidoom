@@ -14,4 +14,4 @@ struct Sidedef { int16_t dx, dy; std::vector<const Texture *> uppertexture, midd
 struct Linedef { Vertex start, end; uint16_t flags, type, sectorTag; const Sidedef *rSidedef, *lSidedef; };
 struct Seg { Vertex start, end; float slopeAngle; const Linedef *linedef; const Sidedef *sidedef; uint16_t direction; float offset, len; const Sector *rSector, *lSector; }; // Direction: 0 same as linedef, 1 opposite of linedef. Offset: distance along linedef to start of seg.
 struct Viewpoint { int16_t x, y, z; float angle, cosa, sina, pitch; };
-struct Thing { int16_t x, y; uint16_t angle, type, flags; std::vector<const Patch *> imgs; };
+struct Thing { int16_t x, y; uint16_t angle, type, flags; std::vector<const Patch *> imgs; int attr; };

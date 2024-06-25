@@ -3,18 +3,16 @@ This is a repo for a fork of DIYDoom [https://github.com/amroibrahim/DIYDoom/tre
 It's in a very rough state, and includes SDL2 directly. It may make your eyes bleed. Tidying is for later.
 
 TODO:
-Graphics:
-- Render sprites
-- Better lighting effects (more like the original)
-Optimising:
-- Optimise floor/ceiling drawing
-- Memory usage
-- What can I be precomputing?
-Gamey stuff:
+Wishlist:
 - View bob?
+- Nicer collision detection, with a rectilinear bounding box
+- Wall slide movement if you run at a wall?
+- Be really cool if we could do, like, doors and floor movements and stuff?
 - SFX / Music
 - A nice interface for selecting weapons and drawing firing animations?
-- Be really cool if we could do, like, doors and floor movements and stuff?
+- Lighting effects more like the original
+- Optimising performance? Prerender textures?
+- Remove <map>, <list>, <vector> and <string>? Go full c89?
 
 
 Build is for Xcode on Apple Silicon macs (but if you replaced the precompiled SDL binary you could do whatever)

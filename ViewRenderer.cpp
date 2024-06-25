@@ -15,6 +15,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[
 , lights(l)
 , ceilingClipHeight(renderWidth)
 , floorClipHeight(renderWidth)
+, renderLaters(renderWidth)
 {
 }
 
@@ -25,7 +26,6 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	texframe = frame / 20;
 	screenBuffer = pScreenBuffer;
 	rowlen = iBufferPitch;
-	renderLaters.clear();
 	solidWallRanges.clear();
 	solidWallRanges.push_back({INT_MIN, -1});
 	solidWallRanges.push_back({renderWidth, INT_MAX});
@@ -33,15 +33,19 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
 	map.render3DView(view, [&] (const Seg &seg){ addWallInFOV(seg, view); }, frame);
 
-	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
+	for (int x = 0; x < renderWidth; x++)
 	{
-		renderLater& r = renderLaters[i];
-		float v = r.v;
-		for (int y = r.from; y < r.to; y++, v += r.dv)
+		for (int i = (int)renderLaters[x].size() - 1; i >= 0; i--)
 		{
-			uint16_t p = r.patch->pixel(r.column, v);
-			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
+			renderLater& r = renderLaters[x][i];
+			float v = r.v;
+			for (int y = r.from; y < r.to; y++, v += r.dv)
+			{
+				uint16_t p = r.patch->pixel(r.column, v);
+				if (p != 256) screenBuffer[rowlen * y + x] = r.light[p];
+			}
 		}
+		renderLaters[x].clear();
 	}
 }
 
@@ -213,7 +217,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int col, yoffset, texu = ((int)u) % tex->getWidth();
 				const Patch *p;
 				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
-					renderLaters.push_back({p, x, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
+					renderLaters[x].push_back({p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);

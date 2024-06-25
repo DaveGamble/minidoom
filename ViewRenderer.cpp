@@ -36,9 +36,10 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	for (int i = (int)renderLaters.size() - 1; i >= 0; i--)
 	{
 		renderLater& r = renderLaters[i];
-		for (int y = std::max(0, r.from); y < std::min(r.to, renderHeight); y++)
+		float v = r.v + std::max(0, r.from) * r.dv;
+		for (int y = std::max(0, r.from); y < std::min(r.to, renderHeight); y++, v += r.dv)
 		{
-			uint16_t p = r.texture->pixel(r.u, r.dv * y + r.v);
+			uint16_t p = (v >= 0 && v < r.texture->getHeight()) ? r.texture->pixel(r.u, v) : 256;
 			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
 		}
 	}

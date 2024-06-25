@@ -69,6 +69,11 @@ public:
 	}
 
 	~WADLoader() { delete[] data; }
+	
+	void release() { delete[] data; data = nullptr; dirs = nullptr; pnames.clear();
+		for (int i = 0; i < kNumTextureCycles; i++) texturecycles[i].clear();
+		for (int i = 0; i < kNumFlatCycles; i++) flatcycles[i].clear();
+	}
 
 	std::vector<uint8_t> getLumpNamed(const std::string& name, size_t after = 0) const
 	{

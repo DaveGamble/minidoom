@@ -46,7 +46,8 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 			{
 				const renderMark &m = renderMarks[x][c];
 				if (m.to <= from || m.from > to) continue;
-				from = std::max(from, m.to); to = std::min(to, m.from);
+				if (m.from <= from) from = std::max(from, m.to);
+				else to = std::min(to, m.from);
 			}
 			float v = r.v + (from - r.from) * r.dv;
 			for (int y = from; y < to; y++, v += r.dv)
@@ -251,7 +252,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 					int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)(z - 5) / 20);
 					screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 				}
-				mark(x, from, to, vH / (to - horizon));
+				mark(x, from, to, vH / (horizon - to));
 			}
 		};
 				

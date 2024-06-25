@@ -147,14 +147,15 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		
 		const uint8_t *lut = lights[std::clamp(light, 0, 31)];
 
-		auto DrawTexture = [&](const std::vector<const Texture *> &textures, int from, int to, float a, float b, float dv, bool upper = false) {
+		auto DrawTexture = [&](const std::vector<const Texture *> &textures, int from, int to, float a, float b, float dv, int stage) {
 			if (!textures.size()) return;
 			const Texture *texture = textures[texframe % textures.size()];
 			if (!texture) return;
 			dv /= (b - a);
 			float v = -a * dv;
-			if (upper && !(flags & kUpperTextureUnpeg)) {v = -b * dv;}
-			if (!upper && (flags & kLowerTextureUnpeg)) {v = -b * dv;}
+			if (stage == 0 && !(flags & kUpperTextureUnpeg)) v = -b * dv;// top
+			if (stage == 1 && (flags & kLowerTextureUnpeg))  {dv = z * 2 * invRenderWidth; v = -yFloor * dv;} // middle
+			if (stage == 2 && (flags & kLowerTextureUnpeg)) v = -yCeiling * dv; // bottom
 			v += tdY;
 			for (int y = from; y < to; y++) { screenBuffer[rowlen * y + x] = lut[texture->pixel(u, v + y * dv) & 255]; }
 		};
@@ -212,14 +213,14 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);
-			else if (seg.sidedef->uppertexture.size()) DrawTexture(seg.sidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
-			if (seg.sidedef->lowertexture.size()) DrawTexture(seg.sidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
+			else if (seg.sidedef->uppertexture.size()) DrawTexture(seg.sidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, 0);
+			if (seg.sidedef->lowertexture.size()) DrawTexture(seg.sidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor, 2);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
-			DrawTexture(seg.sidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight);
+			DrawTexture(seg.sidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight, 1);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}

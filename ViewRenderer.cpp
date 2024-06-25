@@ -153,7 +153,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			dv /= (b - a);
 			float v = -a * dv;
 			if (upper && !(flags & kUpperTextureUnpeg)) {v = -b * dv;}
-			if (!upper && (flags & kLowerTextureUnpeg)) {v = -b * dv + roomHeight;}
+			if (!upper && (flags & kLowerTextureUnpeg)) {v = -b * dv;}
 			v += tdY;
 			for (int y = from; y < to; y++) { screenBuffer[rowlen * y + x] = lut[texture->pixel(u, v + y * dv) & 255]; }
 		};

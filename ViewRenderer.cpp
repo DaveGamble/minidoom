@@ -4,6 +4,8 @@
 #include "Texture.hpp"
 #include "Flat.hpp"
 
+constexpr float light_depth = 0.02, light_off = 5;
+
 ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[34][256])
 : renderWidth(renderXSize)
 , invRenderWidth(1.f / renderXSize)
@@ -69,6 +71,8 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 
 	if (tz < 0) return;
 
+	int light = std::clamp(std::max(32 - (seg.rSector->lightlevel >> 3), (int)((tz - light_off) * light_depth)), 0, 31);
+
 	const int xc = distancePlayerToScreen + round(tx * halfRenderWidth / tz);
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
 	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
@@ -90,7 +94,7 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 		if (x1 < 0 || x1 >= renderWidth) continue;
 		float vx = patch->getWidth() * (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->getWidth()) continue;
-		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)py1, (int)py2, 0, dv, tz, lights[0]});
+		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)py1, (int)py2, 0, dv, tz, lights[light]});
 	}
 }
 
@@ -161,8 +165,6 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 
 void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &p)
 {
-	constexpr float light_depth = 0.05, light_off = 5;
-	
 	const int16_t flags = seg.linedef->flags;
 	const float roomHeight = seg.rSector->ceilingHeight - seg.rSector->floorHeight;
 	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
@@ -198,7 +200,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		const float iz = 1.f / (uC + x * uD);
 		const float z = zscalar * iz;
 		const float u = (uA + x * uB) * iz + tdX;
-		int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
+		int light = std::max(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
 		
 		const uint8_t *lut = lights[std::clamp(light, 0, 31)];
 
@@ -233,7 +235,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			for (int i = from; i < to; i++)
 			{
 				float z = vG / (i - horizon);
-				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
+				int light = std::max(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
 				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
 			mark(x, from, to, vG / (from - horizon));
@@ -249,7 +251,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				for (int i = from; i < to; i++)
 				{
 					float z = vH / (horizon - i);
-					int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
+					int light = std::max(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
 					screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 				}
 				mark(x, from, to, vH / (horizon - to));

@@ -49,14 +49,47 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	}
 }
 
+void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &seg)
+{
+//	printf("Add thing %d at %d %d\n", thing.type, thing.x, thing.y);
+	const int toV1x = thing.x - v.x, toV1y = thing.y - v.y;	// Vectors from origin to segment ends.
+
+	const float ca = v.cosa, sa = v.sina, z = toV1x * ca + toV1y * sa, x = toV1x * sa - toV1y * ca;	// Rotate vectors to be in front of us.
+
+	if (z < 0) return;
+	const float scale = 128; // 16 / z;
+
+	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
+	if (!patch) return;
+	for (int x1 = x - scale; x1 < x + scale; x1++)
+	{
+		if (x1 < 0 || x1 >= renderWidth) continue;
+		float vx = patch->getWidth() * (x1 - x + scale) / (scale * 2);
+		if (vx < 0 || vx >= patch->getWidth()) continue;
+		float dv = 1;// patch->getHeight() / scale;
+		float v = 0;
+		float y1 = 100, y2 = 300;
+		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, z, lights[0]});
+	}
+
+
+}
+
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
+	if (!seg.rSector->thingsThisFrame)
+	{
+		(const_cast<Seg&>(seg)).rSector->thingsThisFrame = true;	// Mark it done.
+		
+		for (int i = 0; i < seg.rSector->things.size(); i++) addThing(*seg.rSector->things[i], v, seg);
+	}
+	
 	const int toV1x = seg.start.x - v.x, toV1y = seg.start.y - v.y, toV2x = seg.end.x - v.x, toV2y = seg.end.y - v.y;	// Vectors from origin to segment ends.
 	if (toV1x * toV2y >= toV1y * toV2x) return;	// If sin(angle) between the two (computed as dot product of V1 and normal to V2) is +ve, wall is out of view. (It's behind us)
 
 	const float ca = v.cosa, sa = v.sina;
 	const float tov1z = toV1x * ca + toV1y * sa, tov2z = toV2x * ca + toV2y * sa;
-	float tov1x = toV1x * sa - toV1y * ca, tov2x = toV2x * sa - toV2y * ca;	// Rotate vectors to be in front of us.
+	const float tov1x = toV1x * sa - toV1y * ca, tov2x = toV2x * sa - toV2y * ca;	// Rotate vectors to be in front of us.
 	// z = how far in front of us it is. -ve values are behind. +ve values are in front.
 	// x = position left to right. left = -1, right = 1.
 

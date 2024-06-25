@@ -230,8 +230,10 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 
 	for (Thing& t : things)
 	{
+		if (t.type == 11 || (t.type >= 1 && t.type <=4)) continue;// Player start positions.
 		auto info = std::lower_bound(thinginfos.begin(), thinginfos.end(), t.type, [] (const thinginfo &a, const int &b) { return a.id < b; });
-		if (info == thinginfos.end()) {printf("Unknown thing, id %d", t.type); continue;}
+		
+		if (info == thinginfos.end() || info->id != t.type) {printf("Unknown thing, id %d\n", t.type); continue;}
 		const char *basename = info->name;
 		t.attr = info->flags;
 		

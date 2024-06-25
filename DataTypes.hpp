@@ -4,6 +4,7 @@
 #include <vector>
 
 enum { kUpperTextureUnpeg = 8, kLowerTextureUnpeg = 16 };
+enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
 
 class Patch;
 class Texture;

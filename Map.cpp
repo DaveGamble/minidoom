@@ -108,7 +108,6 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	
 	
 	struct thinginfo { int id; char name[5], anim[7]; int flags; };
-	enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
 	static std::vector<thinginfo> thinginfos = {	// UDS 1.666 list of things.
 	{    5, "BKEY", "ab    ", thing_collectible },
 	{    6, "YKEY", "ab    ", thing_collectible },

@@ -94,17 +94,13 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 		if (x1 < 0 || x1 >= renderWidth) continue;
 		float vx = patch->getWidth() * (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->getWidth()) continue;
-		float v = 0;
-		y1 = std::max((float)ceilingClipHeight[x1], py1);
-		y2 = std::min(py2, (float)floorClipHeight[x1]);
-		v += dv * (y1 - py1);
-		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, tz, lights[0]});
+		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)py1, (int)py2, 0, dv, tz, lights[0]});
 	}
 }
 
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 {
-	if (!seg.rSector->thingsThisFrame)
+	if (seg.rSector && !seg.rSector->thingsThisFrame)
 	{
 		(const_cast<Seg&>(seg)).rSector->thingsThisFrame = true;	// Mark it done.
 		

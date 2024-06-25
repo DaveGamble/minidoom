@@ -36,7 +36,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
 	map.render3DView(view, [&] (const Seg &seg){ addWallInFOV(seg, view); }, frame);
 
-//	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
+	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
 	for (int x = 0; x < renderWidth; x++)
 	{
 		std::sort(renderMarks[x].begin(), renderMarks[x].end(), [] (const renderMark &a, const renderMark &b) {return a.zfrom + a.zto < b.zfrom + b.zto; });
@@ -48,7 +48,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 			for (int c = 0; to > from && c < renderMarks[x].size() && std::min(renderMarks[x][c].zfrom, renderMarks[x][c].zto) < r.z; c++)
 			{
 				const renderMark &m = renderMarks[x][c];
-				if (m.to <= from || m.from > to) continue;
+				if (m.to <= from || m.from > to || (m.zfrom < 0 && m.zto < 0)) continue;
 				if (m.zfrom == m.zto || std::max(m.zfrom, m.zto) < r.z)	// column clip or completely before.
 				{
 					if (m.from <= from) from = std::max(from, m.to);
@@ -56,9 +56,9 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 				}
 				else
 				{
-//					int intersection = horizon + m.zfrom * (from - horizon) / r.z;
-//					if (m.zfrom < r.z) from = std::max(from, intersection);
-//					else to = std::min(to, intersection);
+					const float intersection =  horizon + m.zfrom * (m.from - horizon) / r.z;
+					if (m.zfrom < r.z) from = std::max(from, (int)intersection);
+					else  to = std::min(to, (int)intersection);
 				}
 			}
 			float v = r.v + (from - r.from) * r.dv;

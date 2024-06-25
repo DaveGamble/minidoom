@@ -81,8 +81,8 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 		if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = y1 + patch->getHeight();}
 		else {y2 = vG / tz + horizon; y1 = y2 - patch->getHeight();}
 		float py1 = y1;
-		y1 = std::max(0.f, y1);
-		y2 = std::min(y2, (float)renderHeight);
+		y1 = std::max((float)ceilingClipHeight[x1], y1);
+		y2 = std::min(y2, (float)floorClipHeight[x1]);
 		v += dv * (y1 - py1);
 		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, tz, lights[0]});
 	}

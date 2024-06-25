@@ -19,7 +19,7 @@ protected:
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 	float invRenderWidth, invRenderHeight;
 
-	struct renderLater {const Patch *patch; int x, column; int from, to; float v, dv; const uint8_t *light;};
+	struct renderLater {const Patch *patch; int x, column; int from, to; float v, dv, z; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;

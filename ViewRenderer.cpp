@@ -213,7 +213,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int col, yoffset, texu = ((int)u) % tex->getWidth();
 				const Patch *p;
 				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
-					renderLaters.push_back({p, x, col, top, bot,  v + top * dv + tdY - yoffset, dv, lut});
+					renderLaters.push_back({p, x, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);

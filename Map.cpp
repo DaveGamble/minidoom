@@ -58,9 +58,9 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	if (seek("SEGS")) for (int i = 0; i < size; i += sizeof(WADSeg))
 	{
 		WADSeg *ws = (WADSeg*)(ptr + i);
-		const Linedef *pLinedef = &linedefs[ws->linedef];
-		const Sidedef *pRightSidedef = ws->dir ? pLinedef->lSidedef : pLinedef->rSidedef;
-		const Sidedef *pLeftSidedef = ws->dir ? pLinedef->rSidedef : pLinedef->lSidedef;
+		Linedef *pLinedef = &linedefs[ws->linedef];
+		Sidedef *pRightSidedef = ws->dir ? pLinedef->lSidedef : pLinedef->rSidedef;
+		Sidedef *pLeftSidedef = ws->dir ? pLinedef->rSidedef : pLinedef->lSidedef;
 		segs.push_back({vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, pRightSidedef, ws->dir, (float)ws->offset,
 			sqrtf((vertices[ws->start].x - vertices[ws->end].x) * (vertices[ws->start].x - vertices[ws->end].x) + (vertices[ws->start].y - vertices[ws->end].y) * (vertices[ws->start].y - vertices[ws->end].y)),
 			(pRightSidedef) ? pRightSidedef->sector : nullptr, (pLeftSidedef) ? pLeftSidedef->sector : nullptr});
@@ -213,7 +213,7 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	{ 2025, "SUIT", "a     ", thing_artefact },
 	{ 2026, "PMAP", "abcdcb", thing_artefact },
 	{ 2028, "COLU", "a     ", thing_obstructs },
-	{ 2035, "BAR1", "ab   ", thing_obstructs },	// taken out the + here
+	{ 2035, "BAR1", "ab    ", thing_obstructs },	// taken out the + here
 	{ 2045, "PVIS", "ab    ", thing_artefact },
 	{ 2046, "BROK", "a     ", thing_collectible },
 	{ 2047, "CELL", "a     ", thing_collectible },
@@ -243,9 +243,13 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 			else
 			{
 				char buffer[9] {};
-				snprintf(buffer, 9, "%s%c", basename, toupper(*anim));				
+				snprintf(buffer, 9, "%s%c0", basename, toupper(*anim));
 				t.imgs.push_back(wad.getPatch(buffer));
 			}
 		}
+		Viewpoint v {t.x, t.y};
+		int subsector = (int)(nodes.size() - 1);
+		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(v, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
+		segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->things.push_back(&t);
 	}
 }

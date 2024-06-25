@@ -14,6 +14,7 @@ public:
 	{
 		for (Sector &sec : sectors)
 		{
+			sec.thingsThisFrame = false;
 			if (!sec.type) continue;
 			if (sec.type == 2 || sec.type == 4 || sec.type == 12) sec.lightlevel = ((frame % 60) < 30) ? sec.maxlightlevel : sec.minlightlevel;
 			if (sec.type == 3 || sec.type == 13) sec.lightlevel = ((frame % 120) < 60) ? sec.maxlightlevel : sec.minlightlevel;

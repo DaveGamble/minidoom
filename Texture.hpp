@@ -37,10 +37,7 @@ public:
 	const Patch *getPatchForColumn(int x, int &col, int &yOffset) const {
 		if (!columns[x].overlap.size()) {col = columns[x].column; yOffset = columns[x].yOffset; return columns[x].patch;} return nullptr;
 	}
-	uint16_t pixel(float u, float v) const { int x = u - width * floorf(u / width), y = v - height * floorf(v / height);
-		x %= width; y %= height;
-		if (x < 0) x += width;
-		if (y < 0) y += height;
+	uint16_t pixel(int x, int y) const { x %= width; y %= height; if (x < 0) x += width; if (y < 0) y += height;
 		return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset);
 	}
 	int getWidth() const { return width; }

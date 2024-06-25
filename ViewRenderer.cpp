@@ -42,7 +42,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 		{
 			renderLater& r = renderLaters[x][i];
 			int from = r.from, to = r.to;
-			for (int c = 0; to < from && c < renderMarks[x].size() && renderMarks[x][c].maxz > r.z; c++)
+			for (int c = 0; to > from && c < renderMarks[x].size() && renderMarks[x][c].maxz < r.z; c++)
 			{
 				const renderMark &m = renderMarks[x][c];
 				if (m.to <= from || m.from > to) continue;
@@ -244,7 +244,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - 5) * light_depth));
 				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
-			mark(x, from, to, vG / (to - horizon));
+			mark(x, from, to, vG / (from - horizon));
 		};
 
 		auto DrawCeiling = [&](const std::vector<const Flat *> &flats, int from, int to) {

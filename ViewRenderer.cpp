@@ -86,8 +86,6 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 		v += dv * (y1 - py1);
 		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, tz, lights[0]});
 	}
-
-
 }
 
 void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)

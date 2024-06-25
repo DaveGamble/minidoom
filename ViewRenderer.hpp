@@ -20,6 +20,8 @@ protected:
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 	float invRenderWidth, invRenderHeight;
 
+	struct renderMark {int from, to; float maxz; };
+	std::vector<std::vector<renderMark>> renderMarks;
 	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;

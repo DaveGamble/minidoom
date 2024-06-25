@@ -16,6 +16,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[
 , ceilingClipHeight(renderWidth)
 , floorClipHeight(renderWidth)
 , renderLaters(renderWidth)
+, renderMarks(renderWidth)
 {
 }
 
@@ -35,17 +36,27 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 
 	for (int x = 0; x < renderWidth; x++)
 	{
+		std::sort(renderMarks[x].begin(), renderMarks[x].end(), [] (const renderMark &a, const renderMark &b) {return a.maxz < b.maxz; });
+		std::sort(renderLaters[x].begin(), renderLaters[x].end(), [] (const renderLater &a, const renderLater &b) {return a.z < b.z; });
 		for (int i = (int)renderLaters[x].size() - 1; i >= 0; i--)
 		{
 			renderLater& r = renderLaters[x][i];
-			float v = r.v;
-			for (int y = r.from; y < r.to; y++, v += r.dv)
+			int from = r.from, to = r.to;
+			for (int c = 0; to < from && c < renderMarks[x].size() && renderMarks[x][c].maxz > r.z; c++)
+			{
+				const renderMark &m = renderMarks[x][c];
+				if (m.to <= from || m.from > to) continue;
+				from = std::max(from, m.to); to = std::min(to, m.from);
+			}
+			float v = r.v + (from - r.from) * r.dv;
+			for (int y = from; y < to; y++, v += r.dv)
 			{
 				uint16_t p = r.patch->pixel(r.column, v);
 				if (p != 256) screenBuffer[rowlen * y + x] = r.light[p];
 			}
 		}
 		renderLaters[x].clear();
+		renderMarks[x].clear();
 	}
 }
 
@@ -261,7 +272,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int top = std::max(std::max(upper, ceilbot), 0), bot = std::min(std::min(lower, floortop), renderHeight);
 				const Texture *tex = seg.sidedef->middletexture[texframe % seg.sidedef->middletexture.size()];
 				float dv = z * invRenderWidth * 2;
-				float v =  -std::max(yUpper, yCeiling) * dv;
+				float v = -std::max(yUpper, yCeiling) * dv;
 				if (flags & kLowerTextureUnpeg)  v = tex->getHeight() -std::min(yLower, yFloor) * dv;
 				int col, yoffset, texu = ((int)u) % tex->getWidth();
 				const Patch *p;

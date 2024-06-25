@@ -150,7 +150,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		auto DrawTexture = [&](const std::vector<const Texture *> &textures, int from, int to, float a, float b, float dv, int stage) {
 			if (!textures.size()) return;
 			const Texture *texture = textures[texframe % textures.size()];
-			if (!texture) return;
+			if (!texture || to <= from) return;
 			dv /= (b - a);
 			float v = -a * dv;
 			if (stage == 0 && !(flags & kUpperTextureUnpeg)) v = -b * dv;// top

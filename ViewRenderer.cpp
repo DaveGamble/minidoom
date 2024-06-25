@@ -68,21 +68,24 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 	
 	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
 	if (!patch) return;
-	const float scale = 3 * patch->getWidth() * 0.5; // 16 / z;
+
+	float y1, y2, height = patch->getHeight();
+	if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = horizon - distancePlayerToScreen * (seg.rSector->ceilingHeight + height - v.z) / tz;}
+	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (v.z - seg.rSector->floorHeight - height) / tz;}
+	float dv = height / (y2 - y1);
+	float py1 = y1, py2 = y2;
+
+
+	const float scale = 0.5 * patch->getWidth() / dv; // 16 / z;
 
 	for (int x1 = xc - scale; x1 < xc + scale; x1++)
 	{
 		if (x1 < 0 || x1 >= renderWidth) continue;
 		float vx = patch->getWidth() * (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->getWidth()) continue;
-		float dv = 1;// patch->getHeight() / scale;
 		float v = 0;
-		float y1, y2;
-		if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = y1 + patch->getHeight();}
-		else {y2 = vG / tz + horizon; y1 = y2 - patch->getHeight();}
-		float py1 = y1;
-		y1 = std::max((float)ceilingClipHeight[x1], y1);
-		y2 = std::min(y2, (float)floorClipHeight[x1]);
+		y1 = std::max((float)ceilingClipHeight[x1], py1);
+		y2 = std::min(py2, (float)floorClipHeight[x1]);
 		v += dv * (y1 - py1);
 		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, tz, lights[0]});
 	}

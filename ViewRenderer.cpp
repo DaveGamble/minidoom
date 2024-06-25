@@ -39,7 +39,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 		float v = r.v;
 		for (int y = r.from; y < r.to; y++, v += r.dv)
 		{
-			uint16_t p = ((v >= 0 && v < r.texture->getHeight())) ? r.texture->pixel(r.u, v) : 256;
+			uint16_t p = r.patch->pixel(r.column, v);
 			if (p != 256) screenBuffer[rowlen * y + r.x] = r.light[p];
 		}
 	}
@@ -210,7 +210,10 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				float dv = z * invRenderWidth * 2;
 				float v =  -std::max(yUpper, yCeiling) * dv;
 				if (flags & kLowerTextureUnpeg)  v = tex->getHeight() -std::min(yLower, yFloor) * dv;
-				renderLaters.push_back({tex, x, top, bot, u,  v + top * dv + tdY, dv, lut});
+				int col, yoffset, texu = ((int)u) % tex->getWidth();
+				const Patch *p;
+				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
+					renderLaters.push_back({p, x, col, top, bot,  v + top * dv + tdY - yoffset, dv, lut});
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);

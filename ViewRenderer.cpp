@@ -64,17 +64,12 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 {
 //	printf("Add thing %d at %d %d\n", thing.type, thing.x, thing.y);
 	const int toV1x = thing.x - v.x, toV1y = thing.y - v.y;	// Vectors from origin to segment ends.
-
 	const float ca = v.cosa, sa = v.sina, tz = toV1x * ca + toV1y * sa, tx = toV1x * sa - toV1y * ca;	// Rotate vectors to be in front of us.
 
 	if (tz < 0) return;
 
 	const int xc = distancePlayerToScreen + round(tx * halfRenderWidth / tz);
-	if (xc < 0 || xc >= renderWidth) return;
-
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
-
-	
 	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
 	
 	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
@@ -85,9 +80,9 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (v.z - seg.rSector->floorHeight - height) / tz;}
 	float dv = height / (y2 - y1);
 	float py1 = y1, py2 = y2;
-
-
 	const float scale = 0.5 * patch->getWidth() / dv; // 16 / z;
+
+	if (xc + scale < 0 || xc - scale >= renderWidth) return;
 
 	for (int x1 = xc - scale; x1 < xc + scale; x1++)
 	{

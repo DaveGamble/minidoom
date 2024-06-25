@@ -65,7 +65,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
     if (x1 == x2) return; // Skip same pixel wall
 	bool solid =  (!seg.lSector || seg.lSector->ceilingHeight <= seg.rSector->floorHeight || seg.lSector->floorHeight >= seg.rSector->ceilingHeight); // Handle walls and closed door
 
-	if (!solid && (seg.lSector->sky && seg.lSector->sky == seg.rSector->sky) && !seg.linedef->rSidedef->middletexture.size()
+	if (!solid && (seg.lSector->sky && seg.lSector->sky == seg.rSector->sky) && !seg.sidedef->middletexture.size()
 		&& seg.rSector->floorHeight == seg.lSector->floorHeight
 		&& seg.lSector->floortexture == seg.rSector->floortexture && seg.lSector->lightlevel == seg.rSector->lightlevel) return;
 	
@@ -111,7 +111,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float lHeight = seg.lSector ? seg.lSector->floorHeight - seg.lSector->ceilingHeight : 0;
 	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
 	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
-	const float tdX = seg.linedef->rSidedef->dx + seg.offset, tdY = seg.linedef->rSidedef->dy;
+	const float tdX = seg.sidedef->dx + seg.offset, tdY = seg.sidedef->dy;
 	const float sinv = v.sina, cosv = v.cosa;
 	const float seglen = seg.len;
 	const float distanceToNormal = (z1 * ux2 - ux1 * z2);
@@ -202,24 +202,22 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
         if (seg.lSector)
         {
 			int upper = std::min((float)CurrentFloorStart, yUpper), lower = std::max(yLower, ceilingClipHeight[x] + 1.f);
-			if (seg.linedef->rSidedef->middletexture.size() && midtop < midbot && yFloor > yCeiling)
+			if (seg.sidedef->middletexture.size() && midtop < midbot && yFloor > yCeiling)
 			{
 				float dv = lHeight / (yLower - yUpper);
-				const Texture *tex = seg.linedef->rSidedef->middletexture[texframe % seg.linedef->rSidedef->middletexture.size()];
+				const Texture *tex = seg.sidedef->middletexture[texframe % seg.sidedef->middletexture.size()];
 				renderLaters.push_back({tex, x, upper, lower, u, ((flags & kLowerTextureUnpeg) ? -yLower * dv + roomHeight :  -yUpper * dv) + tdY, dv, lut});
 			}
 
-			if (seg.lSector->sky)	DrawSky(seg.lSector->sky, ceilbot, upper);
-			else if (seg.linedef->rSidedef->uppertexture.size()) DrawTexture(seg.linedef->rSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
-			else	DrawTexture(seg.linedef->lSidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
-			if (seg.linedef->rSidedef->lowertexture.size()) DrawTexture(seg.linedef->rSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
-			else DrawTexture(seg.linedef->lSidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
+			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);
+			else if (seg.sidedef->uppertexture.size()) DrawTexture(seg.sidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, true);
+			if (seg.sidedef->lowertexture.size()) DrawTexture(seg.sidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
-			DrawTexture(seg.linedef->rSidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight);
+			DrawTexture(seg.sidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}

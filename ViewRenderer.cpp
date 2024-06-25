@@ -41,7 +41,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 		for (int i = (int)renderLaters[x].size() - 1; i >= 0; i--)
 		{
 			renderLater& r = renderLaters[x][i];
-			int from = r.from, to = r.to;
+			int from = std::max(0, r.from), to = std::min(r.to, renderHeight);
 			for (int c = 0; to > from && c < renderMarks[x].size() && renderMarks[x][c].maxz < r.z; c++)
 			{
 				const renderMark &m = renderMarks[x][c];

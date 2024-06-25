@@ -226,7 +226,8 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 	{ 3006, "SKUL", "+     ", thing_hangs | thing_obstructs}};
 	
 	things.erase(std::remove_if(things.begin(), things.end(), [] (const Thing& t) { return !(t.flags & 2); }), things.end());
-	
+	things.erase(std::remove_if(things.begin(), things.end(), [] (const Thing& t) { return (t.flags & 16); }), things.end());
+
 	for (Thing& t : things)
 	{
 		auto info = std::lower_bound(thinginfos.begin(), thinginfos.end(), t.type, [] (const thinginfo &a, const int &b) { return a.id < b; });

@@ -21,6 +21,9 @@ DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
 	for (int i = 0; i < 34; i++) memcpy(lighting[i], lights.data() + 256 * i, 256);
 
 	weapon = wad.getPatch("PISGA0");
+	
+	wad.release();
+	
 	const Thing* t = map.getThing(1);
 	if (t)
 	{

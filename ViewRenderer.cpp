@@ -102,7 +102,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg, const Viewpoint &v)
 	if (nextWall != f) solidWallRanges.erase(++f, ++nextWall);
 }
 
-void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &v)
+void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &p)
 {
 	constexpr float light_depth = 0.05;
 	
@@ -112,7 +112,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float lrFloor = seg.lSector ? seg.lSector->floorHeight - seg.rSector->floorHeight : 0;
 	const float rlCeiling = seg.lSector ? seg.rSector->ceilingHeight - seg.lSector->ceilingHeight : 0;
 	const float tdX = seg.sidedef->dx + seg.offset, tdY = seg.sidedef->dy;
-	const float sinv = v.sina, cosv = v.cosa;
+	const float sinv = p.sina, cosv = p.cosa;
 	const float seglen = seg.len;
 	const float distanceToNormal = (z1 * ux2 - ux1 * z2);
 	const float idistanceToNormal = 1.0 / distanceToNormal;	// Distance from origin to rotated wall segment
@@ -120,22 +120,22 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 	const float uA = distancePlayerToScreen * (ux1 + z1) * seglen, uB = -z1 * seglen, uC = -distancePlayerToScreen * (ux2 - ux1 + z2 - z1), uD = z2 - z1;
 	const float dx = uD * idistanceToNormal, x1z = uC * idistanceToNormal + x1 * dx;
 
-	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
-	const float vA = cosv - sinv, vB = 2 * sinv * invRenderWidth, vC = v.x, vD = -cosv - sinv, vE = 2 * cosv * invRenderWidth, vF = -v.y;
+	const float vG = distancePlayerToScreen * (p.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - p.z);
+	const float vA = cosv - sinv, vB = 2 * sinv * invRenderWidth, vC = p.x - 1, vD = -cosv - sinv, vE = 2 * cosv * invRenderWidth, vF = -p.y;
 
-	const float dyCeiling = (seg.rSector->ceilingHeight - v.z) * dx;
-	const float dyFloor = (seg.rSector->floorHeight - v.z) * dx;
-	const float dyUpper = seg.lSector ? (seg.lSector->ceilingHeight - v.z) * dx : 0;
-	const float dyLower = seg.lSector ? (seg.lSector->floorHeight - v.z) * dx : 0;
+	const float dyCeiling = (seg.rSector->ceilingHeight - p.z) * dx;
+	const float dyFloor = (seg.rSector->floorHeight - p.z) * dx;
+	const float dyUpper = seg.lSector ? (seg.lSector->ceilingHeight - p.z) * dx : 0;
+	const float dyLower = seg.lSector ? (seg.lSector->floorHeight - p.z) * dx : 0;
 	const float dSkyAng = invRenderWidth;
 
-	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
+	const float horizon = halfRenderHeight + p.pitch * halfRenderHeight;
 
-	float yCeiling = horizon + (seg.rSector->ceilingHeight - v.z) * x1z;
-	float yFloor = horizon + (seg.rSector->floorHeight - v.z) * x1z;
-	float yUpper = seg.lSector ? horizon + (seg.lSector->ceilingHeight - v.z) * x1z : 0;
-	float yLower = seg.lSector ? horizon + (seg.lSector->floorHeight - v.z) * x1z : 0;
-	float skyAng = x1 * dSkyAng - 2 * v.angle / M_PI;
+	float yCeiling = horizon + (seg.rSector->ceilingHeight - p.z) * x1z;
+	float yFloor = horizon + (seg.rSector->floorHeight - p.z) * x1z;
+	float yUpper = seg.lSector ? horizon + (seg.lSector->ceilingHeight - p.z) * x1z : 0;
+	float yLower = seg.lSector ? horizon + (seg.lSector->floorHeight - p.z) * x1z : 0;
+	float skyAng = x1 * dSkyAng - 2 * p.angle / M_PI;
 	
 	for (int x = x1; x <= x2; x++)
     {

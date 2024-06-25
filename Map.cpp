@@ -235,7 +235,11 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 		
 		for (const char *anim = info->anim; *anim && *anim != ' '; anim++)
 		{
-			if (*anim == '+') t.imgs = wad.getPatchesStartingWith(basename);
+			if (*anim == '+')
+			{
+				std::vector<std::string> all = wad.getPatchesStartingWith(basename);
+				for (std::string& s : all) t.imgs.push_back(wad.getPatch(s));
+			}
 			else
 			{
 				char buffer[9] {};

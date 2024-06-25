@@ -81,14 +81,14 @@ public:
 		return -1;
 	}
 
-	const std::vector<const Patch *> getPatchesStartingWith(const char *name)
+	const std::vector<std::string> getPatchesStartingWith(const char *name)
 	{
-		std::vector<const Patch *> all;
+		std::vector<std::string> all;
 		for (int i = 0; i < numLumps; i++)
 		{
 			if (strncmp(name, dirs[i].lumpName, 4)) continue;
 			char name[9] {}; memcpy(name, dirs[i].lumpName, 8);
-			all.push_back(getPatch(name));
+			all.push_back(name);
 		}
 		return all;
 	}

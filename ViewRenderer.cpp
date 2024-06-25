@@ -54,22 +54,37 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 //	printf("Add thing %d at %d %d\n", thing.type, thing.x, thing.y);
 	const int toV1x = thing.x - v.x, toV1y = thing.y - v.y;	// Vectors from origin to segment ends.
 
-	const float ca = v.cosa, sa = v.sina, z = toV1x * ca + toV1y * sa, x = toV1x * sa - toV1y * ca;	// Rotate vectors to be in front of us.
+	const float ca = v.cosa, sa = v.sina, tz = toV1x * ca + toV1y * sa, tx = toV1x * sa - toV1y * ca;	// Rotate vectors to be in front of us.
 
-	if (z < 0) return;
-	const float scale = 128; // 16 / z;
+	if (tz < 0) return;
 
+	const int xc = distancePlayerToScreen + round(tx * halfRenderWidth / tz);
+	if (xc < 0 || xc >= renderWidth) return;
+
+	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
+
+	
+	const float vG = distancePlayerToScreen * (v.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - v.z);
+	
 	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
 	if (!patch) return;
-	for (int x1 = x - scale; x1 < x + scale; x1++)
+	const float scale = 3 * patch->getWidth() * 0.5; // 16 / z;
+
+	for (int x1 = xc - scale; x1 < xc + scale; x1++)
 	{
 		if (x1 < 0 || x1 >= renderWidth) continue;
-		float vx = patch->getWidth() * (x1 - x + scale) / (scale * 2);
+		float vx = patch->getWidth() * (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->getWidth()) continue;
 		float dv = 1;// patch->getHeight() / scale;
 		float v = 0;
-		float y1 = 100, y2 = 300;
-		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, z, lights[0]});
+		float y1, y2;
+		if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = y1 + patch->getHeight();}
+		else {y2 = vG / tz + horizon; y1 = y2 - patch->getHeight();}
+		float py1 = y1;
+		y1 = std::max(0.f, y1);
+		y2 = std::min(y2, (float)renderHeight);
+		v += dv * (y1 - py1);
+		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)y1, (int)y2, v, dv, tz, lights[0]});
 	}
 
 

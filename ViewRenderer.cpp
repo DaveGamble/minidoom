@@ -206,7 +206,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			{
 				float dv = lHeight / (yLower - yUpper);
 				const Texture *tex = seg.sidedef->middletexture[texframe % seg.sidedef->middletexture.size()];
-				renderLaters.push_back({tex, x, upper, lower, u, ((flags & kLowerTextureUnpeg) ? -yLower * dv + roomHeight :  -yUpper * dv) + tdY, dv, lut});
+				renderLaters.push_back({tex, x, std::max(upper, ceilbot), std::min(lower, floortop), u,  -std::max(yUpper, yCeiling) * dv + tdY, dv, lut});
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);

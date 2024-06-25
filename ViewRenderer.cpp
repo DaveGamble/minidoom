@@ -221,6 +221,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			if (stage == 2 && (flags & kLowerTextureUnpeg)) v = -yCeiling * dv; // bottom
 			v += tdY;
 			for (int y = from; y < to; y++) { screenBuffer[rowlen * y + x] = lut[texture->pixel(u, v + y * dv) & 255]; }
+			mark(x, from, to, z);
 		};
 
 		auto DrawSky = [&](const Patch *sky, int from, int to) {
@@ -235,12 +236,15 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 
 		auto DrawFloor = [&](const std::vector<const Flat *> &flats, int from, int to) {
 			const Flat *flat = flats[texframe % flats.size()];
-			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
+			from = std::max(0, from);
+			to = std::min(to, renderHeight);
+			for (int i = from; i < to; i++)
 			{
 				float z = vG / (i - horizon);
 				int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)((z - 5) * light_depth));
 				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
+			mark(x, from, to, vG / (to - horizon));
 		};
 
 		auto DrawCeiling = [&](const std::vector<const Flat *> &flats, int from, int to) {
@@ -248,12 +252,15 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			else
 			{
 				const Flat *flat = flats[texframe % flats.size()];
-				for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
+				from = std::max(0, from);
+				to = std::min(to, renderHeight);
+				for (int i = from; i < to; i++)
 				{
 					float z = vH / (horizon - i);
 					int light = std::min(32 - (seg.rSector->lightlevel >> 3), (int)(z - 5) / 20);
 					screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 				}
+				mark(x, from, to, vH / (to - horizon));
 			}
 		};
 				

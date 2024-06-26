@@ -39,6 +39,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
 	for (int x = 0; x < renderWidth; x++)
 	{
+		if (!renderLaters[x].size())  {renderMarks[x].clear(); continue;}
 		std::sort(renderMarks[x].begin(), renderMarks[x].end(), [] (const renderMark &a, const renderMark &b) {return a.zfrom + a.zto < b.zfrom + b.zto; });
 		std::sort(renderLaters[x].begin(), renderLaters[x].end(), [] (const renderLater &a, const renderLater &b) {return a.z < b.z; });
 		for (int i = (int)renderLaters[x].size() - 1; i >= 0; i--)

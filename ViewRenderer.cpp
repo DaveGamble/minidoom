@@ -48,7 +48,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpo
 			for (int c = 0; to > from && c < renderMarks[x].size() && std::min(renderMarks[x][c].zfrom, renderMarks[x][c].zto) < r.z; c++)
 			{
 				const renderMark &m = renderMarks[x][c];
-				if (m.to <= from || m.from > to || (m.zfrom < 0 && m.zto < 0)) continue;
+				if (m.to <= from || m.from > to) continue;
 				if (m.zfrom == m.zto || std::max(m.zfrom, m.zto) < r.z)	// column clip or completely before.
 				{
 					if (m.from <= from) from = std::max(from, m.to);
@@ -239,8 +239,9 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		};
 
 		auto DrawFloor = [&](const std::vector<const Flat *> &flats, int from, int to) {
+			if (vG < 0) return;
 			const Flat *flat = flats[texframe % flats.size()];
-			from = std::max(0, from);
+			from = std::max((int)horizon, from);
 			to = std::min(to, renderHeight);
 			for (int i = from; i < to; i++)
 			{
@@ -255,9 +256,10 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			if (seg.rSector->sky)	DrawSky(seg.rSector->sky, from, to);
 			else
 			{
+				if (vH < 0) return;
 				const Flat *flat = flats[texframe % flats.size()];
 				from = std::max(0, from);
-				to = std::min(to, renderHeight);
+				to = std::min(to, (int)horizon);
 				for (int i = from; i < to; i++)
 				{
 					float z = vH / (horizon - i);

@@ -22,7 +22,7 @@ protected:
 
 	struct renderMark {int from, to; float zfrom, zto; };
 	std::vector<std::vector<renderMark>> renderMarks;
-	void mark(int x, int from, int to, float zfrom, float zto) { renderMarks[x].push_back({from, to, zfrom, zto}); }
+	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back({from, to, zfrom, zto}); }
 	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight;

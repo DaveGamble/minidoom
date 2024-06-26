@@ -288,7 +288,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				float dv = z * invRenderWidth * 2;
 				float v = -std::max(yUpper, yCeiling) * dv;
 				if (flags & kLowerTextureUnpeg)  v = tex->getHeight() -std::min(yLower, yFloor) * dv;
-				int col, yoffset, texu = ((int)u) % tex->getWidth();
+				int col, yoffset, texu = ((int)u) % tex->getWidth(); if (texu < 0) texu += tex->getWidth();
 				const Patch *p;
 				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
 					renderLaters[x].push_back({p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});

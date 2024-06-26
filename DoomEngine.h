@@ -17,11 +17,11 @@ protected:
 	bool m_bIsOver {false};
 
 	// SDL
-	SDL_Surface *m_pScreenBuffer {nullptr}, *m_pRGBBuffer {nullptr};
-	SDL_Color m_ColorPalette[256];
-	SDL_Window *m_pWindow {nullptr};
-	SDL_Renderer *m_pRenderer {nullptr};
-	SDL_Texture *m_pTexture {nullptr};
+	SDL_Surface *screenBuffer {nullptr}, *outputBuffer {nullptr};
+	SDL_Color palette[256];
+	SDL_Window *window {nullptr};
+	SDL_Renderer *sdl_renderer {nullptr};
+	SDL_Texture *texture {nullptr};
 	// SDL
 	
 	Viewpoint view;

@@ -70,6 +70,8 @@ public:
 
 	~WADLoader() { delete[] data; }
 	
+	bool didLoad() const { return data != nullptr; }
+	
 	void release() { delete[] data; data = nullptr; dirs = nullptr; pnames.clear();
 		for (int i = 0; i < kNumTextureCycles; i++) texturecycles[i].clear();
 		for (int i = 0; i < kNumFlatCycles; i++) flatcycles[i].clear();

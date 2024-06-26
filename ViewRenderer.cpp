@@ -241,7 +241,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		auto DrawFloor = [&](const std::vector<const Flat *> &flats, int from, int to) {
 			if (vG < 0) return;
 			const Flat *flat = flats[texframe % flats.size()];
-			from = std::max((int)horizon, from);
+			from = std::max((int)horizon + 1, from);
 			to = std::min(to, renderHeight);
 			for (int i = from; i < to; i++)
 			{
@@ -259,7 +259,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				if (vH < 0) return;
 				const Flat *flat = flats[texframe % flats.size()];
 				from = std::max(0, from);
-				to = std::min(to, (int)horizon);
+				to = std::min(to, (int)horizon - 1);
 				for (int i = from; i < to; i++)
 				{
 					float z = vH / (horizon - i);

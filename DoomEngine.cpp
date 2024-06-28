@@ -1,7 +1,7 @@
 #include "DoomEngine.h"
 
 DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
-: wad(wadname)
+: wad(wadname.c_str())
 , map(mapName, wad)
 , renderer(m_iRenderWidth, m_iRenderHeight, lighting)
 {

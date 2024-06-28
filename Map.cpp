@@ -3,12 +3,12 @@
 
 Map::Map(const std::string &mapName, WADLoader &wad)
 {
-	int li = wad.findLumpByName(mapName);
+	int li = wad.findLumpByName(mapName.c_str());
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;
 	size_t size;
 	auto seek = [&](const std::string& name) {
-		data = wad.getLumpNamed(name, li);
+		data = wad.getLumpNamed(name.c_str(), li);
 		ptr = data.data();
 		size = data.size();
 		return ptr;
@@ -242,8 +242,8 @@ Map::Map(const std::string &mapName, WADLoader &wad)
 		{
 			if (*anim == '+')
 			{
-				std::vector<std::string> all = wad.getPatchesStartingWith(basename);
-				for (std::string& s : all) t.imgs.push_back(wad.getPatch(s));
+				std::vector<const char*> all = wad.getPatchesStartingWith(basename);
+				for (const char *s : all) t.imgs.push_back(wad.getPatch(s));
 			}
 			else
 			{

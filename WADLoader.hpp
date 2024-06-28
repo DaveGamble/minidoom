@@ -8,9 +8,9 @@
 class WADLoader
 {
 public:
-	WADLoader(const std::string &filename)
+	WADLoader(const char *filename)
 	{
-		FILE *f = fopen(filename.c_str(), "rb");
+		FILE *f = fopen(filename, "rb");
 		if (!f) return;
 		fseek(f, 0, SEEK_END);
 		size_t length = ftell(f);
@@ -23,12 +23,10 @@ public:
 		dirs = (const Directory*)(data + ((const uint32_t*)data)[2]);
 
 		std::vector<uint8_t> lump = getLumpNamed("PNAMES");
+		std::vector<const char *> pnames;
+
 		int32_t count = *(int32_t*)lump.data();
-		for (int i = 0; i < count; ++i)
-		{
-			char Name[9] {}; memcpy(Name, lump.data() + 4 + 8 * i, 8);
-			pnames.push_back(Name);
-		}
+		for (int i = 0; i < count; ++i) pnames.push_back((const char *)lump.data() + 4 + 8 * i);
 		
 		int cycle = -1;
 		const char *toload[2] = {"TEXTURE1", "TEXTURE2"};
@@ -45,11 +43,12 @@ public:
 			int32_t numTextures = asint[0];
 			for (int j = 0; j < numTextures; j++)
 			{
-				char name[9] {}; memcpy(name, data.data() + asint[j + 1], 8);
-				for (int k = 0; cycle == -1 && k < kNumTextureCycles; k++) if (!strcasecmp(name, specialtextures[k][0])) cycle = k;
-				textures.emplace(toupper(name), Texture(data.data() + asint[j + 1], [&](int idx) { return getPatch(pnames[idx]); }));
+				char name[9] {}; memcpy(name, data.data() + asint[j + 1], 8);	// THIS COMES OUT
+//				const char *name = (const char *)data.data() + asint[j + 1];	// THIS GOES IN
+				for (int k = 0; cycle == -1 && k < kNumTextureCycles; k++) if (!strncasecmp(name, specialtextures[k][0], 8)) cycle = k;
+				textures.emplace(toupper(name), Texture(data.data() + asint[j + 1], [&](int idx) { return getPatch(pnames[idx]); }));	// THIS CHANGES
 				if (cycle != -1) texturecycles[cycle].push_back(&textures.at(toupper(name)));
-				for (int k = 0; cycle != -1 && k < kNumTextureCycles; k++) if (!strcasecmp(name, specialtextures[k][1])) cycle = -1;
+				for (int k = 0; cycle != -1 && k < kNumTextureCycles; k++) if (!strncasecmp(name, specialtextures[k][1], 8)) cycle = -1;
 			}
 		}
 		
@@ -60,11 +59,12 @@ public:
 		for (int flat = findLumpByName("F_START") + 1; strncasecmp(dirs[flat].lumpName, "F_END", 8); flat++)
 		{
 			if (dirs[flat].lumpSize != 4096) continue;
-			char name[9] {}; memcpy(name, dirs[flat].lumpName, 8);
-			for (int k = 0; cycle == -1 && k < kNumFlatCycles; k++) if (!strcasecmp(name, specialflats[k][0])) cycle = k;
-			flats.emplace(name, data + dirs[flat].lumpOffset);
+			char name[9] {}; memcpy(name, dirs[flat].lumpName, 8);	// THIS COMES OUT
+//			const char *name = dirs[flat].lumpName;	// THIS GOES IN
+			for (int k = 0; cycle == -1 && k < kNumFlatCycles; k++) if (!strncasecmp(name, specialflats[k][0], 8)) cycle = k;
+			flats.emplace(name, data + dirs[flat].lumpOffset);	// THIS CHANGES
 			if (cycle != -1) flatcycles[cycle].push_back(&flats.at(name));
-			for (int k = 0; cycle != -1 && k < kNumFlatCycles; k++) if (!strcasecmp(name, specialflats[k][1])) cycle = -1;
+			for (int k = 0; cycle != -1 && k < kNumFlatCycles; k++) if (!strncasecmp(name, specialflats[k][1], 8)) cycle = -1;
 		}
 	}
 
@@ -72,35 +72,30 @@ public:
 	
 	bool didLoad() const { return data != nullptr; }
 	
-	void release() { delete[] data; data = nullptr; dirs = nullptr; pnames.clear();
+	void release() { delete[] data; data = nullptr; dirs = nullptr;
 		for (int i = 0; i < kNumTextureCycles; i++) texturecycles[i].clear();
 		for (int i = 0; i < kNumFlatCycles; i++) flatcycles[i].clear();
 	}
 
-	std::vector<uint8_t> getLumpNamed(const std::string& name, size_t after = 0) const
+	std::vector<uint8_t> getLumpNamed(const char *name, size_t after = 0) const
 	{
 		int id = findLumpByName(name, after);
 		return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].lumpOffset, data + dirs[id].lumpOffset + dirs[id].lumpSize);
 	}
-	int findLumpByName(const std::string &LumpName, size_t after = 0) const
+	int findLumpByName(const char *lumpName, size_t after = 0) const
 	{
-		for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, LumpName.c_str(), 8)) return (int)i;
+		for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, lumpName, 8)) return (int)i;
 		return -1;
 	}
 
-	const std::vector<std::string> getPatchesStartingWith(const char *name)
+	const std::vector<const char*> getPatchesStartingWith(const char *name)
 	{
-		std::vector<std::string> all;
-		for (int i = 0; i < numLumps; i++)
-		{
-			if (strncmp(name, dirs[i].lumpName, 4)) continue;
-			char name[9] {}; memcpy(name, dirs[i].lumpName, 8);
-			all.push_back(name);
-		}
+		std::vector<const char*> all;
+		for (int i = 0; i < numLumps; i++) if (!strncasecmp(name, dirs[i].lumpName, 4)) all.push_back(dirs[i].lumpName);
 		return all;
 	}
 	
-	const Patch *getPatch(const std::string &name)
+	const Patch *getPatch(const char *name)
 	{
 		if (!patches.count(name))
 		{
@@ -109,10 +104,10 @@ public:
 		}
 		return &patches.at(name);
 	}
-	std::vector<const Texture *> getTexture(const std::string &name) const
+	std::vector<const Texture *> getTexture(const char *name) const
 	{
 		std::vector<const Texture *> t;
-		std::string Name = toupper(name);
+		std::string Name = toupper(name);	// THIS CHANGES
 		if (textures.count(Name))
 		{
 			const Texture *tex = &textures.at(Name);
@@ -124,7 +119,7 @@ public:
 	std::vector<const Flat *> getFlat(const std::string &name) const
 	{
 		std::vector<const Flat *> f;
-		std::string Name = toupper(name);
+		std::string Name = toupper(name);	// THIS CHANGES
 		if (flats.count(Name))
 		{
 			const Flat *flat = &flats.at(Name);
@@ -135,7 +130,7 @@ public:
 	}
 protected:
 	static constexpr int kNumTextureCycles = 13, kNumFlatCycles = 9;
-	std::string toupper(const std::string &s) const {std::string S = s; std::transform(S.begin(), S.end(), S.begin(), ::toupper); return S;}
+	std::string toupper(const std::string &s) const {std::string S = s; std::transform(S.begin(), S.end(), S.begin(), ::toupper); return S;}	// THIS GOES
 	uint8_t *data {nullptr};
 	size_t numLumps {0};
 	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8] {}; };
@@ -145,6 +140,5 @@ protected:
 	std::map<std::string, Flat> flats;
 	std::map<std::string, Patch> patches;
 	std::map<std::string, Texture> textures;
-	std::vector<std::string> pnames;
 };
 

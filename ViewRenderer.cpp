@@ -96,7 +96,7 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (v.z - seg.rSector->floorHeight - height) / tz;}
 	float dv = height / (y2 - y1);
 	float py1 = y1, py2 = y2;
-	const float scale = 0.5 * patch->getWidth() / dv; // 16 / z;
+	const float scale = 0.5 * patch->getWidth() * (y2 - y1) / height; // 16 / z;
 
 	if (xc + scale < 0 || xc - scale >= renderWidth) return;
 

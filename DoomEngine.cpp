@@ -1,11 +1,11 @@
 #include "DoomEngine.h"
 
-DoomEngine::DoomEngine(const std::string &wadname, const std::string &mapName)
-: wad(wadname.c_str())
+DoomEngine::DoomEngine(const char *wadname, const char *mapName)
+: wad(wadname)
 , map(mapName, wad)
 , renderer(m_iRenderWidth, m_iRenderHeight, lighting)
 {
-	if (!wad.didLoad()) {printf("The WAD didn't happen. Is it next to the binary? Look in DIYDoom.cpp. In there it asks for [%s] so that's the filename\n", wadname.c_str()); m_bIsOver = true; return;}
+	if (!wad.didLoad()) {printf("The WAD didn't happen. Is it next to the binary? Look in DIYDoom.cpp. In there it asks for [%s] so that's the filename\n", wadname); m_bIsOver = true; return;}
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
 	window = SDL_CreateWindow("DIY DOOM", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_iRenderWidth, m_iRenderHeight, SDL_WINDOW_SHOWN);

@@ -116,7 +116,7 @@ public:
 		}
 		return t;
 	}
-	std::vector<const Flat *> getFlat(const std::string &name) const
+	std::vector<const Flat *> getFlat(const char *name) const
 	{
 		std::vector<const Flat *> f;
 		std::string Name = toupper(name);	// THIS CHANGES

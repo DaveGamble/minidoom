@@ -1,14 +1,14 @@
 #include "Map.hpp"
 #include "WADLoader.hpp"
 
-Map::Map(const std::string &mapName, WADLoader &wad)
+Map::Map(const char *mapName, WADLoader &wad)
 {
-	int li = wad.findLumpByName(mapName.c_str());
+	int li = wad.findLumpByName(mapName);
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;
 	size_t size;
-	auto seek = [&](const std::string& name) {
-		data = wad.getLumpNamed(name.c_str(), li);
+	auto seek = [&](const char *name) {
+		data = wad.getLumpNamed(name, li);
 		ptr = data.data();
 		size = data.size();
 		return ptr;

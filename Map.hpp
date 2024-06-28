@@ -7,7 +7,7 @@
 class Map
 {
 public:
-    Map(const std::string &mapName, class WADLoader& wad);
+    Map(const char *mapName, class WADLoader& wad);
 	~Map() {}
 
 	template<typename F> void render3DView(const Viewpoint &v, F &&addWall, int frame)

@@ -8,7 +8,7 @@
 class DoomEngine
 {
 public:
-	DoomEngine(const std::string &wad, const std::string &mapName);
+	DoomEngine(const char *wad, const char *mapName);
 	~DoomEngine();
 	bool Tick();
 protected:

@@ -40,8 +40,7 @@ public:
 
 	~Patch()
 	{
-		for (size_t i = 0; i < cols.size(); ++i)
-			if (cols[i].top != 0xFF) delete[] cols[i].data;
+		for (size_t i = 0; i < cols.size(); ++i) if (cols[i].top != 0xFF) delete[] cols[i].data;
 	}
 
 

@@ -47,8 +47,8 @@ public:
 			{
 				char name[9] {}; memcpy(name, data.data() + asint[j + 1], 8);
 				for (int k = 0; cycle == -1 && k < kNumTextureCycles; k++) if (!strcasecmp(name, specialtextures[k][0])) cycle = k;
-				textures[toupper(name)] = std::unique_ptr<Texture>(new Texture(data.data() + asint[j + 1], [&](int idx) { return getPatch(pnames[idx]); }));
-				if (cycle != -1) texturecycles[cycle].push_back(textures[toupper(name)].get());
+				textures.emplace(toupper(name), Texture(data.data() + asint[j + 1], [&](int idx) { return getPatch(pnames[idx]); }));
+				if (cycle != -1) texturecycles[cycle].push_back(&textures.at(toupper(name)));
 				for (int k = 0; cycle != -1 && k < kNumTextureCycles; k++) if (!strcasecmp(name, specialtextures[k][1])) cycle = -1;
 			}
 		}
@@ -62,8 +62,8 @@ public:
 			if (dirs[flat].lumpSize != 4096) continue;
 			char name[9] {}; memcpy(name, dirs[flat].lumpName, 8);
 			for (int k = 0; cycle == -1 && k < kNumFlatCycles; k++) if (!strcasecmp(name, specialflats[k][0])) cycle = k;
-			flats[name] = std::unique_ptr<Flat>(new Flat(data + dirs[flat].lumpOffset));
-			if (cycle != -1) flatcycles[cycle].push_back(flats[name].get());
+			flats.emplace(name, data + dirs[flat].lumpOffset);
+			if (cycle != -1) flatcycles[cycle].push_back(&flats.at(name));
 			for (int k = 0; cycle != -1 && k < kNumFlatCycles; k++) if (!strcasecmp(name, specialflats[k][1])) cycle = -1;
 		}
 	}
@@ -105,9 +105,9 @@ public:
 		if (!patches.count(name))
 		{
 			std::vector<uint8_t> lump = getLumpNamed(name);
-			if (lump.size()) patches[name] = std::unique_ptr<Patch>(new Patch(lump.data()));
+			if (lump.size()) patches.emplace(name, lump.data());
 		}
-		return patches[name].get();
+		return &patches.at(name);
 	}
 	std::vector<const Texture *> getTexture(const std::string &name) const
 	{
@@ -115,7 +115,7 @@ public:
 		std::string Name = toupper(name);
 		if (textures.count(Name))
 		{
-			const Texture *tex = textures.at(Name).get();
+			const Texture *tex = &textures.at(Name);
 			for (int i = 0; i < kNumTextureCycles; i++) for (const Texture *tt : texturecycles[i]) if (tt == tex) return texturecycles[i];
 			t.push_back(tex);
 		}
@@ -127,7 +127,7 @@ public:
 		std::string Name = toupper(name);
 		if (flats.count(Name))
 		{
-			const Flat *flat = flats.at(Name).get();
+			const Flat *flat = &flats.at(Name);
 			for (int i = 0; i < kNumFlatCycles; i++) for (const Flat *ff : flatcycles[i]) if (ff == flat) return flatcycles[i];
 			f.push_back(flat);
 		}
@@ -142,9 +142,9 @@ protected:
 	const Directory* dirs {nullptr};
 	std::vector<const Texture *> texturecycles[kNumTextureCycles];
 	std::vector<const Flat *> flatcycles[kNumFlatCycles];
-	std::map<std::string, std::unique_ptr<Flat>> flats;
-	std::map<std::string, std::unique_ptr<Patch>> patches;
-	std::map<std::string, std::unique_ptr<Texture>> textures;
+	std::map<std::string, Flat> flats;
+	std::map<std::string, Patch> patches;
+	std::map<std::string, Texture> textures;
 	std::vector<std::string> pnames;
 };
 

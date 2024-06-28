@@ -1,6 +1,5 @@
 #pragma once
 
-#include <map>
 #include "DataTypes.hpp"
 #include "Texture.hpp"
 #include "Flat.hpp"

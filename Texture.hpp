@@ -4,7 +4,7 @@
 class Texture
 {
 public:
-    template<typename F> Texture(const uint8_t *ptr, F &&getPatch)
+    template<typename F> Texture(const char *_name, const uint8_t *ptr, F &&getPatch) : name(_name)
 	{
 		struct WADTextureData { char textureName[8]; uint32_t alwayszero; uint16_t width, height; uint32_t alwayszero2; uint16_t patchCount; };
 		WADTextureData *textureData = (WADTextureData*)ptr;
@@ -42,7 +42,9 @@ public:
 	}
 	int getWidth() const { return width; }
 	int getHeight() const { return height; }
+	const char *getName() const {return name;}
 protected:
+	const char *name;
 	int width, height;
 	struct TextureColumn { int column, yOffset; const Patch *patch; std::vector<uint8_t> overlap; };
 	std::vector<TextureColumn> columns;

@@ -5,7 +5,7 @@
 class Patch
 {
 public:
-	Patch(const uint8_t *ptr)
+	Patch(const char *_name, const uint8_t *ptr) : name(_name)
 	{
 		struct WADPatchHeader { uint16_t width, height; int16_t leftOffset, topOffset; };
 
@@ -85,8 +85,10 @@ public:
 	int getXOffset() const { return xoffset; }
 	int getYOffset() const { return yoffset; }
 	int getColumnDataIndex(int x) const { return index[x]; }
+	const char *getName() const {return name;}
 
 protected:
+	const char *name;
 	int height {0}, width {0}, xoffset {0}, yoffset {0};
 	struct PatchColumnData { uint8_t top, length, paddingPre, *data, paddingPost; };
 

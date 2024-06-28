@@ -4,7 +4,7 @@
 #include "Texture.hpp"
 #include "Flat.hpp"
 
-constexpr float light_depth = 0.02, light_off = 5;
+constexpr float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
 
 ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[34][256])
 : renderWidth(renderXSize)
@@ -82,7 +82,7 @@ void ViewRenderer::addThing(const Thing &thing, const Viewpoint &v, const Seg &s
 
 	if (tz < 0) return;
 
-	int light = std::clamp(std::max(32 - (seg.rSector->lightlevel >> 3), (int)((tz - light_off) * light_depth)), 0, 31);
+	int light = std::clamp(light_offset + seg.rSector->lightlevel * sector_light_scale + tz * light_depth, 0.f, 31.f);
 
 	const int xc = distancePlayerToScreen + round(tx * halfRenderWidth / tz);
 	const float horizon = halfRenderHeight + v.pitch * halfRenderHeight;
@@ -211,8 +211,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		const float iz = 1.f / (uC + x * uD);
 		const float z = zscalar * iz;
 		const float u = (uA + x * uB) * iz + tdX;
-		int light = std::max(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
-		
+		int light = light_offset + seg.rSector->lightlevel * sector_light_scale +  z * light_depth;
 		const uint8_t *lut = lights[std::clamp(light, 0, 31)];
 
 		auto DrawTexture = [&](const std::vector<const Texture *> &textures, int from, int to, float a, float b, float dv, int stage) {
@@ -247,7 +246,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			for (int i = from; i < to; i++)
 			{
 				float z = vG / (i - horizon);
-				int light = std::max(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
+				int light = light_offset + seg.rSector->lightlevel * sector_light_scale + z * light_depth;
 				screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
 			mark(x, from, to, vG / (from - horizon), vG / (to - horizon));
@@ -264,7 +263,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				for (int i = from; i < to; i++)
 				{
 					float z = vH / (horizon - i);
-					int light = std::max(32 - (seg.rSector->lightlevel >> 3), (int)((z - light_off) * light_depth));
+					int light = light_offset + seg.rSector->lightlevel * sector_light_scale + z * light_depth;
 					screenBuffer[i * rowlen + x] = lights[std::clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 				}
 				mark(x, from, to, vH / (horizon - from), vH / (horizon - to));

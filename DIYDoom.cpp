@@ -3,12 +3,11 @@
 
 int main(int argc, char* argv[])
 {
-	const float moveSpeed = 8, rotateSpeed = 0.06981317008;
 	const int m_iRenderWidth = 960, m_iRenderHeight = 600;
+	const float moveSpeed = 8, rotateSpeed = 0.06981317008;
 //	ViewRenderer engine(m_iRenderWidth, m_iRenderHeight, "DOOM2.WAD", "MAP01");
 	ViewRenderer engine(m_iRenderWidth, m_iRenderHeight, "DOOM.WAD", "E1M1");
 //    ViewRenderer engine(m_iRenderWidth, m_iRenderHeight, "freedoom1.WAD", "E1M1");
-
 
 	if (!engine.didLoadOK()) {printf("The WAD didn't happen. Is it next to the binary? Look at the line before this.\n"); return -1;}
 	// SDL

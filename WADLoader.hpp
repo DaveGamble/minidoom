@@ -1,8 +1,6 @@
 #pragma once
 
 #include "DataTypes.hpp"
-#include "Texture.hpp"
-#include "Flat.hpp"
 
 class WADLoader
 {

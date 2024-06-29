@@ -41,14 +41,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		550FCA3A2C1FA00E00FDF6B7 /* Flat.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Flat.hpp; sourceTree = SOURCE_ROOT; };
 		55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4602C1DBCB400F9DCAC /* DIYDoom */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DIYDoom; sourceTree = BUILT_PRODUCTS_DIR; };
-		55FEA46A2C1DBCC800F9DCAC /* Patch.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Patch.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoomEngine.h; sourceTree = SOURCE_ROOT; };
 		55FEA4732C1DBCC800F9DCAC /* ViewRenderer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ViewRenderer.hpp; sourceTree = SOURCE_ROOT; };
-		55FEA4762C1DBCC800F9DCAC /* Texture.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Texture.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ViewRenderer.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4792C1DBCC800F9DCAC /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = begin_code.h; sourceTree = "<group>"; };
 		55FEA47A2C1DBCC800F9DCAC /* close_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = close_code.h; sourceTree = "<group>"; };
@@ -169,9 +166,6 @@
 			children = (
 				55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */,
 				55FEA4CA2C1DBCC800F9DCAC /* DataTypes.hpp */,
-				550FCA3A2C1FA00E00FDF6B7 /* Flat.hpp */,
-				55FEA46A2C1DBCC800F9DCAC /* Patch.hpp */,
-				55FEA4762C1DBCC800F9DCAC /* Texture.hpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.hpp */,
 				55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */,
 				55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */,

@@ -1,8 +1,6 @@
 #include "ViewRenderer.hpp"
 
 #include "Map.hpp"
-#include "Texture.hpp"
-#include "Flat.hpp"
 
 constexpr float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
 

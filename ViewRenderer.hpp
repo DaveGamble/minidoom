@@ -110,6 +110,7 @@ protected:
 	void addThing(const Thing &thing, const Seg &seg);
 	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back({from, to, zfrom, zto}); }
 	
+	template<typename F> static F clamp(const F &val, const F &min, const F &max) { return (val < min) ? min : (val > max) ? max : val; }
 	bool didload {false};
 	// Map:
 	std::vector<Thing> things;

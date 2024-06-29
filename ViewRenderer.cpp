@@ -403,20 +403,20 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
 	if (!patch) return;
 
-	float y1, y2, height = patch->getHeight();
+	float y1, y2, height = patch->height;
 	if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = horizon - distancePlayerToScreen * (seg.rSector->ceilingHeight + height - view.z) / tz;}
 	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight - height) / tz;}
 	float dv = height / (y2 - y1);
 	float py1 = y1, py2 = y2;
-	const float scale = 0.5 * patch->getWidth() * (y2 - y1) / height; // 16 / z;
+	const float scale = 0.5 * patch->width * (y2 - y1) / height; // 16 / z;
 
 	if (xc + scale < 0 || xc - scale >= renderWidth) return;
 
 	for (int x1 = std::max(xc - scale, 0.f); x1 < std::min(xc + scale, (float)renderWidth); x1++)
 	{
-		float vx = patch->getWidth() * (x1 - xc + scale) / (scale * 2);
-		if (vx < 0 || vx >= patch->getWidth()) continue;
-		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)py1, (int)py2, 0, dv, tz, lights[light]});
+		float vx = patch->width* (x1 - xc + scale) / (scale * 2);
+		if (vx < 0 || vx >= patch->width) continue;
+		renderLaters[x1].push_back({patch, patch->index[vx], (int)py1, (int)py2, 0, dv, tz, lights[light]});
 	}
 }
 
@@ -540,12 +540,12 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 		};
 
 		auto DrawSky = [&](const Patch *sky, int from, int to) {
-			int tx = (skyAng - floor(skyAng)) * sky->getWidth();
-			if (tx == sky->getWidth()) tx = 0;
+			int tx = (skyAng - floor(skyAng)) * sky->width;
+			if (tx == sky->width) tx = 0;
 			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
-				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->getHeight() * invRenderHeight, -1.f, sky->getHeight() - 1.f);
-				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->getColumnDataIndex((ty < 0) ? 0 : tx), std::max(ty, 0.f))];
+				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->height * invRenderHeight, -1.f, sky->height - 1.f);
+				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->index[(ty < 0) ? 0 : tx], std::max(ty, 0.f))];
 			}
 		};
 
@@ -597,8 +597,8 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				const Texture *tex = seg.sidedef->middletexture[texframe % seg.sidedef->middletexture.size()];
 				float dv = z * invRenderWidth * 2;
 				float v = -std::max(yUpper, yCeiling) * dv;
-				if (flags & kLowerTextureUnpeg)  v = tex->getHeight() -std::min(yLower, yFloor) * dv;
-				int col, yoffset, texu = ((int)u) % tex->getWidth(); if (texu < 0) texu += tex->getWidth();
+				if (flags & kLowerTextureUnpeg)  v = tex->height -std::min(yLower, yFloor) * dv;
+				int col, yoffset, texu = ((int)u) % tex->width; if (texu < 0) texu += tex->width;
 				const Patch *p;
 				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
 					renderLaters[x].push_back({p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
@@ -764,7 +764,7 @@ Texture::Texture(const char *_name, const uint8_t *ptr, WADLoader *wad) : name(_
 	for (int i = 0; i < textureData->patchCount; ++i)
 	{
 		const Patch *patch = wad->getPatch(texturePatch[i].pnameIndex);	// Get the patch
-		for (int x = std::max(texturePatch[i].dx, (int16_t)0); x < std::min(width, texturePatch[i].dx + patch->getWidth()); x++)
+		for (int x = std::max(texturePatch[i].dx, (int16_t)0); x < std::min(width, texturePatch[i].dx + patch->width); x++)
 		{
 			if (columns[x].patch)	// This column already has something in
 			{
@@ -773,9 +773,9 @@ Texture::Texture(const char *_name, const uint8_t *ptr, WADLoader *wad) : name(_
 					columns[x].overlap.resize(height);
 					columns[x].patch->composeColumn(columns[x].overlap.data(), height, columns[x].column, columns[x].yOffset);
 				}
-				patch->composeColumn(columns[x].overlap.data(), height, patch->getColumnDataIndex(x - texturePatch[i].dx), texturePatch[i].dy);	// Render your goodies on top.
+				patch->composeColumn(columns[x].overlap.data(), height, patch->index[x - texturePatch[i].dx], texturePatch[i].dy);	// Render your goodies on top.
 			}
-			else columns[x] = { patch->getColumnDataIndex(x - texturePatch[i].dx), texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
+			else columns[x] = { patch->index[x - texturePatch[i].dx], texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
 		}
 	}
 }
@@ -873,7 +873,7 @@ const std::vector<const char*> WADLoader::getPatchesStartingWith(const char *nam
 
 const Patch *WADLoader::getPatch(const char *name)
 {
-	for (const Patch *p : patches) if (!strncasecmp(name, p->getName(), 8)) return p;
+	for (const Patch *p : patches) if (!strncasecmp(name, p->name, 8)) return p;
 	int n = findLumpByName(name);
 	if (n != -1 && dirs[n].lumpSize) patches.push_back(new Patch(dirs[n].lumpName, data + dirs[n].lumpOffset));
 	return patches[patches.size() - 1];
@@ -883,7 +883,7 @@ std::vector<const Texture *> WADLoader::getTexture(const char *name) const
 	std::vector<const Texture *> ts;
 	for (const Texture *t : textures)
 	{
-		if (strncasecmp(name, t->getName(), 8)) continue;
+		if (strncasecmp(name, t->name, 8)) continue;
 		for (int i = 0; i < kNumTextureCycles; i++) for (const Texture *tt : texturecycles[i]) if (tt == t) return texturecycles[i];
 		ts.push_back(t);
 	}
@@ -894,7 +894,7 @@ std::vector<const Flat *> WADLoader::getFlat(const char *name) const
 	std::vector<const Flat *> fs;
 	for (const Flat *f : flats)
 	{
-		if (strncasecmp(name, f->getName(), 8)) continue;
+		if (strncasecmp(name, f->name, 8)) continue;
 		for (int i = 0; i < kNumFlatCycles; i++) for (const Flat *ff : flatcycles[i]) if (ff == f) return flatcycles[i];
 		fs.push_back(f);
 	}

@@ -7,9 +7,8 @@
 enum { kUpperTextureUnpeg = 8, kLowerTextureUnpeg = 16 };
 enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
 
-class Patch
+struct Patch
 {
-public:
 	Patch(const char *_name, const uint8_t *ptr);
 	~Patch();
 
@@ -21,25 +20,13 @@ public:
 	void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale, const uint8_t *lut) const;
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
-	int getWidth() const { return width; }
-	int getHeight() const { return height; }
-	int getXOffset() const { return xoffset; }
-	int getYOffset() const { return yoffset; }
-	int getColumnDataIndex(int x) const { return index[x]; }
-	const char *getName() const {return name;}
-
-protected:
-	const char *name;
-	int height {0}, width {0}, xoffset {0}, yoffset {0};
 	struct PatchColumnData { uint8_t top, length, paddingPre, *data, paddingPost; };
-	std::vector<PatchColumnData> cols;
-	std::vector<int> index;
+	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<PatchColumnData> cols; std::vector<int> index;
 };
 
 
-class Texture
+struct Texture
 {
-public:
 	Texture(const char *_name, const uint8_t *ptr, class WADLoader *wad);
 	const Patch *getPatchForColumn(int x, int &col, int &yOffset) const {
 		if (!columns[x].overlap.size()) {col = columns[x].column; yOffset = columns[x].yOffset; return columns[x].patch;} return nullptr;
@@ -47,25 +34,16 @@ public:
 	uint16_t pixel(int x, int y) const { x %= width; y %= height; if (x < 0) x += width; if (y < 0) y += height;
 		return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset);
 	}
-	int getWidth() const { return width; }
-	int getHeight() const { return height; }
-	const char *getName() const {return name;}
-protected:
-	const char *name;
-	int width, height;
+	const char *name; int width, height;
 	struct TextureColumn { int column, yOffset; const Patch *patch; std::vector<uint8_t> overlap; };
 	std::vector<TextureColumn> columns;
 };
 
-class Flat
+struct Flat
 {
-public:
 	Flat(const char *_name, const uint8_t *_data) : name(_name) { memcpy(data, _data, 4096); }
 	uint8_t pixel(int u, int v) const { return data[(64 * v + (u & 63)) & 4095]; }
-	const char *getName() const {return name;}
-protected:
-	const char *name;
-	uint8_t data[4096];
+	const char *name; uint8_t data[4096];
 };
 struct Thing { int16_t x, y; uint16_t angle, type, flags; std::vector<const Patch *> imgs; int attr; };
 struct Vertex { int16_t x, y; };
@@ -156,8 +134,7 @@ protected:
 	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back({from, to, zfrom, zto}); }
 	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;
-    std::vector<int> floorClipHeight;
-    std::vector<int> ceilingClipHeight;
+    std::vector<int> floorClipHeight, ceilingClipHeight;
 	std::vector<std::vector<renderLater>> renderLaters;
 	uint8_t lights[34][256];
 	int pal[256];

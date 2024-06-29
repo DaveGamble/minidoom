@@ -557,15 +557,10 @@ bool ViewRenderer::doesLineIntersect(int x1, int y1, int x2, int y2) const
 
 bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const { return (v.x - nodes[node].x) * nodes[node].dy <= (v.y - nodes[node].y) * nodes[node].dx; }
 
-Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
+struct WADPatchHeader { uint16_t width, height; int16_t leftOffset, topOffset; };
+Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name), cols(((WADPatchHeader*)ptr)->width)
+, width(((WADPatchHeader*)ptr)->width), height(((WADPatchHeader*)ptr)->height), xoffset(((WADPatchHeader*)ptr)->leftOffset), yoffset(((WADPatchHeader*)ptr)->topOffset)
 {
-	struct WADPatchHeader { uint16_t width, height; int16_t leftOffset, topOffset; };
-	WADPatchHeader *patchHeader = (WADPatchHeader*)ptr;
-	width = patchHeader->width;
-	height = patchHeader->height;
-	xoffset = patchHeader->leftOffset;
-	yoffset = patchHeader->topOffset;
-	cols.resize(width);
 	for (int i = 0; i < width; ++i) for (int off = ((uint32_t*)(ptr))[i + 2]; ptr[off] != 0xff; off += ptr[off + 1] + 4) cols[i].push_back((colData){ptr[off], ptr[off + 1], ptr + off + 3});
 }
 
@@ -573,29 +568,22 @@ void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, const uin
 {
 	buf += rowlen * screeny + screenx;
 	for (int x = 0, tox = 0; x < width; x++)
-	{
 		while (tox < (x + 1) * scale)
 		{
 			for (const colData &c : cols[x])
 			{
 				int y = (c.top < 0) ? -c.top : 0, sl = floor(scale * (c.top + y)), el = floor((c.length - y) * scale) + sl;
-				int run = std::max(el - sl, 0), start = rowlen * sl + tox;
-				for (int i = 0, to = 0; to < run && i < c.length; i++)
-					while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[c.data[i + y]];
+				for (int i = 0, to = 0; to < std::max(el - sl, 0) && i < c.length; i++) while (to < (i + 1) * scale && to < std::max(el - sl, 0)) buf[tox + (sl + to++) * rowlen] = lut[c.data[i + y]];
 			}
 			tox++;
 		}
-	}
 }
 
-void Patch::composeColumn(uint8_t *buf, int iHeight, int x, int yOffset) const
-{
+void Patch::composeColumn(uint8_t *buf, int iHeight, int x, int yOffset) const {
 	for (const colData &c : cols[x])
 	{
-		int y = yOffset + c.top, iMaxRun = c.length;
-		if (y < 0) { iMaxRun += y; y = 0; }
-		iMaxRun = std::min(iHeight - y, iMaxRun);
-		if (iMaxRun > 0) memcpy(buf + y, c.data, iMaxRun);
+		int y = std::max(yOffset + c.top, 0), iMaxRun = c.length + std::min(yOffset + c.top, 0);
+		iMaxRun = std::min(iHeight - y, iMaxRun); if (iMaxRun > 0) memcpy(buf + y, c.data, iMaxRun);
 	}
 }
 

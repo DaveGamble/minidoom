@@ -1,4 +1,5 @@
 #include "ViewRenderer.hpp"
+#include <cassert>
 
 const float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
 
@@ -45,11 +46,14 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	std::vector<Vertex> vertices;
 	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) vertices.push_back(*(Vertex*)(ptr + i));
 
+	auto skyt = wad.getTexture("SKY1");
+	const Texture *skytex = skyt.size() ? skyt[0] : nullptr;
+
 	struct WADSector { int16_t fh, ch; char floorTexture[8], ceilingTexture[8]; uint16_t lightlevel, type, tag; };
 	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector))
 	{
 		WADSector *ws = (WADSector*)(ptr + i);
-		const Patch *sky = (!strncmp(ws->ceilingTexture, "F_SKY", 5)) ? wad.getPatch(ws->ceilingTexture + 2) : nullptr;
+		const Texture * sky = (!strncasecmp(ws->ceilingTexture, "F_SKY", 5)) ? skytex : nullptr;
 		sectors.push_back((Sector){ws->fh, ws->ch, wad.getFlat(ws->floorTexture), wad.getFlat(ws->ceilingTexture), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
 	}
 
@@ -416,13 +420,13 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			mark(x, from, to, z, z);
 		};
 
-		auto DrawSky = [&](const Patch *sky, int from, int to) {
+		auto DrawSky = [&](const Texture *sky, int from, int to) {
 			int tx = (skyAng - floor(skyAng)) * sky->width;
 			if (tx == sky->width) tx = 0;
 			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
 				float ty = clamp((i - horizon + halfRenderHeight) * sky->height * invRenderHeight, -1.f, sky->height - 1.f);
-				screenBuffer[rowlen * i + x] = lights[0][sky->pixel((ty < 0) ? 0 : tx, std::max(ty, 0.f))];
+				screenBuffer[rowlen * i + x] = lights[0][sky->pixel((ty < 0) ? sky->width / 2 : tx, std::max(ty, 0.f))];
 			}
 		};
 
@@ -709,56 +713,28 @@ WADLoader::~WADLoader()
 	for (Flat *f : flats) delete f;
 }
 
-void WADLoader::release() { delete[] data; data = nullptr; dirs = nullptr;
-	for (int i = 0; i < kNumTextureCycles; i++) texturecycles[i].clear();
-	for (int i = 0; i < kNumFlatCycles; i++) flatcycles[i].clear();
+void WADLoader::release() { delete[] data; data = nullptr; dirs = nullptr; for (int i = 0; i < kNumTextureCycles; i++) texturecycles[i].clear(); for (int i = 0; i < kNumFlatCycles; i++) flatcycles[i].clear();
 }
-
-std::vector<uint8_t> WADLoader::getLumpNamed(const char *name, size_t after) const
-{
-	int id = findLumpByName(name, after);
-	return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].lumpOffset, data + dirs[id].lumpOffset + dirs[id].lumpSize);
+std::vector<uint8_t> WADLoader::getLumpNamed(const char *name, size_t after) const {
+	int id = findLumpByName(name, after); return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].lumpOffset, data + dirs[id].lumpOffset + dirs[id].lumpSize);
 }
-
-int WADLoader::findLumpByName(const char *lumpName, size_t after) const
-{
-	for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, lumpName, 8)) return (int)i;
-	return -1;
+int WADLoader::findLumpByName(const char *lumpName, size_t after) const {
+	for (size_t i = after; i < numLumps; ++i) if (!strncasecmp(dirs[i].lumpName, lumpName, 8)) return (int)i; return -1;
 }
-
-const std::vector<const char*> WADLoader::getPatchesStartingWith(const char *name)
-{
-	std::vector<const char*> all;
-	for (int i = 0; i < numLumps; i++) if (!strncasecmp(name, dirs[i].lumpName, 4)) all.push_back(dirs[i].lumpName);
-	return all;
+const std::vector<const char*> WADLoader::getPatchesStartingWith(const char *name) {
+	std::vector<const char*> all; for (int i = 0; i < numLumps; i++) if (!strncasecmp(name, dirs[i].lumpName, 4)) all.push_back(dirs[i].lumpName); return all;
 }
-
-const Patch *WADLoader::getPatch(const char *name)
-{
+const Patch *WADLoader::getPatch(const char *name) {
 	for (const Patch *p : patches) if (!strncasecmp(name, p->name, 8)) return p;
-	int n = findLumpByName(name);
-	if (n != -1 && dirs[n].lumpSize) patches.push_back(new Patch(dirs[n].lumpName, data + dirs[n].lumpOffset));
-	return patches[patches.size() - 1];
+	int n = findLumpByName(name); if (n == -1 || !dirs[n].lumpSize) {assert(0); return nullptr;}
+	patches.push_back(new Patch(dirs[n].lumpName, data + dirs[n].lumpOffset)); return patches[patches.size() - 1];
 }
-std::vector<const Texture *> WADLoader::getTexture(const char *name) const
-{
-	std::vector<const Texture *> ts;
-	for (const Texture *t : textures)
-	{
-		if (strncasecmp(name, t->name, 8)) continue;
-		for (int i = 0; i < kNumTextureCycles; i++) for (const Texture *tt : texturecycles[i]) if (tt == t) return texturecycles[i];
-		ts.push_back(t);
-	}
-	return ts;
+std::vector<const Texture *> WADLoader::getTexture(const char *name) const {
+	if (!strncasecmp(name, "-", 2)) return {};
+	for (const Texture *t : textures) if (!strncasecmp(name, t->name, 8)) {for (int i = 0; i < kNumTextureCycles; i++) { for (const Texture *tt : texturecycles[i]) if (tt == t) return texturecycles[i]; } return {t};}
+	assert(0); return {};
 }
-std::vector<const Flat *> WADLoader::getFlat(const char *name) const
-{
-	std::vector<const Flat *> fs;
-	for (const Flat *f : flats)
-	{
-		if (strncasecmp(name, f->name, 8)) continue;
-		for (int i = 0; i < kNumFlatCycles; i++) for (const Flat *ff : flatcycles[i]) if (ff == f) return flatcycles[i];
-		fs.push_back(f);
-	}
-	return fs;
+std::vector<const Flat *> WADLoader::getFlat(const char *name) const {
+	for (const Flat *f : flats) if (!strncasecmp(name, f->name, 8)) { for (int i = 0; i < kNumFlatCycles; i++) {for (const Flat *ff : flatcycles[i]) if (ff == f) return flatcycles[i];} return {f}; }
+	assert(0); return {};
 }

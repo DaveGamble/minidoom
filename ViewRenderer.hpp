@@ -14,7 +14,7 @@ struct Patch
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
 	struct colData { uint8_t top, length, *data; };
-	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<std::vector<colData>> cols; std::vector<uint8_t> pixels;
+	const char *name; int height, width, xoffset, yoffset; std::vector<std::vector<colData> > cols; std::vector<uint8_t> pixels;
 };
 
 struct Texture
@@ -60,11 +60,11 @@ public:
 	std::vector<const Texture *> getTexture(const char *name) const;
 	std::vector<const Flat *> getFlat(const char *name) const;
 protected:
-	static constexpr int kNumTextureCycles = 13, kNumFlatCycles = 9;
-	uint8_t *data {nullptr};
-	size_t numLumps {0};
-	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8] {}; };
-	const Directory* dirs {nullptr};
+	enum { kNumTextureCycles = 13, kNumFlatCycles = 9 };
+	uint8_t *data;
+	size_t numLumps;
+	struct Directory { uint32_t lumpOffset, lumpSize; char lumpName[8]; };
+	const Directory* dirs;
 	std::vector<const Texture *> texturecycles[kNumTextureCycles];
 	std::vector<const Flat *> flatcycles[kNumFlatCycles];
 	std::vector<Flat *> flats;
@@ -93,7 +93,7 @@ protected:
 	struct renderMark {int from, to; float zfrom, zto; };
 	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
 
-	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
+	enum { kSubsectorIdentifier = 0x8000 }; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 	enum { kUpperTextureUnpeg = 8, kLowerTextureUnpeg = 16 };
 	enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
 
@@ -108,10 +108,10 @@ protected:
     void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2);
 	void addWallInFOV(const Seg &seg);
 	void addThing(const Thing &thing, const Seg &seg);
-	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back({from, to, zfrom, zto}); }
+	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back((renderMark){from, to, zfrom, zto}); }
 	
 	template<typename F> static F clamp(const F &val, const F &min, const F &max) { return (val < min) ? min : (val > max) ? max : val; }
-	bool didload {false};
+	bool didload;
 	// Map:
 	std::vector<Thing> things;
 	std::vector<Sector> sectors;
@@ -120,18 +120,18 @@ protected:
 	std::vector<Seg> segs;
 	std::vector<Subsector> subsectors;
 	std::vector<Node> nodes;
-	std::vector<std::vector<std::vector<const Linedef *>>> blockmap;
+	std::vector<std::vector<std::vector<const Linedef *> > > blockmap;
 	int16_t blockmap_x, blockmap_y;
 	WADLoader wad;
 	// Render:
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 	float invRenderWidth, invRenderHeight;
-	std::vector<std::vector<renderMark>> renderMarks;
+	std::vector<std::vector<renderMark> > renderMarks;
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight, ceilingClipHeight;
-	std::vector<std::vector<renderLater>> renderLaters;
+	std::vector<std::vector<renderLater> > renderLaters;
 	uint8_t lights[34][256], *screenBuffer;
 	int rowlen, frame {0}, texframe {0}, pal[256];
 	Viewpoint view;
-	const Patch *weapon {nullptr};
+	const Patch *weapon;
 };

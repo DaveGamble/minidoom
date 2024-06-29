@@ -1,6 +1,6 @@
 #include "ViewRenderer.hpp"
 
-constexpr float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
+const float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
 
 ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname, const char *mapName)
 : renderWidth(renderXSize)
@@ -17,6 +17,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 , screenBuffer(new uint8_t[renderXSize * renderYSize])
 , rowlen(renderXSize)
 , wad(wadname)
+, didload(false)
 {
 	if (!wad.didLoad()) return;
 	std::vector<uint8_t> ll = wad.getLumpNamed("COLORMAP");

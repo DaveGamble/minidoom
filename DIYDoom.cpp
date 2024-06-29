@@ -3,8 +3,8 @@
 
 int main(int argc, char* argv[])
 {
-	static constexpr float moveSpeed = 8, rotateSpeed = 0.06981317008;
-	static constexpr int m_iRenderWidth {960}, m_iRenderHeight {600};
+	const float moveSpeed = 8, rotateSpeed = 0.06981317008;
+	const int m_iRenderWidth = 960, m_iRenderHeight = 600;
 //	ViewRenderer engine(m_iRenderWidth, m_iRenderHeight, "DOOM2.WAD", "MAP01");
 	ViewRenderer engine(m_iRenderWidth, m_iRenderHeight, "DOOM.WAD", "E1M1");
 //    ViewRenderer engine(m_iRenderWidth, m_iRenderHeight, "freedoom1.WAD", "E1M1");

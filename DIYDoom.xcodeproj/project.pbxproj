@@ -39,6 +39,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		55D322822C304F7300906DCA /* thinginfo.inc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.pascal; path = thinginfo.inc; sourceTree = "<group>"; };
 		55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4602C1DBCB400F9DCAC /* DIYDoom */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DIYDoom; sourceTree = BUILT_PRODUCTS_DIR; };
 		55FEA4732C1DBCC800F9DCAC /* ViewRenderer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ViewRenderer.hpp; sourceTree = SOURCE_ROOT; };
@@ -159,6 +160,7 @@
 				55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */,
 				55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */,
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.hpp */,
+				55D322822C304F7300906DCA /* thinginfo.inc */,
 				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
 				55FEA4612C1DBCB400F9DCAC /* Products */,
 				55FEA5EA2C1DBDC200F9DCAC /* Frameworks */,

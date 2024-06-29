@@ -23,7 +23,6 @@ struct Patch
 	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<std::vector<PatchColumnData>> cols; std::vector<uint8_t> pixels;
 };
 
-
 struct Texture
 {
 	Texture(const char *_name, const uint8_t *ptr, class WADLoader *wad);
@@ -93,22 +92,30 @@ public:
 	bool didLoadOK() const {return didload;}
 
 protected:
-	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
-	bool didload {false};
-	void addWallInFOV(const Seg &seg);
-	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
+	struct Subsector { uint16_t numSegs, firstSeg; };
+	struct BBox { int16_t top, bottom, left, right; };
+	struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
+	struct SolidSegmentRange { int start, end; };
+	struct renderMark {int from, to; float zfrom, zto; };
+	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
 
+	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
+
+	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 	void updatePlayerSubSectorHeight();
-	void renderBSPNodes(int iNodeID);
 	
 	std::vector<const Linedef *> getBlock(int x, int y) const;
 	bool doesLineIntersect(int x1, int y1, int x2, int y2) const;
 	bool isPointOnLeftSide(const Viewpoint &v, int node) const;
-
-	struct Subsector { uint16_t numSegs, firstSeg; };
-	struct BBox { int16_t top, bottom, left, right; };
-	struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
-
+	
+	void renderBSPNodes(int iNodeID);
+    void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2);
+	void addWallInFOV(const Seg &seg);
+	void addThing(const Thing &thing, const Seg &seg);
+	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back({from, to, zfrom, zto}); }
+	
+	bool didload {false};
+	// Map:
 	std::vector<Thing> things;
 	std::vector<Sector> sectors;
 	std::vector<Sidedef> sidedefs;
@@ -116,32 +123,18 @@ protected:
 	std::vector<Seg> segs;
 	std::vector<Subsector> subsectors;
 	std::vector<Node> nodes;
-	
 	std::vector<std::vector<std::vector<const Linedef *>>> blockmap;
 	int16_t blockmap_x, blockmap_y;
-	
-    struct SolidSegmentRange { int start, end; };
-
-    void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2);
-	void addThing(const Thing &thing, const Seg &seg);
-
+	WADLoader wad;
+	// Render:
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 	float invRenderWidth, invRenderHeight;
-
-	struct renderMark {int from, to; float zfrom, zto; };
 	std::vector<std::vector<renderMark>> renderMarks;
-	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back({from, to, zfrom, zto}); }
-	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
     std::list<SolidSegmentRange> solidWallRanges;
     std::vector<int> floorClipHeight, ceilingClipHeight;
 	std::vector<std::vector<renderLater>> renderLaters;
-	uint8_t lights[34][256];
-	int pal[256];
-	uint8_t *screenBuffer;
-	int rowlen, frame {0}, texframe {0};
-	
+	uint8_t lights[34][256], *screenBuffer;
+	int rowlen, frame {0}, texframe {0}, pal[256];
 	Viewpoint view;
-	
-	WADLoader wad;
 	const Patch *weapon {nullptr};
 };

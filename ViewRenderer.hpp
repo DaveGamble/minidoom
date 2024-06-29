@@ -11,8 +11,7 @@ public:
 
 	void render(uint8_t *pScreenBuffer, int iBufferPitch);
 
-	WADLoader &getWad() {return wad;}
-	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
+	std::vector<uint8_t> getPalette() const { return pal; }
 
 	void rotateBy(float dt)
 	{
@@ -32,15 +31,18 @@ public:
 
 	void updatePitch(float dp) { view.pitch = std::clamp(view.pitch - dp, -1.f, 1.f); }
 	
+	bool didLoadOK() const {return didload;}
+protected:
+	bool didload {false};
+	void addWallInFOV(const Seg &seg);
+	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
+
 	void updatePlayerSubSectorHeight()
 	{
 		int subsector = (int)(nodes.size() - 1);
 		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(view, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
 		view.z = 41 + segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
 	}
-
-protected:
-	void addWallInFOV(const Seg &seg);
 
 	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 
@@ -123,10 +125,12 @@ protected:
     std::vector<int> ceilingClipHeight;
 	std::vector<std::vector<renderLater>> renderLaters;
 	uint8_t lights[34][256];
+	std::vector<uint8_t> pal;
 	uint8_t *screenBuffer;
 	int rowlen, frame {0}, texframe {0};
 	
 	Viewpoint view;
 	
 	WADLoader wad;
+	const Patch *weapon {nullptr};
 };

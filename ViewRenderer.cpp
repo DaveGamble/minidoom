@@ -16,9 +16,10 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 , renderMarks(renderWidth)
 , wad(wadname)
 {
+	if (!wad.didLoad()) return;
 	std::vector<uint8_t> ll = wad.getLumpNamed("COLORMAP");
 	for (int i = 0; i < 34; i++) memcpy(lights[i], ll.data() + 256 * i, 256);
-
+	pal = wad.getLumpNamed("PLAYPAL");
 	int li = wad.findLumpByName(mapName);
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;
@@ -280,11 +281,16 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	}
 	view.z = 41;
 	view.pitch = 0;
+	weapon = wad.getPatch("PISGA0");
+	wad.release();
+	didload = true;
 }
 
 
 void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 {
+	updatePlayerSubSectorHeight();
+
 	frame++;
 	texframe = frame / 20;
 	screenBuffer = pScreenBuffer;
@@ -341,6 +347,9 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 		renderLaters[x].clear();
 		renderMarks[x].clear();
 	}
+	
+//	weapon->render(pScreenBuffer, iBufferPitch, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lights[0], 3);
+
 }
 
 void ViewRenderer::addThing(const Thing &thing, const Seg &seg)

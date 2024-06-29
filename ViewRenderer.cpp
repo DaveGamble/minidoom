@@ -690,7 +690,12 @@ Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 	xoffset = patchHeader->leftOffset;
 	yoffset = patchHeader->topOffset;
 
+	size_t totallen = 0;
 	uint32_t *columnOffsets = (uint32_t*)(ptr + 8);
+	for (int i = 0; i < width; ++i) for (int c = columnOffsets[i]; ptr[c] != 0xff; c += ptr[c + 1] + 4) totallen += ptr[c + 1];
+	pixels.resize(totallen);
+	uint8_t *to = pixels.data();
+	
 	for (int i = 0; i < width; ++i)
 	{
 		int off = columnOffsets[i];
@@ -703,19 +708,15 @@ Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 			{
 				patchColumn.length = ptr[off++];
 				patchColumn.paddingPre = ptr[off++];
-				patchColumn.data = new uint8_t[patchColumn.length];
-				memcpy(patchColumn.data, ptr + off, patchColumn.length);
+				patchColumn.data = to;
+				memcpy(to, ptr + off, patchColumn.length);
+				to += patchColumn.length;
 				off += patchColumn.length;
 				patchColumn.paddingPost = ptr[off++];
 			}
 			cols.push_back(patchColumn);
 		} while (patchColumn.top != 0xFF);
 	}
-}
-
-Patch::~Patch()
-{
-	for (size_t i = 0; i < cols.size(); ++i) if (cols[i].top != 0xFF) delete[] cols[i].data;
 }
 
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale) const

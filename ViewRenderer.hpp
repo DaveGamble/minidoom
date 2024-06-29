@@ -10,7 +10,6 @@ enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefa
 struct Patch
 {
 	Patch(const char *_name, const uint8_t *ptr);
-	~Patch();
 
 	uint16_t pixel(int x, int y) const {
 		for ( ; cols[x].top != 0xff && cols[x].top <= y; x++) { int o = y - cols[x].top; if (o >= 0 && o < cols[x].length) return cols[x].data[o]; } return 256;
@@ -21,7 +20,7 @@ struct Patch
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
 	struct PatchColumnData { uint8_t top, length, paddingPre, *data, paddingPost; };
-	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<PatchColumnData> cols; std::vector<int> index;
+	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<PatchColumnData> cols; std::vector<int> index; std::vector<uint8_t> pixels;
 };
 
 

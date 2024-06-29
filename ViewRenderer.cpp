@@ -40,8 +40,6 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 		char floorname[9] {}, ceilname[9] {};
 		memcpy(floorname, ws->floorTexture, 8);
 		memcpy(ceilname, ws->ceilingTexture, 8);
-//		if (!wad.getFlat(floorname).size()) printf("Didn't find flat [%s]\n", floorname);
-//		if (!wad.getFlat(ceilname).size()) printf("Didn't find flat [%s]\n", ceilname);
 		const Patch *sky = (!strncmp(ceilname, "F_SKY", 5)) ? wad.getPatch(ceilname + 2) : nullptr;
 		sectors.push_back({ws->fh, ws->ch, wad.getFlat(floorname), wad.getFlat(ceilname), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
 	}
@@ -54,9 +52,6 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 		memcpy(uname, ws->upperTexture, 8);
 		memcpy(lname, ws->lowerTexture, 8);
 		memcpy(mname, ws->middleTexture, 8);
-//		if (!wad.getTexture(uname).size() && strcmp(uname, "-")) printf("Didn't find texture [%s]\n",uname);
-//		if (!wad.getTexture(lname).size() && strcmp(lname, "-")) printf("Didn't find texture [%s]\n",lname);
-//		if (!wad.getTexture(mname).size() && strcmp(mname, "-")) printf("Didn't find texture [%s]\n",mname);
 		sidedefs.push_back({ws->dx, ws->dy, wad.getTexture(uname), wad.getTexture(mname), wad.getTexture(lname), sectors.data() + ws->sector});
 	}
 

@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		55E6BDF32C1E2B3600FA2E64 /* DIYDoom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */; };
-		55FEA4D02C1DBCC800F9DCAC /* DoomEngine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */; };
 		55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */; };
 		55FEA6082C1DBDE500F9DCAC /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5F92C1DBDC200F9DCAC /* AudioToolbox.framework */; };
 		55FEA6092C1DBDE500F9DCAC /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 55FEA5EE2C1DBDC200F9DCAC /* IOKit.framework */; };
@@ -42,8 +41,6 @@
 /* Begin PBXFileReference section */
 		55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DIYDoom.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4602C1DBCB400F9DCAC /* DIYDoom */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DIYDoom; sourceTree = BUILT_PRODUCTS_DIR; };
-		55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DoomEngine.cpp; sourceTree = SOURCE_ROOT; };
-		55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DoomEngine.h; sourceTree = SOURCE_ROOT; };
 		55FEA4732C1DBCC800F9DCAC /* ViewRenderer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = ViewRenderer.hpp; sourceTree = SOURCE_ROOT; };
 		55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ViewRenderer.cpp; sourceTree = SOURCE_ROOT; };
 		55FEA4792C1DBCC800F9DCAC /* begin_code.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = begin_code.h; sourceTree = "<group>"; };
@@ -162,8 +159,6 @@
 			children = (
 				55E6BDF22C1E2B3600FA2E64 /* DIYDoom.cpp */,
 				55FEA4CD2C1DBCC800F9DCAC /* WADLoader.hpp */,
-				55FEA46D2C1DBCC800F9DCAC /* DoomEngine.cpp */,
-				55FEA46F2C1DBCC800F9DCAC /* DoomEngine.h */,
 				55FEA4782C1DBCC800F9DCAC /* ViewRenderer.cpp */,
 				55FEA4732C1DBCC800F9DCAC /* ViewRenderer.hpp */,
 				55FEA4BC2C1DBCC800F9DCAC /* SDL2 */,
@@ -333,7 +328,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				55FEA4D02C1DBCC800F9DCAC /* DoomEngine.cpp in Sources */,
 				55E6BDF32C1E2B3600FA2E64 /* DIYDoom.cpp in Sources */,
 				55FEA4D32C1DBCC800F9DCAC /* ViewRenderer.cpp in Sources */,
 			);

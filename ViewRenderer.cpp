@@ -50,21 +50,21 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	{
 		WADSector *ws = (WADSector*)(ptr + i);
 		const Patch *sky = (!strncmp(ws->ceilingTexture, "F_SKY", 5)) ? wad.getPatch(ws->ceilingTexture + 2) : nullptr;
-		sectors.push_back({ws->fh, ws->ch, wad.getFlat(ws->floorTexture), wad.getFlat(ws->ceilingTexture), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
+		sectors.push_back((Sector){ws->fh, ws->ch, wad.getFlat(ws->floorTexture), wad.getFlat(ws->ceilingTexture), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
 	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef))
 	{
 		WADSidedef *ws = (WADSidedef*)(ptr + i);
-		sidedefs.push_back({ws->dx, ws->dy, wad.getTexture(ws->upperTexture), wad.getTexture(ws->middleTexture), wad.getTexture(ws->lowerTexture), sectors.data() + ws->sector});
+		sidedefs.push_back((Sidedef){ws->dx, ws->dy, wad.getTexture(ws->upperTexture), wad.getTexture(ws->middleTexture), wad.getTexture(ws->lowerTexture), sectors.data() + ws->sector});
 	}
 
 	struct WADLinedef { uint16_t start, end, flags, type, sectorTag, rSidedef, lSidedef; }; // Sidedef 0xFFFF means there is no sidedef
 	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef))
 	{
 		WADLinedef *wl = (WADLinedef*)(ptr + i);
-		linedefs.push_back({vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
+		linedefs.push_back((Linedef){vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
 			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef,
 			(wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
 		});
@@ -77,12 +77,12 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 		Linedef *pLinedef = &linedefs[ws->linedef];
 		Sidedef *pRightSidedef = ws->dir ? pLinedef->lSidedef : pLinedef->rSidedef;
 		Sidedef *pLeftSidedef = ws->dir ? pLinedef->rSidedef : pLinedef->lSidedef;
-		segs.push_back({vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, pRightSidedef, ws->dir, (float)ws->offset,
+		segs.push_back((Seg){vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, pRightSidedef, ws->dir, (float)ws->offset,
 			sqrtf((vertices[ws->start].x - vertices[ws->end].x) * (vertices[ws->start].x - vertices[ws->end].x) + (vertices[ws->start].y - vertices[ws->end].y) * (vertices[ws->start].y - vertices[ws->end].y)),
 			(pRightSidedef) ? pRightSidedef->sector : nullptr, (pLeftSidedef) ? pLeftSidedef->sector : nullptr});
 	}
 	struct WADThing { int16_t x, y; uint16_t angle, type, flags; };
-	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(WADThing)) {WADThing *wt = (WADThing*)(ptr + i); things.push_back({wt->x, wt->y, wt->angle, wt->type, wt->flags});}
+	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(WADThing)) {WADThing *wt = (WADThing*)(ptr + i); things.push_back((Thing){wt->x, wt->y, wt->angle, wt->type, wt->flags});}
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 	struct WADBlockmap { int16_t x, y; uint16_t numCols, numRows; };
@@ -146,12 +146,12 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 			}
 			else
 			{
-				char buffer[9] {};
+				char buffer[9]; memset(buffer, 0, 9);
 				snprintf(buffer, 9, "%s%c0", basename, toupper(*anim));
 				t.imgs.push_back(wad.getPatch(buffer));
 			}
 		}
-		Viewpoint v {t.x, t.y};
+		Viewpoint v = (Viewpoint){t.x, t.y};
 		int subsector = (int)(nodes.size() - 1);
 		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(v, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
 		segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->things.push_back(&t);
@@ -201,8 +201,8 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 	frame++;
 	texframe = frame / 20;
 	solidWallRanges.clear();
-	solidWallRanges.push_back({INT_MIN, -1});
-	solidWallRanges.push_back({renderWidth, INT_MAX});
+	solidWallRanges.push_back((SolidSegmentRange){INT_MIN, -1});
+	solidWallRanges.push_back((SolidSegmentRange){renderWidth, INT_MAX});
 	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
 
@@ -293,7 +293,7 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 	{
 		float vx = patch->width* (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->width) continue;
-		renderLaters[x1].push_back({patch, (int)vx, (int)py1, (int)py2, 0, dv, tz, lights[light]});
+		renderLaters[x1].push_back((renderLater){patch, (int)vx, (int)py1, (int)py2, 0, dv, tz, lights[light]});
 	}
 }
 
@@ -338,7 +338,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg)
         if (x2 < f->start - 1)
         {
             storeWallRange(seg, x1, x2, tov1x, tov2x, tov1z, tov2z); //All of the wall is visible, so insert it
-            if (solid) solidWallRanges.insert(f, {x1, x2});
+            if (solid) solidWallRanges.insert(f, (SolidSegmentRange){x1, x2});
             return;
         }
         storeWallRange(seg, x1, f->start - 1, tov1x, tov2x, tov1z, tov2z); // The end is already included, just update start
@@ -478,7 +478,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int col, yoffset, texu = ((int)u) % tex->width; if (texu < 0) texu += tex->width;
 				const Patch *p;
 				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
-					renderLaters[x].push_back({p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
+					renderLaters[x].push_back((renderLater){p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);
@@ -525,8 +525,8 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 
 std::vector<const Linedef *> ViewRenderer::getBlock(int x, int y) const
 {
-	if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return {};
-	if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return {};
+	if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return std::vector<const Linedef*>();
+	if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return std::vector<const Linedef*>();
 	return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
 }
 
@@ -578,7 +578,7 @@ Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 	{
 		for (int off = columnOffsets[i]; ptr[off] != 0xff; off += ptr[off + 1] + 4)
 		{
-			cols[i].push_back({ptr[off], ptr[off + 1], to});
+			cols[i].push_back((colData){ptr[off], ptr[off + 1], to});
 			memcpy(to, ptr + off + 2, ptr[off + 1]);
 			to += ptr[off + 1];
 		}
@@ -640,7 +640,7 @@ Texture::Texture(const char *_name, const uint8_t *ptr, WADLoader *wad) : name(_
 				}
 				patch->composeColumn(cols[x].overlap.data(), height, x - texturePatch[i].dx, texturePatch[i].dy);	// Render your goodies on top.
 			}
-			else cols[x] = { x - texturePatch[i].dx, texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
+			else cols[x] = (colData){ x - texturePatch[i].dx, texturePatch[i].dy, patch, std::vector<uint8_t>()};	// Save this as the handler for this column.
 		}
 	}
 }
@@ -666,7 +666,7 @@ WADLoader::WADLoader(const char *filename)
    
    int cycle = -1;
    const char *toload[2] = {"TEXTURE1", "TEXTURE2"};
-   static constexpr const char *specialtextures[kNumTextureCycles][2] = { {"BLODGR1", "BLODGR4"}, {"BLODRIP1", "BLODRIP4"}, {"FIREBLU1", "FIREBLU2"}, {"FIRELAV3", "FIRELAVA"},
+   static const char *specialtextures[kNumTextureCycles][2] = { {"BLODGR1", "BLODGR4"}, {"BLODRIP1", "BLODRIP4"}, {"FIREBLU1", "FIREBLU2"}, {"FIRELAV3", "FIRELAVA"},
 	   {"FIREMAG1", "FIREMAG3"}, {"FIREWALA", "FIREWALL"}, {"GSTFONT1", "GSTFONT3"}, {"ROCKRED1", "ROCKRED3"}, {"SLADRIP1", "SLADRIP3"}, {"BFALL1", "BFALL4"},
 	   {"SFALL1", "SFALL4"}, {"WFALL1", "WFALL4"}, {"DBRAIN1", "DBRAIN4"} }; // From UDS1.666.
 
@@ -689,7 +689,7 @@ WADLoader::WADLoader(const char *filename)
 	   }
    }
    
-   static constexpr const char *specialflats[kNumFlatCycles][2] = {{"NUKAGE1", "NUKAGE3"}, {"FWATER1", "FWATER4"}, {"SWATER1", "SWATER4"}, {"LAVA1", "LAVA4"},
+   static const char *specialflats[kNumFlatCycles][2] = {{"NUKAGE1", "NUKAGE3"}, {"FWATER1", "FWATER4"}, {"SWATER1", "SWATER4"}, {"LAVA1", "LAVA4"},
 	   {"BLOOD1", "BLOOD3"}, {"RROCK05", "RROCK08"}, {"SLIME01", "SLIME04"}, {"SLIME05", "SLIME08"}, {"SLIME09", "SLIME12"}}; // From UDS1.666.
 
    cycle = -1;

@@ -107,90 +107,27 @@ class ViewRenderer
 {
 public:
     ViewRenderer(int renderXSize, int renderYSize, const char *wadname, const char *mapName);
-	~ViewRenderer() {delete[] screenBuffer;}
+	~ViewRenderer();
 
 	void render(uint8_t *pScreenBuffer, int iBufferPitch);
-
-	void rotateBy(float dt)
-	{
-		view.angle += dt;
-		view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
-		view.cosa = cos(view.angle);
-		view.sina = sin(view.angle);
-	};
-
-	void moveBy(float fwd, float side)
-	{
-		float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
-		if (doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
-		view.x += dx;
-		view.y += dy;
-	};
-
-	void updatePitch(float dp) { view.pitch = std::clamp(view.pitch - dp, -1.f, 1.f); }
-	
+	void rotateBy(float dt);
+	void moveBy(float fwd, float side);
+	void updatePitch(float dp);
 	bool didLoadOK() const {return didload;}
+
 protected:
+	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 	bool didload {false};
 	void addWallInFOV(const Seg &seg);
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 
-	void updatePlayerSubSectorHeight()
-	{
-		int subsector = (int)(nodes.size() - 1);
-		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(view, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
-		view.z = 41 + segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
-	}
-
-	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
-
-	void renderBSPNodes(int iNodeID, const Viewpoint &v)
-	{
-		if (iNodeID & kSubsectorIdentifier) // Masking all the bits exipt the last one to check if this is a subsector
-		{
-			iNodeID &= ~kSubsectorIdentifier;
-			for (int i = 0; i < subsectors[iNodeID].numSegs; i++) addWallInFOV(segs[subsectors[iNodeID].firstSeg + i]);
-			return;
-		}
-		const bool left = isPointOnLeftSide(v, iNodeID);
-		renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild, v);
-		renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild, v);
-	}
+	void updatePlayerSubSectorHeight();
+	void renderBSPNodes(int iNodeID);
 	
-	std::vector<const Linedef *> getBlock(int x, int y) const
-	{
-		if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return {};
-		if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return {};
-		return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
-	}
+	std::vector<const Linedef *> getBlock(int x, int y) const;
+	bool doesLineIntersect(int x1, int y1, int x2, int y2) const;
+	bool isPointOnLeftSide(const Viewpoint &v, int node) const;
 
-	bool doesLineIntersect(int x1, int y1, int x2, int y2) const
-	{
-		std::vector<const Linedef *> tests = getBlock(x1, y1);
-		if (x1 >> 7 != x2 >> 7 || y1 >> 7 != y2 >> 7)
-		{
-			std::vector<const Linedef *> tests2 = getBlock(x2, y2);
-			tests.insert(tests.end(), tests2.begin(), tests2.end());
-		}
-		for (const Linedef *l : tests)	// Graphics Gems 3.
-		{
-			if (l->lSidedef && !(l->flags & 1)) continue;	// Could test for doors here.
-			const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
-			float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
-			if (den > 0) { if (tn < 0 || tn > den) continue; } else if (tn > 0 || tn < den) continue;
-			float un = Ax * Cy - Ay * Cx;
-			if (den > 0) { if (un < 0 || un > den) continue; } else if (un > 0 || un < den) continue;
-			return true;
-		}
-		// Test thing collisions here?
-		return false;
-	}
-	
-	bool isPointOnLeftSide(const Viewpoint &v, int node) const
-	{
-		return ((((v.x - nodes[node].x) * nodes[node].dy) - ((v.y - nodes[node].y) * nodes[node].dx)) <= 0);
-	}
-	
 	struct Subsector { uint16_t numSegs, firstSeg; };
 	struct BBox { int16_t top, bottom, left, right; };
 	struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };

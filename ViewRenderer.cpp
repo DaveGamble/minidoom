@@ -259,7 +259,7 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 		renderMarks[x].clear();
 	}
 	
-//	weapon->render(screenBuffer, rowlen, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lights[0], 3);
+//	weapon->render(screenBuffer, rowlen, -weapon->xoffset * 3, -weapon->yoffset * 3, lights[0], 3);
 
 	const uint8_t *from = screenBuffer;
 	for (int y = 0; y < renderHeight; y++)
@@ -594,25 +594,25 @@ Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale) const
 {
 	buf += rowlen * screeny + screenx;
-	for (int x = 0, tox = 0; x < width; x++) while (tox < (x + 1) * scale) renderColumn(buf + tox++, rowlen, x, INT_MAX, 0, scale, lut);
-}
-void Patch::renderColumn(uint8_t *buf, int rowlen, int x, int maxHeight, int yOffset, float scale, const uint8_t *lut) const
-{
-	if (scale < 0) return;
-	for (const PatchColumnData &c : cols[x])
+	for (int x = 0, tox = 0; x < width; x++)
 	{
-		int y = (c.top + yOffset < 0) ? - c.top - yOffset : 0;
-		int sl = floor(scale * (c.top + y + yOffset));
-		int el = std::min(floor((c.length - y) * scale) + sl, (float)maxHeight);
-		int run = std::max(el - sl, 0), start = rowlen * sl;
-		const uint8_t *from = c.data + y;
-		for (int i = 0, to = 0; to < run && i < c.length; i++)
-			while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[from[i]];
+		while (tox < (x + 1) * scale)
+		{
+			for (const colData &c : cols[x])
+			{
+				int y = (c.top < 0) ? -c.top : 0, sl = floor(scale * (c.top + y)), el = floor((c.length - y) * scale) + sl;
+				int run = std::max(el - sl, 0), start = rowlen * sl + tox;
+				for (int i = 0, to = 0; to < run && i < c.length; i++)
+					while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[c.data[i + y]];
+			}
+			tox++;
+		}
 	}
 }
+
 void Patch::composeColumn(uint8_t *buf, int iHeight, int x, int yOffset) const
 {
-	for (const PatchColumnData &c : cols[x])
+	for (const colData &c : cols[x])
 	{
 		int y = yOffset + c.top, iMaxRun = c.length;
 		if (y < 0) { iMaxRun += y; y = 0; }

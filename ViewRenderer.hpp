@@ -1,26 +1,20 @@
 #pragma once
 
-#include <list>
 #include <cstdint>
+#include <list>
 #include <vector>
-
-enum { kUpperTextureUnpeg = 8, kLowerTextureUnpeg = 16 };
-enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
 
 struct Patch
 {
 	Patch(const char *_name, const uint8_t *ptr);
 
-	uint16_t pixel(int x, int y) const {
-		for (const PatchColumnData &c : cols[x]) if (c.top <= y) { int o = y - c.top; if (o >= 0 && o < c.length) return c.data[o]; } return 256;
-	}
+	uint16_t pixel(int x, int y) const { for (const colData &c : cols[x]) if (y >= c.top && y < c.top + c.length) return c.data[y - c.top]; return 256; }
 
 	void render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale = 1) const;
-	void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale, const uint8_t *lut) const;
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
-	struct PatchColumnData { uint8_t top, length, *data; };
-	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<std::vector<PatchColumnData>> cols; std::vector<uint8_t> pixels;
+	struct colData { uint8_t top, length, *data; };
+	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<std::vector<colData>> cols; std::vector<uint8_t> pixels;
 };
 
 struct Texture
@@ -100,6 +94,8 @@ protected:
 	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
 
 	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
+	enum { kUpperTextureUnpeg = 8, kLowerTextureUnpeg = 16 };
+	enum { thing_collectible = 1, thing_obstructs = 2, thing_hangs = 4, thing_artefact = 8 };
 
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 	void updatePlayerSubSectorHeight();

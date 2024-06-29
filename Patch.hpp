@@ -74,7 +74,7 @@ public:
 		{
 			int y = yOffset + cols[firstColumn].top, iMaxRun = cols[firstColumn].length;
 			if (y < 0) { iMaxRun += y; y = 0; }
-			if (iMaxRun > iHeight - y) iMaxRun = iHeight - y;
+			iMaxRun = std::min(iHeight - y, iMaxRun);
 			if (iMaxRun > 0) memcpy(buf + y, cols[firstColumn].data, iMaxRun);
 			++firstColumn;
 		}

@@ -416,7 +416,7 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 	{
 		float vx = patch->width* (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->width) continue;
-		renderLaters[x1].push_back({patch, patch->index[vx], (int)py1, (int)py2, 0, dv, tz, lights[light]});
+		renderLaters[x1].push_back({patch, (int)vx, (int)py1, (int)py2, 0, dv, tz, lights[light]});
 	}
 }
 
@@ -545,7 +545,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			for (int i = std::max(0, from); i < std::min(to, renderHeight); i++)
 			{
 				float ty = std::clamp((i - horizon + halfRenderHeight) * sky->height * invRenderHeight, -1.f, sky->height - 1.f);
-				screenBuffer[rowlen * i + x] = lights[0][sky->pixel(sky->index[(ty < 0) ? 0 : tx], std::max(ty, 0.f))];
+				screenBuffer[rowlen * i + x] = lights[0][sky->pixel((ty < 0) ? 0 : tx, std::max(ty, 0.f))];
 			}
 		};
 
@@ -692,62 +692,49 @@ Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 
 	size_t totallen = 0;
 	uint32_t *columnOffsets = (uint32_t*)(ptr + 8);
-	for (int i = 0; i < width; ++i) for (int c = columnOffsets[i]; ptr[c] != 0xff; c += ptr[c + 1] + 4) totallen += ptr[c + 1];
+	for (int i = 0; i < width; ++i) for (int off = columnOffsets[i]; ptr[off] != 0xff; off += ptr[off + 1] + 4) totallen += ptr[off + 1];
 	pixels.resize(totallen);
 	uint8_t *to = pixels.data();
+	cols.resize(width);
 	
 	for (int i = 0; i < width; ++i)
 	{
-		int off = columnOffsets[i];
-		index.push_back((int)cols.size());
-		PatchColumnData patchColumn;
-		do
+		for (int off = columnOffsets[i]; ptr[off] != 0xff; off += ptr[off + 1] + 4)
 		{
-			patchColumn.top = ptr[off++];
-			if (patchColumn.top != 0xFF)
-			{
-				patchColumn.length = ptr[off++];
-				patchColumn.paddingPre = ptr[off++];
-				patchColumn.data = to;
-				memcpy(to, ptr + off, patchColumn.length);
-				to += patchColumn.length;
-				off += patchColumn.length;
-				patchColumn.paddingPost = ptr[off++];
-			}
-			cols.push_back(patchColumn);
-		} while (patchColumn.top != 0xFF);
+			cols[i].push_back({ptr[off], ptr[off + 1], to});
+			memcpy(to, ptr + off + 2, ptr[off + 1]);
+			to += ptr[off + 1];
+		}
 	}
 }
 
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale) const
 {
 	buf += rowlen * screeny + screenx;
-	for (int x = 0, tox = 0; x < width; x++) while (tox < (x + 1) * scale) renderColumn(buf + tox++, rowlen, index[x], INT_MAX, 0, scale, lut);
+	for (int x = 0, tox = 0; x < width; x++) while (tox < (x + 1) * scale) renderColumn(buf + tox++, rowlen, x, INT_MAX, 0, scale, lut);
 }
-void Patch::renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale, const uint8_t *lut) const
+void Patch::renderColumn(uint8_t *buf, int rowlen, int x, int maxHeight, int yOffset, float scale, const uint8_t *lut) const
 {
 	if (scale < 0) return;
-	while (cols[firstColumn].top != 0xFF)
+	for (const PatchColumnData &c : cols[x])
 	{
-		int y = (cols[firstColumn].top + yOffset < 0) ? - cols[firstColumn].top - yOffset : 0;
-		int sl = floor(scale * (cols[firstColumn].top + y + yOffset));
-		int el = std::min(floor((cols[firstColumn].length - y) * scale) + sl, (float)maxHeight);
+		int y = (c.top + yOffset < 0) ? - c.top - yOffset : 0;
+		int sl = floor(scale * (c.top + y + yOffset));
+		int el = std::min(floor((c.length - y) * scale) + sl, (float)maxHeight);
 		int run = std::max(el - sl, 0), start = rowlen * sl;
-		const uint8_t *from = cols[firstColumn].data + y;
-		for (int i = 0, to = 0; to < run && i < cols[firstColumn].length; i++)
+		const uint8_t *from = c.data + y;
+		for (int i = 0, to = 0; to < run && i < c.length; i++)
 			while (to < (i + 1) * scale && to < run) buf[start + (to++) * rowlen] = lut[from[i]];
-		++firstColumn;
 	}
 }
-void Patch::composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const
+void Patch::composeColumn(uint8_t *buf, int iHeight, int x, int yOffset) const
 {
-	while (cols[firstColumn].top != 0xFF)
+	for (const PatchColumnData &c : cols[x])
 	{
-		int y = yOffset + cols[firstColumn].top, iMaxRun = cols[firstColumn].length;
+		int y = yOffset + c.top, iMaxRun = c.length;
 		if (y < 0) { iMaxRun += y; y = 0; }
 		iMaxRun = std::min(iHeight - y, iMaxRun);
-		if (iMaxRun > 0) memcpy(buf + y, cols[firstColumn].data, iMaxRun);
-		++firstColumn;
+		if (iMaxRun > 0) memcpy(buf + y, c.data, iMaxRun);
 	}
 }
 
@@ -774,9 +761,9 @@ Texture::Texture(const char *_name, const uint8_t *ptr, WADLoader *wad) : name(_
 					columns[x].overlap.resize(height);
 					columns[x].patch->composeColumn(columns[x].overlap.data(), height, columns[x].column, columns[x].yOffset);
 				}
-				patch->composeColumn(columns[x].overlap.data(), height, patch->index[x - texturePatch[i].dx], texturePatch[i].dy);	// Render your goodies on top.
+				patch->composeColumn(columns[x].overlap.data(), height, x - texturePatch[i].dx, texturePatch[i].dy);	// Render your goodies on top.
 			}
-			else columns[x] = { patch->index[x - texturePatch[i].dx], texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
+			else columns[x] = { x - texturePatch[i].dx, texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
 		}
 	}
 }

@@ -12,15 +12,15 @@ struct Patch
 	Patch(const char *_name, const uint8_t *ptr);
 
 	uint16_t pixel(int x, int y) const {
-		for ( ; cols[x].top != 0xff && cols[x].top <= y; x++) { int o = y - cols[x].top; if (o >= 0 && o < cols[x].length) return cols[x].data[o]; } return 256;
+		for (const PatchColumnData &c : cols[x]) if (c.top <= y) { int o = y - c.top; if (o >= 0 && o < c.length) return c.data[o]; } return 256;
 	}
 
 	void render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale = 1) const;
 	void renderColumn(uint8_t *buf, int rowlen, int firstColumn, int maxHeight, int yOffset, float scale, const uint8_t *lut) const;
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
-	struct PatchColumnData { uint8_t top, length, paddingPre, *data, paddingPost; };
-	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<PatchColumnData> cols; std::vector<int> index; std::vector<uint8_t> pixels;
+	struct PatchColumnData { uint8_t top, length, *data; };
+	const char *name; int height {0}, width {0}, xoffset {0}, yoffset {0}; std::vector<std::vector<PatchColumnData>> cols; std::vector<uint8_t> pixels;
 };
 
 

@@ -20,18 +20,6 @@ DoomEngine::DoomEngine(const char *wadname, const char *mapName)
 	weapon = renderer.getWad().getPatch("PISGA0");
 	
 	renderer.getWad().release();
-	
-	const Thing* t = renderer.getThing(1);
-	if (t)
-	{
-		view.x = t->x;
-		view.y = t->y;
-		view.angle = t->angle * M_PI / 180;
-		view.cosa = cos(view.angle);
-		view.sina = sin(view.angle);
-	}
-	view.z = 41;
-	view.pitch = 0;
 }
 
 DoomEngine::~DoomEngine()
@@ -45,24 +33,13 @@ bool DoomEngine::Tick()
 {
 	if (m_bIsOver) return m_bIsOver;
 	float mscalar = moveSpeed;
-	auto rotateBy = [&](float dt) {
-		view.angle += (dt * rotateSpeed);
-		view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
-		view.cosa = cos(view.angle);
-		view.sina = sin(view.angle);
-	};
-	auto moveBy = [&](float dx, float dy) {
-		if (renderer.doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
-		view.x += dx;
-		view.y += dy;
-	};
 	
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
 		switch (event.type)
 		{
-			case SDL_MOUSEMOTION:	rotateBy(-0.1*event.motion.xrel);	view.pitch = std::clamp(view.pitch - 0.01 * event.motion.yrel, -1.0, 1.0); break;
+			case SDL_MOUSEMOTION:	renderer.rotateBy(-0.1 * event.motion.xrel * rotateSpeed);	renderer.updatePitch(0.01 * event.motion.yrel); break;
 			case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) m_bIsOver = true;	break;
 			case SDL_QUIT:		m_bIsOver = true;	break;
 		}
@@ -70,21 +47,21 @@ bool DoomEngine::Tick()
 	
 	const Uint8* keyStates = SDL_GetKeyboardState(NULL);
 	if (keyStates[SDL_SCANCODE_LSHIFT] || keyStates[SDL_SCANCODE_RSHIFT]) mscalar *= 3;
-	if (keyStates[SDL_SCANCODE_W]) { moveBy(view.cosa * mscalar, view.sina * mscalar); }
-	if (keyStates[SDL_SCANCODE_A]) { moveBy(-view.sina * mscalar, view.cosa * mscalar); }
-	if (keyStates[SDL_SCANCODE_D]) { moveBy(view.sina * mscalar, -view.cosa * mscalar); }
-	if (keyStates[SDL_SCANCODE_S]) { moveBy(-view.cosa * mscalar, -view.sina * mscalar); }
-	if (keyStates[SDL_SCANCODE_Q]) rotateBy(0.1875f);
-	if (keyStates[SDL_SCANCODE_E]) rotateBy(-0.1875f);
+	if (keyStates[SDL_SCANCODE_W]) { renderer.moveBy(mscalar, 0); }
+	if (keyStates[SDL_SCANCODE_A]) { renderer.moveBy(0, -mscalar); }
+	if (keyStates[SDL_SCANCODE_D]) { renderer.moveBy(0, mscalar); }
+	if (keyStates[SDL_SCANCODE_S]) { renderer.moveBy(-mscalar, 0); }
+	if (keyStates[SDL_SCANCODE_Q]) renderer.rotateBy(0.1875f * rotateSpeed);
+	if (keyStates[SDL_SCANCODE_E]) renderer.rotateBy(-0.1875f * rotateSpeed);
 	
 	// Update
-	view.z = renderer.getPlayerSubSectorHeight(view) + 41;
+	renderer.updatePlayerSubSectorHeight();
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)screenBuffer->pixels;
 	SDL_FillRect(screenBuffer, NULL, 0);
 	{
-		renderer.render(pScreenBuffer, m_iRenderWidth, view);
+		renderer.render(pScreenBuffer, m_iRenderWidth);
 //		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lighting[0], 3);
 	}
 	SDL_SetPaletteColors(screenBuffer->format->palette, palette, 0, 256);

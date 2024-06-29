@@ -22,7 +22,6 @@ protected:
 	SDL_Texture *texture {nullptr};
 	// SDL
 	
-	Viewpoint view;
 	ViewRenderer renderer;
 	const Patch *weapon {nullptr};
 };

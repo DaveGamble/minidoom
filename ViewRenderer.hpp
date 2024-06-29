@@ -9,11 +9,26 @@ public:
     ViewRenderer(int renderXSize, int renderYSize, const char *wadname, const char *mapName);
 	~ViewRenderer() {}
 
-	void render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint &v);
+	void render(uint8_t *pScreenBuffer, int iBufferPitch);
 
 	WADLoader &getWad() {return wad;}
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 
+	void rotateBy(float dt) {
+		view.angle += dt;
+		view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
+		view.cosa = cos(view.angle);
+		view.sina = sin(view.angle);
+	};
+	void moveBy(float fwd, float side) {
+		float dx = fwd * view.cosa + side * view.sina;
+		float dy = fwd * view.sina - side * view.cosa;
+		if (doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
+		view.x += dx;
+		view.y += dy;
+	};
+	void updatePitch(float dp) { view.pitch = std::clamp(view.pitch - dp, -1.f, 1.f); }
+	
 	bool doesLineIntersect(int x1, int y1, int x2, int y2) const
 	{
 		std::vector<const Linedef *> tests = getBlock(x1, y1);
@@ -36,14 +51,14 @@ public:
 		return false;
 	}
 
-	int getPlayerSubSectorHeight(const Viewpoint &v) const
+	void updatePlayerSubSectorHeight()
 	{
 		int subsector = (int)(nodes.size() - 1);
-		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(v, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
-		return segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
+		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(view, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
+		view.z = 41 + segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
 	}
 protected:
-	void addWallInFOV(const Seg &seg, const Viewpoint &v);
+	void addWallInFOV(const Seg &seg);
 
 	static constexpr uint16_t kSubsectorIdentifier = 0x8000; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
 
@@ -52,7 +67,7 @@ protected:
 		if (iNodeID & kSubsectorIdentifier) // Masking all the bits exipt the last one to check if this is a subsector
 		{
 			iNodeID &= ~kSubsectorIdentifier;
-			for (int i = 0; i < subsectors[iNodeID].numSegs; i++) addWallInFOV(segs[subsectors[iNodeID].firstSeg + i], v);
+			for (int i = 0; i < subsectors[iNodeID].numSegs; i++) addWallInFOV(segs[subsectors[iNodeID].firstSeg + i]);
 			return;
 		}
 		const bool left = isPointOnLeftSide(v, iNodeID);
@@ -89,8 +104,8 @@ protected:
 	
     struct SolidSegmentRange { int start, end; };
 
-    void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2, const Viewpoint &v);
-	void addThing(const Thing &thing, const Viewpoint &v, const Seg &seg);
+    void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2);
+	void addThing(const Thing &thing, const Seg &seg);
 
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;
 	float invRenderWidth, invRenderHeight;
@@ -106,6 +121,8 @@ protected:
 	uint8_t lights[34][256];
 	uint8_t *screenBuffer;
 	int rowlen, frame {0}, texframe {0};
+	
+	Viewpoint view;
 	
 	WADLoader wad;
 };

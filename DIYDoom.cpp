@@ -1,7 +1,6 @@
 #include <SDL.h>
 #include "ViewRenderer.hpp"
 
-
 int main(int argc, char* argv[])
 {
 	static constexpr float moveSpeed = 8, rotateSpeed = 0.06981317008;
@@ -24,14 +23,9 @@ int main(int argc, char* argv[])
 	while (!isOver)
 	{
 		SDL_Event event;
-		while (SDL_PollEvent(&event))
-		{
-			switch (event.type)
-			{
-				case SDL_MOUSEMOTION:	engine.rotateBy(-0.1 * event.motion.xrel * rotateSpeed);	engine.updatePitch(0.01 * event.motion.yrel); break;
-				case SDL_KEYDOWN:	if (event.key.keysym.sym == SDLK_ESCAPE) isOver = true;	break;
-				case SDL_QUIT:		isOver = true;	break;
-			}
+		while (SDL_PollEvent(&event)) {
+			if (event.type == SDL_MOUSEMOTION) { engine.rotateBy(-0.1 * event.motion.xrel * rotateSpeed);	engine.updatePitch(0.01 * event.motion.yrel); }
+			else if (event.type == SDL_QUIT || (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE)) isOver = true;
 		}
 		
 		float mscalar = moveSpeed;
@@ -44,11 +38,10 @@ int main(int argc, char* argv[])
 		if (keyStates[SDL_SCANCODE_Q]) engine.rotateBy(0.1875f * rotateSpeed);
 		if (keyStates[SDL_SCANCODE_E]) engine.rotateBy(-0.1875f * rotateSpeed);
 		
-		// Render
 		void *pixels; int pitch;
 		if (!SDL_LockTexture(texture, NULL, &pixels, &pitch))
 		{
-			engine.render((uint8_t *)pixels, pitch);
+			engine.render((uint8_t *)pixels, pitch);	// Render
 			SDL_UnlockTexture(texture);
 		}
 		SDL_RenderCopy(sdl_renderer, texture, nullptr, nullptr);

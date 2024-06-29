@@ -2,7 +2,7 @@
 
 constexpr float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
 
-ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[34][256], const char *mapName, WADLoader &wad)
+ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname, const char *mapName)
 : renderWidth(renderXSize)
 , invRenderWidth(1.f / renderXSize)
 , renderHeight(renderYSize)
@@ -10,12 +10,15 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&l)[
 , halfRenderWidth(renderXSize / 2)
 , halfRenderHeight(renderYSize / 2)
 , distancePlayerToScreen(halfRenderWidth)	// 90 here is FOV
-, lights(l)
 , ceilingClipHeight(renderWidth)
 , floorClipHeight(renderWidth)
 , renderLaters(renderWidth)
 , renderMarks(renderWidth)
+, wad(wadname)
 {
+	std::vector<uint8_t> ll = wad.getLumpNamed("COLORMAP");
+	for (int i = 0; i < 34; i++) memcpy(lights[i], ll.data() + 256 * i, 256);
+
 	int li = wad.findLumpByName(mapName);
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;

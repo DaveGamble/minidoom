@@ -23,8 +23,6 @@ protected:
 	// SDL
 	
 	Viewpoint view;
-	WADLoader wad;
 	ViewRenderer renderer;
-	uint8_t lighting[34][256];
 	const Patch *weapon {nullptr};
 };

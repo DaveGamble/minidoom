@@ -6,11 +6,12 @@
 class ViewRenderer
 {
 public:
-    ViewRenderer(int renderXSize, int renderYSize, const uint8_t (&lights)[34][256], const char *mapName, WADLoader &wad);
+    ViewRenderer(int renderXSize, int renderYSize, const char *wadname, const char *mapName);
 	~ViewRenderer() {}
 
 	void render(uint8_t *pScreenBuffer, int iBufferPitch, const Viewpoint &v);
 
+	WADLoader &getWad() {return wad;}
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 
 	bool doesLineIntersect(int x1, int y1, int x2, int y2) const
@@ -102,7 +103,9 @@ protected:
     std::vector<int> floorClipHeight;
     std::vector<int> ceilingClipHeight;
 	std::vector<std::vector<renderLater>> renderLaters;
-	const uint8_t (&lights)[34][256];
+	uint8_t lights[34][256];
 	uint8_t *screenBuffer;
 	int rowlen, frame {0}, texframe {0};
+	
+	WADLoader wad;
 };

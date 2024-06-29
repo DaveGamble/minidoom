@@ -1,10 +1,9 @@
 #include "DoomEngine.h"
 
 DoomEngine::DoomEngine(const char *wadname, const char *mapName)
-: wad(wadname)
-, renderer(m_iRenderWidth, m_iRenderHeight, lighting, mapName, wad)
+: renderer(m_iRenderWidth, m_iRenderHeight, wadname, mapName)
 {
-	if (!wad.didLoad()) {printf("The WAD didn't happen. Is it next to the binary? Look in DIYDoom.cpp. In there it asks for [%s] so that's the filename\n", wadname); m_bIsOver = true; return;}
+	if (!renderer.getWad().didLoad()) {printf("The WAD didn't happen. Is it next to the binary? Look in DIYDoom.cpp. In there it asks for [%s] so that's the filename\n", wadname); m_bIsOver = true; return;}
 	// SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
 	window = SDL_CreateWindow("DIY DOOM", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, m_iRenderWidth, m_iRenderHeight, SDL_WINDOW_SHOWN);
@@ -13,16 +12,14 @@ DoomEngine::DoomEngine(const char *wadname, const char *mapName)
 	outputBuffer = SDL_CreateRGBSurface(0, m_iRenderWidth, m_iRenderHeight, 32, 0xff0000, 0xff00, 0xff, 0xff000000);
 	texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
-	std::vector<uint8_t> pal = wad.getLumpNamed("PLAYPAL");
+	std::vector<uint8_t> pal = renderer.getWad().getLumpNamed("PLAYPAL");
 	for (int i = 0; i < 256; i++) palette[i] = {pal[i * 3 + 0], pal[i * 3 + 1], pal[i * 3 + 2], 255};
 	// SDL
 
-	std::vector<uint8_t> lights = wad.getLumpNamed("COLORMAP");
-	for (int i = 0; i < 34; i++) memcpy(lighting[i], lights.data() + 256 * i, 256);
 
-	weapon = wad.getPatch("PISGA0");
+	weapon = renderer.getWad().getPatch("PISGA0");
 	
-	wad.release();
+	renderer.getWad().release();
 	
 	const Thing* t = renderer.getThing(1);
 	if (t)

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include "DataTypes.hpp"
 #include "WADLoader.hpp"
 
 class ViewRenderer

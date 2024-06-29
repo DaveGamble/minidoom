@@ -2,7 +2,6 @@
 
 #include <SDL.h>
 #include "ViewRenderer.hpp"
-#include "WADLoader.hpp"
 
 class DoomEngine
 {

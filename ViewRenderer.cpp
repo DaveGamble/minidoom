@@ -173,7 +173,6 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	view.z = 41;
 	view.pitch = 0;
 	weapon = wad.getPatch("PISGA0");
-	wad.release();
 	didload = true;
 }
 
@@ -561,29 +560,13 @@ bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const { retur
 Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 {
 	struct WADPatchHeader { uint16_t width, height; int16_t leftOffset, topOffset; };
-
 	WADPatchHeader *patchHeader = (WADPatchHeader*)ptr;
 	width = patchHeader->width;
 	height = patchHeader->height;
 	xoffset = patchHeader->leftOffset;
 	yoffset = patchHeader->topOffset;
-
-	size_t totallen = 0;
-	uint32_t *columnOffsets = (uint32_t*)(ptr + 8);
-	for (int i = 0; i < width; ++i) for (int off = columnOffsets[i]; ptr[off] != 0xff; off += ptr[off + 1] + 4) totallen += ptr[off + 1];
-	pixels.resize(totallen);
-	uint8_t *to = pixels.data();
 	cols.resize(width);
-	
-	for (int i = 0; i < width; ++i)
-	{
-		for (int off = columnOffsets[i]; ptr[off] != 0xff; off += ptr[off + 1] + 4)
-		{
-			cols[i].push_back((colData){ptr[off], ptr[off + 1], to});
-			memcpy(to, ptr + off + 2, ptr[off + 1]);
-			to += ptr[off + 1];
-		}
-	}
+	for (int i = 0; i < width; ++i) for (int off = ((uint32_t*)(ptr))[i + 2]; ptr[off] != 0xff; off += ptr[off + 1] + 4) cols[i].push_back((colData){ptr[off], ptr[off + 1], ptr + off + 3});
 }
 
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale) const
@@ -705,16 +688,8 @@ WADLoader::WADLoader(const char *filename)
    }
 }
 
-WADLoader::~WADLoader()
-{
-	delete[] data;
-	for (Patch *p : patches) delete p;
-	for (Texture *t : textures) delete t;
-	for (Flat *f : flats) delete f;
-}
+WADLoader::~WADLoader() { delete[] data; for (Patch *p : patches) delete p; for (Texture *t : textures) delete t; for (Flat *f : flats) delete f; }
 
-void WADLoader::release() { delete[] data; data = nullptr; dirs = nullptr; for (int i = 0; i < kNumTextureCycles; i++) texturecycles[i].clear(); for (int i = 0; i < kNumFlatCycles; i++) flatcycles[i].clear();
-}
 std::vector<uint8_t> WADLoader::getLumpNamed(const char *name, size_t after) const {
 	int id = findLumpByName(name, after); return (id == -1) ? std::vector<uint8_t>() : std::vector<uint8_t>(data + dirs[id].lumpOffset, data + dirs[id].lumpOffset + dirs[id].lumpSize);
 }

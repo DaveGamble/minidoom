@@ -13,8 +13,8 @@ struct Patch
 	void render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale = 1) const;
 	void composeColumn(uint8_t *buf, int iHeight, int firstColumn, int yOffset) const;
 
-	struct colData { uint8_t top, length, *data; };
-	const char *name; int height, width, xoffset, yoffset; std::vector<std::vector<colData> > cols; std::vector<uint8_t> pixels;
+	struct colData { uint8_t top, length; const uint8_t *data; };
+	const char *name; int height, width, xoffset, yoffset; std::vector<std::vector<colData> > cols;
 };
 
 struct Texture
@@ -51,7 +51,6 @@ public:
 	WADLoader(const char *filename);
 	~WADLoader();
 	bool didLoad() const { return data != nullptr; }
-	void release();
 	std::vector<uint8_t> getLumpNamed(const char *name, size_t after = 0) const;
 	int findLumpByName(const char *lumpName, size_t after = 0) const;
 	const std::vector<const char*> getPatchesStartingWith(const char *name);

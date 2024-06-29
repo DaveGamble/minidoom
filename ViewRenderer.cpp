@@ -14,12 +14,22 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 , floorClipHeight(renderWidth)
 , renderLaters(renderWidth)
 , renderMarks(renderWidth)
+, screenBuffer(new uint8_t[renderXSize * renderYSize])
+, rowlen(renderXSize)
 , wad(wadname)
 {
 	if (!wad.didLoad()) return;
 	std::vector<uint8_t> ll = wad.getLumpNamed("COLORMAP");
 	for (int i = 0; i < 34; i++) memcpy(lights[i], ll.data() + 256 * i, 256);
-	pal = wad.getLumpNamed("PLAYPAL");
+	std::vector<uint8_t> pp = wad.getLumpNamed("PLAYPAL");
+	const uint8_t *pptr = pp.data();
+	for (int i = 0; i < 256; i++)
+	{
+		unsigned int r = *pptr++;
+		unsigned int g = *pptr++;
+		unsigned int b = *pptr++;
+		pal[i] = (r << 24) | (g << 16) | (b << 8) | 255;
+	}
 	int li = wad.findLumpByName(mapName);
 	std::vector<uint8_t> data;
 	const uint8_t *ptr;
@@ -293,8 +303,6 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 
 	frame++;
 	texframe = frame / 20;
-	screenBuffer = pScreenBuffer;
-	rowlen = iBufferPitch;
 	solidWallRanges.clear();
 	solidWallRanges.push_back({INT_MIN, -1});
 	solidWallRanges.push_back({renderWidth, INT_MAX});
@@ -348,8 +356,14 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 		renderMarks[x].clear();
 	}
 	
-//	weapon->render(pScreenBuffer, iBufferPitch, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lights[0], 3);
+//	weapon->render(screenBuffer, rowlen, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lights[0], 3);
 
+	const uint8_t *from = screenBuffer;
+	for (int y = 0; y < renderHeight; y++)
+	{
+		uint32_t *to = (uint32_t*)(pScreenBuffer + iBufferPitch * y);
+		for (int x = 0; x < renderWidth; x++) *to++ = pal[*from++];
+	}
 }
 
 void ViewRenderer::addThing(const Thing &thing, const Seg &seg)

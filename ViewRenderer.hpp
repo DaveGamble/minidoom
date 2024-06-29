@@ -7,11 +7,9 @@ class ViewRenderer
 {
 public:
     ViewRenderer(int renderXSize, int renderYSize, const char *wadname, const char *mapName);
-	~ViewRenderer() {}
+	~ViewRenderer() {delete[] screenBuffer;}
 
 	void render(uint8_t *pScreenBuffer, int iBufferPitch);
-
-	std::vector<uint8_t> getPalette() const { return pal; }
 
 	void rotateBy(float dt)
 	{
@@ -125,7 +123,7 @@ protected:
     std::vector<int> ceilingClipHeight;
 	std::vector<std::vector<renderLater>> renderLaters;
 	uint8_t lights[34][256];
-	std::vector<uint8_t> pal;
+	int pal[256];
 	uint8_t *screenBuffer;
 	int rowlen, frame {0}, texframe {0};
 	

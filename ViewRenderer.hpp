@@ -21,14 +21,14 @@ struct Texture
 {
 	Texture(const char *_name, const uint8_t *ptr, class WADLoader *wad);
 	const Patch *getPatchForColumn(int x, int &col, int &yOffset) const {
-		if (!columns[x].overlap.size()) {col = columns[x].column; yOffset = columns[x].yOffset; return columns[x].patch;} return nullptr;
+		if (!cols[x].overlap.size()) {col = cols[x].x; yOffset = cols[x].dy; return cols[x].patch;} return nullptr;
 	}
 	uint16_t pixel(int x, int y) const { x %= width; y %= height; if (x < 0) x += width; if (y < 0) y += height;
-		return (columns[x].overlap.size()) ? columns[x].overlap[y] : columns[x].patch->pixel(columns[x].column, y - columns[x].yOffset);
+		return (cols[x].overlap.size()) ? cols[x].overlap[y] : cols[x].patch->pixel(cols[x].x, y - cols[x].dy);
 	}
 	const char *name; int width, height;
-	struct TextureColumn { int column, yOffset; const Patch *patch; std::vector<uint8_t> overlap; };
-	std::vector<TextureColumn> columns;
+	struct colData { int x, dy; const Patch *patch; std::vector<uint8_t> overlap; };
+	std::vector<colData> cols;
 };
 
 struct Flat

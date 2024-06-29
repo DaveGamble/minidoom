@@ -630,23 +630,23 @@ Texture::Texture(const char *_name, const uint8_t *ptr, WADLoader *wad) : name(_
 
 	width = textureData->width;
 	height = textureData->height;
-	columns.resize(width);
+	cols.resize(width);
 
 	for (int i = 0; i < textureData->patchCount; ++i)
 	{
 		const Patch *patch = wad->getPatch(texturePatch[i].pnameIndex);	// Get the patch
 		for (int x = std::max(texturePatch[i].dx, (int16_t)0); x < std::min(width, texturePatch[i].dx + patch->width); x++)
 		{
-			if (columns[x].patch)	// This column already has something in
+			if (cols[x].patch)	// This column already has something in
 			{
-				if (!columns[x].overlap.size())	// Need to render off what's in there!
+				if (!cols[x].overlap.size())	// Need to render off what's in there!
 				{
-					columns[x].overlap.resize(height);
-					columns[x].patch->composeColumn(columns[x].overlap.data(), height, columns[x].column, columns[x].yOffset);
+					cols[x].overlap.resize(height);
+					cols[x].patch->composeColumn(cols[x].overlap.data(), height, cols[x].x, cols[x].dy);
 				}
-				patch->composeColumn(columns[x].overlap.data(), height, x - texturePatch[i].dx, texturePatch[i].dy);	// Render your goodies on top.
+				patch->composeColumn(cols[x].overlap.data(), height, x - texturePatch[i].dx, texturePatch[i].dy);	// Render your goodies on top.
 			}
-			else columns[x] = { x - texturePatch[i].dx, texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
+			else cols[x] = { x - texturePatch[i].dx, texturePatch[i].dy, patch, {}};	// Save this as the handler for this column.
 		}
 	}
 }

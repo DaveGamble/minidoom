@@ -12,7 +12,7 @@ Wishlist:
 - A nice interface for selecting weapons and drawing firing animations?
 - Lighting effects more like the original
 - Optimising performance? Prerender textures?
-- Remove <map>, <list>, <vector> and <string>? Go full c89?
+- Remove std::list std::vector? Go full c89?
 
 
 Build is for Xcode on Apple Silicon macs (but if you replaced the precompiled SDL binary you could do whatever)

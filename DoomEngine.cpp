@@ -15,10 +15,7 @@ DoomEngine::DoomEngine(const char *wadname, const char *mapName)
 	std::vector<uint8_t> pal = renderer.getWad().getLumpNamed("PLAYPAL");
 	for (int i = 0; i < 256; i++) palette[i] = {pal[i * 3 + 0], pal[i * 3 + 1], pal[i * 3 + 2], 255};
 	// SDL
-
-
 	weapon = renderer.getWad().getPatch("PISGA0");
-	
 	renderer.getWad().release();
 }
 

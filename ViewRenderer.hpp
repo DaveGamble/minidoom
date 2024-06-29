@@ -14,49 +14,31 @@ public:
 	WADLoader &getWad() {return wad;}
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 
-	void rotateBy(float dt) {
+	void rotateBy(float dt)
+	{
 		view.angle += dt;
 		view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
 		view.cosa = cos(view.angle);
 		view.sina = sin(view.angle);
 	};
-	void moveBy(float fwd, float side) {
-		float dx = fwd * view.cosa + side * view.sina;
-		float dy = fwd * view.sina - side * view.cosa;
+
+	void moveBy(float fwd, float side)
+	{
+		float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
 		if (doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
 		view.x += dx;
 		view.y += dy;
 	};
+
 	void updatePitch(float dp) { view.pitch = std::clamp(view.pitch - dp, -1.f, 1.f); }
 	
-	bool doesLineIntersect(int x1, int y1, int x2, int y2) const
-	{
-		std::vector<const Linedef *> tests = getBlock(x1, y1);
-		if (x1 >> 7 != x2 >> 7 || y1 >> 7 != y2 >> 7)
-		{
-			std::vector<const Linedef *> tests2 = getBlock(x2, y2);
-			tests.insert(tests.end(), tests2.begin(), tests2.end());
-		}
-		for (const Linedef *l : tests)	// Graphics Gems 3.
-		{
-			if (l->lSidedef && !(l->flags & 1)) continue;	// Could test for doors here.
-			const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
-			float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
-			if (den > 0) { if (tn < 0 || tn > den) continue; } else if (tn > 0 || tn < den) continue;
-			float un = Ax * Cy - Ay * Cx;
-			if (den > 0) { if (un < 0 || un > den) continue; } else if (un > 0 || un < den) continue;
-			return true;
-		}
-		// Test thing collisions here?
-		return false;
-	}
-
 	void updatePlayerSubSectorHeight()
 	{
 		int subsector = (int)(nodes.size() - 1);
 		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(view, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
 		view.z = 41 + segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->floorHeight;
 	}
+
 protected:
 	void addWallInFOV(const Seg &seg);
 
@@ -82,6 +64,28 @@ protected:
 		return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
 	}
 
+	bool doesLineIntersect(int x1, int y1, int x2, int y2) const
+	{
+		std::vector<const Linedef *> tests = getBlock(x1, y1);
+		if (x1 >> 7 != x2 >> 7 || y1 >> 7 != y2 >> 7)
+		{
+			std::vector<const Linedef *> tests2 = getBlock(x2, y2);
+			tests.insert(tests.end(), tests2.begin(), tests2.end());
+		}
+		for (const Linedef *l : tests)	// Graphics Gems 3.
+		{
+			if (l->lSidedef && !(l->flags & 1)) continue;	// Could test for doors here.
+			const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
+			float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
+			if (den > 0) { if (tn < 0 || tn > den) continue; } else if (tn > 0 || tn < den) continue;
+			float un = Ax * Cy - Ay * Cx;
+			if (den > 0) { if (un < 0 || un > den) continue; } else if (un > 0 || un < den) continue;
+			return true;
+		}
+		// Test thing collisions here?
+		return false;
+	}
+	
 	bool isPointOnLeftSide(const Viewpoint &v, int node) const
 	{
 		return ((((v.x - nodes[node].x) * nodes[node].dy) - ((v.y - nodes[node].y) * nodes[node].dx)) <= 0);

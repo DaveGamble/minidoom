@@ -33,9 +33,9 @@ struct Texture
 
 struct Flat
 {
-	Flat(const char *_name, const uint8_t *_data) : name(_name) { memcpy(data, _data, 4096); }
+	Flat(const char *_name, const uint8_t *_data) : name(_name), data(_data) { }
 	uint8_t pixel(int u, int v) const { return data[(64 * v + (u & 63)) & 4095]; }
-	const char *name; uint8_t data[4096];
+	const char *name; const uint8_t *data;
 };
 struct Thing { int16_t x, y; uint16_t angle, type, flags; std::vector<const Patch *> imgs; int attr; };
 struct Vertex { int16_t x, y; };

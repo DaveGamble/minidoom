@@ -552,10 +552,7 @@ bool ViewRenderer::doesLineIntersect(int x1, int y1, int x2, int y2) const
 	return false;
 }
 
-bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const
-{
-	return ((((v.x - nodes[node].x) * nodes[node].dy) - ((v.y - nodes[node].y) * nodes[node].dx)) <= 0);
-}
+bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const { return (v.x - nodes[node].x) * nodes[node].dy <= (v.y - nodes[node].y) * nodes[node].dx; }
 
 Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name)
 {

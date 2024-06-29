@@ -392,9 +392,8 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 
 	if (xc + scale < 0 || xc - scale >= renderWidth) return;
 
-	for (int x1 = xc - scale; x1 < xc + scale; x1++)
+	for (int x1 = std::max(xc - scale, 0.f); x1 < std::min(xc + scale, (float)renderWidth); x1++)
 	{
-		if (x1 < 0 || x1 >= renderWidth) continue;
 		float vx = patch->getWidth() * (x1 - xc + scale) / (scale * 2);
 		if (vx < 0 || vx >= patch->getWidth()) continue;
 		renderLaters[x1].push_back({patch, patch->getColumnDataIndex(vx), (int)py1, (int)py2, 0, dv, tz, lights[light]});

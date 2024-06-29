@@ -2,8 +2,7 @@
 
 DoomEngine::DoomEngine(const char *wadname, const char *mapName)
 : wad(wadname)
-, map(mapName, wad)
-, renderer(m_iRenderWidth, m_iRenderHeight, lighting)
+, renderer(m_iRenderWidth, m_iRenderHeight, lighting, mapName, wad)
 {
 	if (!wad.didLoad()) {printf("The WAD didn't happen. Is it next to the binary? Look in DIYDoom.cpp. In there it asks for [%s] so that's the filename\n", wadname); m_bIsOver = true; return;}
 	// SDL
@@ -25,7 +24,7 @@ DoomEngine::DoomEngine(const char *wadname, const char *mapName)
 	
 	wad.release();
 	
-	const Thing* t = map.getThing(1);
+	const Thing* t = renderer.getThing(1);
 	if (t)
 	{
 		view.x = t->x;
@@ -56,7 +55,7 @@ bool DoomEngine::Tick()
 		view.sina = sin(view.angle);
 	};
 	auto moveBy = [&](float dx, float dy) {
-		if (map.doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
+		if (renderer.doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
 		view.x += dx;
 		view.y += dy;
 	};
@@ -82,13 +81,13 @@ bool DoomEngine::Tick()
 	if (keyStates[SDL_SCANCODE_E]) rotateBy(-0.1875f);
 	
 	// Update
-	view.z = map.getPlayerSubSectorHeight(view) + 41;
+	view.z = renderer.getPlayerSubSectorHeight(view) + 41;
 	
 	// Render
 	uint8_t *pScreenBuffer = (uint8_t *)screenBuffer->pixels;
 	SDL_FillRect(screenBuffer, NULL, 0);
 	{
-		renderer.render(pScreenBuffer, m_iRenderWidth, view, map);
+		renderer.render(pScreenBuffer, m_iRenderWidth, view);
 //		weapon->render(pScreenBuffer, m_iRenderWidth, -weapon->getXOffset() * 3, -weapon->getYOffset() * 3, lighting[0], 3);
 	}
 	SDL_SetPaletteColors(screenBuffer->format->palette, palette, 0, 256);

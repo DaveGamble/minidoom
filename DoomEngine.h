@@ -1,7 +1,6 @@
 #pragma once
 
 #include <SDL.h>
-#include "Map.hpp"
 #include "ViewRenderer.hpp"
 #include "WADLoader.hpp"
 
@@ -27,7 +26,6 @@ protected:
 	Viewpoint view;
 	WADLoader wad;
 	ViewRenderer renderer;
-    Map map;
 	uint8_t lighting[34][256];
 	const Patch *weapon {nullptr};
 };

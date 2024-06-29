@@ -49,22 +49,15 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	if (seek("SECTORS")) for (int i = 0; i < size; i += sizeof(WADSector))
 	{
 		WADSector *ws = (WADSector*)(ptr + i);
-		char floorname[9] {}, ceilname[9] {};
-		memcpy(floorname, ws->floorTexture, 8);
-		memcpy(ceilname, ws->ceilingTexture, 8);
-		const Patch *sky = (!strncmp(ceilname, "F_SKY", 5)) ? wad.getPatch(ceilname + 2) : nullptr;
-		sectors.push_back({ws->fh, ws->ch, wad.getFlat(floorname), wad.getFlat(ceilname), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
+		const Patch *sky = (!strncmp(ws->ceilingTexture, "F_SKY", 5)) ? wad.getPatch(ws->ceilingTexture + 2) : nullptr;
+		sectors.push_back({ws->fh, ws->ch, wad.getFlat(ws->floorTexture), wad.getFlat(ws->ceilingTexture), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
 	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef))
 	{
 		WADSidedef *ws = (WADSidedef*)(ptr + i);
-		char uname[9] {}, lname[9] {}, mname[9] {};
-		memcpy(uname, ws->upperTexture, 8);
-		memcpy(lname, ws->lowerTexture, 8);
-		memcpy(mname, ws->middleTexture, 8);
-		sidedefs.push_back({ws->dx, ws->dy, wad.getTexture(uname), wad.getTexture(mname), wad.getTexture(lname), sectors.data() + ws->sector});
+		sidedefs.push_back({ws->dx, ws->dy, wad.getTexture(ws->upperTexture), wad.getTexture(ws->middleTexture), wad.getTexture(ws->lowerTexture), sectors.data() + ws->sector});
 	}
 
 	struct WADLinedef { uint16_t start, end, flags, type, sectorTag, rSidedef, lSidedef; }; // Sidedef 0xFFFF means there is no sidedef

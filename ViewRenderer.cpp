@@ -24,24 +24,10 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	std::vector<uint8_t> ll = wad.getLumpNamed("COLORMAP");
 	for (int i = 0; i < 34; i++) memcpy(lights[i], ll.data() + 256 * i, 256);
 	std::vector<uint8_t> pp = wad.getLumpNamed("PLAYPAL");
-	const uint8_t *pptr = pp.data();
-	for (int i = 0; i < 256; i++)
-	{
-		unsigned int r = *pptr++;
-		unsigned int g = *pptr++;
-		unsigned int b = *pptr++;
-		pal[i] = (r << 24) | (g << 16) | (b << 8) | 255;
-	}
+	for (int i = 0; i < 256; i++) pal[i] = (pp[i * 3 + 0] << 24) | (pp[i * 3 + 1] << 16) | (pp[i * 3 + 2] << 8) | 255;
 	int li = wad.findLumpByName(mapName);
-	std::vector<uint8_t> data;
-	const uint8_t *ptr;
-	size_t size;
-	auto seek = [&](const char *name) {
-		data = wad.getLumpNamed(name, li);
-		ptr = data.data();
-		size = data.size();
-		return ptr;
-	};
+	std::vector<uint8_t> data; const uint8_t *ptr; size_t size;
+	auto seek = [&](const char *name) { data = wad.getLumpNamed(name, li); ptr = data.data(); size = data.size(); return ptr; };
 	
 	std::vector<Vertex> vertices;
 	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) vertices.push_back(*(Vertex*)(ptr + i));
@@ -69,8 +55,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	{
 		WADLinedef *wl = (WADLinedef*)(ptr + i);
 		linedefs.push_back((Linedef){vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
-			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef,
-			(wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
+			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef, (wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
 		});
 	}
 
@@ -108,11 +93,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	}
 	
 	auto addLinedef = [&](const Linedef &l, const Sidedef *s) { if (s && s->sector) (const_cast<Sector*>(s->sector))->linedefs.push_back(&l); };
-	for (int i = 0; i < linedefs.size(); i++)
-	{
-		addLinedef(linedefs[i], linedefs[i].rSidedef);
-		addLinedef(linedefs[i], linedefs[i].lSidedef);
-	}
+	for (int i = 0; i < linedefs.size(); i++) { addLinedef(linedefs[i], linedefs[i].rSidedef); addLinedef(linedefs[i], linedefs[i].lSidedef); }
 	for (Sector &s : sectors)
 	{
 		if (!s.type) continue;	// Skip these.

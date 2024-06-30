@@ -268,7 +268,9 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 
 void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 {
-//	printf("Add thing %d at %d %d\n", thing.type, thing.x, thing.y);
+	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
+	if (!patch) return;
+//	printf("Add thing %d at %d %d, patch %d x %d {%d, %d}\n", thing.type, thing.x, thing.y, patch->width, patch->height, patch->xoffset,patch->yoffset);
 	const int toV1x = thing.x - view.x, toV1y = thing.y - view.y;	// Vectors from origin to segment ends.
 	const float ca = view.cosa, sa = view.sina, tz = toV1x * ca + toV1y * sa, tx = toV1x * sa - toV1y * ca;	// Rotate vectors to be in front of us.
 
@@ -276,28 +278,27 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 
 	int light = clamp(light_offset + seg.rSector->lightlevel * sector_light_scale + tz * light_depth, 0.f, 31.f);
 
-	const int xc = distancePlayerToScreen + round(tx * halfRenderWidth / tz);
+	const float xc = distancePlayerToScreen + tx * halfRenderWidth / tz;
 	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
-	const float vG = distancePlayerToScreen * (view.z - seg.rSector->floorHeight), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - view.z);
+	const float vG = distancePlayerToScreen * (view.z - seg.rSector->floorHeight - patch->yoffset + patch->height), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - view.z);
 	
-	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
-	if (!patch) return;
 
 	float y1, y2, height = patch->height;
 	if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = horizon - distancePlayerToScreen * (seg.rSector->ceilingHeight + height - view.z) / tz;}
-	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight - height) / tz;}
+	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight - patch->yoffset) / tz;}
 	float dv = height / (y2 - y1);
-	float py1 = y1, py2 = y2;
-	const float scale = 0.5 * patch->width * (y2 - y1) / height; // 16 / z;
 
-	if (xc + scale < 0 || xc - scale >= renderWidth) return;
+	const float idu = (y2 - y1) / height;
+	const float scale = patch->width * idu;
+	const float xoff = (patch->width - patch->xoffset) * idu;
+	int x1 = std::max(xc - xoff, 0.f), x2 = std::min(xc + scale - xoff, (float)renderWidth);
+	float u = dv * (x1 - xc + xoff);
 
-	for (int x1 = std::max(xc - scale, 0.f); x1 < std::min(xc + scale, (float)renderWidth); x1++)
-	{
-		float vx = patch->width* (x1 - xc + scale) / (scale * 2);
-		if (vx < 0 || vx >= patch->width) continue;
-		renderLaters[x1].push_back((renderLater){patch, (int)vx, (int)py1, (int)py2, 0, dv, tz, lights[light]});
-	}
+	if (x2 < 0 || x1 >= renderWidth) return;
+
+	for ( ; x1 < x2; x1++, u += dv)
+		if (u >= 0 && u < patch->width && y2 > y1)
+			renderLaters[x1].push_back((renderLater){patch, (int)u, (int)y1, (int)y2, 0, dv, tz, lights[light]});
 }
 
 void ViewRenderer::addWallInFOV(const Seg &seg)

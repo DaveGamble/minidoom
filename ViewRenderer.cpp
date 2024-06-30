@@ -171,7 +171,7 @@ void ViewRenderer::rotateBy(float dt)
 void ViewRenderer::moveBy(float fwd, float side)
 {
 	float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
-	if (doesLineIntersect(view.x, view.y, view.x + dx * 4, view.y + dy * 4)) return;
+	if (doesLineIntersect(view.x, view.y, view.x + dx, view.y + dy)) return;
 	view.x += dx;
 	view.y += dy;
 };

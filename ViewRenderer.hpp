@@ -89,7 +89,7 @@ protected:
 	struct BBox { int16_t top, bottom, left, right; };
 	struct Node { int16_t x, y, dx, dy; BBox rBox, lBox; uint16_t rChild, lChild; };
 	struct SolidSegmentRange { int start, end; };
-	struct renderMark {int from, to; float zfrom, zto; };
+	struct renderMark {int from, to; float z; };
 	struct renderLater {const Patch *patch; int column, from, to; float v, dv, z; const uint8_t *light;};
 
 	enum { kSubsectorIdentifier = 0x8000 }; // Subsector Identifier is the 16th bit which indicate if the node ID is a subsector. The node ID is stored as uint16 0x8000
@@ -107,7 +107,7 @@ protected:
     void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2);
 	void addWallInFOV(const Seg &seg);
 	void addThing(const Thing &thing, const Seg &seg);
-	void mark(int x, int from, int to, float zfrom, float zto) { if (to >= from) renderMarks[x].push_back((renderMark){from, to, zfrom, zto}); }
+	void mark(int x, int from, int to, float z) { if (to >= from) renderMarks[x].push_back((renderMark){from, to, z}); }
 	
 	template<typename F> static F clamp(const F &val, const F &min, const F &max) { return (val < min) ? min : (val > max) ? max : val; }
 	bool didload;

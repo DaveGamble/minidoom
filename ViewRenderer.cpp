@@ -219,31 +219,20 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 	}
 	renderBSPNodes((int)nodes.size() - 1);
 	
-	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
 	for (int x = 0; x < renderWidth; x++)
 	{
 		if (!renderLaters[x].size())  {renderMarks[x].clear(); continue;}
-		std::sort(renderMarks[x].begin(), renderMarks[x].end(), [] (const renderMark &a, const renderMark &b) {return a.zfrom + a.zto < b.zfrom + b.zto; });
+		std::sort(renderMarks[x].begin(), renderMarks[x].end(), [] (const renderMark &a, const renderMark &b) {return a.z < b.z; });
 		std::sort(renderLaters[x].begin(), renderLaters[x].end(), [] (const renderLater &a, const renderLater &b) {return a.z < b.z; });
 		for (int i = (int)renderLaters[x].size() - 1; i >= 0; i--)
 		{
 			renderLater& r = renderLaters[x][i];
 			int from = std::max(0, r.from), to = std::min(r.to, renderHeight);
-			for (int c = 0; to > from && c < renderMarks[x].size() && std::min(renderMarks[x][c].zfrom, renderMarks[x][c].zto) < r.z; c++)
+			for (int c = 0; to > from && c < renderMarks[x].size() && renderMarks[x][c].z < r.z; c++)
 			{
 				const renderMark &m = renderMarks[x][c];
 				if (m.to <= from || m.from > to) continue;
-				if (m.zfrom == m.zto || std::max(m.zfrom, m.zto) < r.z)	// column clip or completely before.
-				{
-					if (m.from <= from) from = std::max(from, m.to);
-					else to = std::min(to, m.from);
-				}
-				else
-				{
-					const float intersection =  horizon + m.zfrom * (m.from - horizon) / r.z;
-					if (m.zfrom < r.z) from = std::max(from, (int)intersection);
-					else  to = std::min(to, (int)intersection);
-				}
+				if (m.from <= from) from = std::max(from, m.to); else to = std::min(to, m.from);
 			}
 			float v = r.v + (from - r.from) * r.dv;
 			for (int y = from; y < to; y++, v += r.dv)
@@ -270,22 +259,25 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 {
 	const Patch *patch = thing.imgs[texframe % thing.imgs.size()];
 	if (!patch) return;
-//	printf("Add thing %d at %d %d, patch %d x %d {%d, %d}\n", thing.type, thing.x, thing.y, patch->width, patch->height, patch->xoffset,patch->yoffset);
 	const int toV1x = thing.x - view.x, toV1y = thing.y - view.y;	// Vectors from origin to segment ends.
 	const float ca = view.cosa, sa = view.sina, tz = toV1x * ca + toV1y * sa, tx = toV1x * sa - toV1y * ca;	// Rotate vectors to be in front of us.
 
-	if (tz < 0) return;
+	if (tz <= 0) return;
 
 	int light = clamp(light_offset + seg.rSector->lightlevel * sector_light_scale + tz * light_depth, 0.f, 31.f);
 
+	float y1, y2, height = patch->height;
 	const float xc = distancePlayerToScreen + tx * halfRenderWidth / tz;
 	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
-	const float vG = distancePlayerToScreen * (view.z - seg.rSector->floorHeight - patch->yoffset + patch->height), vH = distancePlayerToScreen * (seg.rSector->ceilingHeight - view.z);
-	
 
-	float y1, y2, height = patch->height;
-	if (thing.attr & thing_hangs) {y1 = horizon - vH / tz; y2 = horizon - distancePlayerToScreen * (seg.rSector->ceilingHeight + height - view.z) / tz;}
-	else {y2 = vG / tz + horizon; y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight - patch->yoffset) / tz;}
+	if (thing.attr & thing_hangs) {
+		y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->ceilingHeight  - height + patch->yoffset  ) / tz;
+		y2 = horizon + distancePlayerToScreen * (view.z - seg.rSector->ceilingHeight + patch->yoffset) / tz;
+	}
+	else {
+		y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight - patch->yoffset) / tz;
+		y2 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight + height - patch->yoffset) / tz ;
+	}
 	float dv = height / (y2 - y1);
 
 	const float idu = (y2 - y1) / height;
@@ -417,7 +409,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			if (stage == 2 && (flags & kLowerTextureUnpeg)) v = -yCeiling * dv; // bottom
 			v += tdY;
 			for (int y = from; y < to; y++) { screenBuffer[rowlen * y + x] = lut[texture->pixel(u, v + y * dv) & 255]; }
-			mark(x, from, to, z, z);
 		};
 
 		auto DrawSky = [&](const Texture *sky, int from, int to) {
@@ -441,7 +432,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int light = light_offset + seg.rSector->lightlevel * sector_light_scale + z * light_depth;
 				screenBuffer[i * rowlen + x] = lights[clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 			}
-			mark(x, from, to, vG / (from - horizon), vG / (to - horizon));
 		};
 
 		auto DrawCeiling = [&](const std::vector<const Flat *> &flats, int from, int to) {
@@ -458,7 +448,6 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 					int light = light_offset + seg.rSector->lightlevel * sector_light_scale + z * light_depth;
 					screenBuffer[i * rowlen + x] = lights[clamp(light, 0, 31)][flat->pixel(z * (vA + vB * x) + vC, z * (vD + vE * x) + vF)];
 				}
-				mark(x, from, to, vH / (horizon - from), vH / (horizon - to));
 			}
 		};
 				
@@ -488,12 +477,15 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);
 			else if (seg.sidedef->uppertexture.size()) DrawTexture(seg.sidedef->uppertexture, ceilbot, upper, yCeiling, yUpper, rlCeiling, 0);
 			if (seg.sidedef->lowertexture.size()) DrawTexture(seg.sidedef->lowertexture, lower, floortop, yLower, yFloor, lrFloor, 2);
+			mark(x, 0, std::max(yCeiling, yUpper), z);
+			mark(x, std::min(yFloor, yLower), renderHeight, z);
 			ceilingClipHeight[x] = std::max(CurrentCeilingEnd - 1, upper);
 			floorClipHeight[x] = std::min(CurrentFloorStart + 1, lower);
 		}
         else
 		{
 			DrawTexture(seg.sidedef->middletexture, midtop, midbot, yCeiling, yFloor, roomHeight, 1);
+			mark(x, 0, renderHeight, z);
 			ceilingClipHeight[x] = renderHeight;
 			floorClipHeight[x] = -1;
 		}

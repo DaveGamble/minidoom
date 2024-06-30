@@ -54,7 +54,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef))
 	{
 		WADLinedef *wl = (WADLinedef*)(ptr + i);
-		linedefs.push_back((Linedef){vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag,
+		linedefs.push_back((Linedef){vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag, {},
 			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef, (wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
 		});
 	}
@@ -92,14 +92,15 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 			}
 	}
 	
-	auto addLinedef = [&](const Linedef &l, const Sidedef *s) { if (s && s->sector) (const_cast<Sector*>(s->sector))->linedefs.push_back(&l); };
+	auto addLinedef = [&](Linedef &l, Sidedef *s) { if (s && s->sector) s->sector->linedefs.push_back(&l); };
 	for (int i = 0; i < linedefs.size(); i++) { addLinedef(linedefs[i], linedefs[i].rSidedef); addLinedef(linedefs[i], linedefs[i].lSidedef); }
 	for (Sector &s : sectors)
 	{
 		if (!s.type) continue;	// Skip these.
 		uint16_t minlight = s.lightlevel;
-		for (const Linedef *l : s.linedefs)
+		for (Linedef *l : s.linedefs)
 		{
+			if (l->tag == s.tag) l->targets.push_back(&s);
 			if (l->lSidedef && l->lSidedef->sector && l->lSidedef->sector != &s) minlight = std::min(minlight, l->lSidedef->sector->lightlevel);
 			if (l->rSidedef && l->rSidedef->sector && l->rSidedef->sector != &s) minlight = std::min(minlight, l->rSidedef->sector->lightlevel);
 		}

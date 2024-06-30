@@ -474,18 +474,26 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 	renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild);
 }
 
-bool ViewRenderer::doesLineIntersect(float x1, float y1, float x2, float y2) const
+void ViewRenderer::findIntersectingNodes(int n, float x1, float y1, float x2, float y2, std::vector<const Linedef*>& out) const
 {
 	int size = 16 / 2;
+
 	auto doesLineSegmentIntersect = [](const Linedef *l, float x1, float y1, float x2, float y2) {
 		if (l->lSidedef && !(l->flags & 1)) return false;	// Could test for doors here.
 		const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
+		
+		const float x1lo = (Ax < 0) ? x2 : x1, x1hi = (Ax < 0) ? x1 : x2, y1lo = (Ay < 0) ? y2 : y1, y1hi = (Ay < 0) ? y1 : y2;
+		if (Bx > 0) { if( x1hi < l->end.x || l->start.x < x1lo) return false; } else if (x1hi < l->start.x || l->end.x < x1lo) return false;
+		if (By > 0) { if (y1hi < l->end.y || l->start.y < y1lo) return false; } else if (y1hi < l->start.y || l->end.y < y1lo) return false;
+	
 		float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
+		if (!den) return false;
 		if (den > 0) { if (tn < 0 || tn > den) return false; } else if (tn > 0 || tn < den) return false;
 		float un = Ax * Cy - Ay * Cx;
 		if (den > 0) { if (un < 0 || un > den) return false; } else if (un > 0 || un < den) return false;
 		return true;
 	};
+	
 	auto sideForBox = [nodes = this->nodes, size](float x, float y, int node)
 	{
 		const float x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
@@ -497,31 +505,44 @@ bool ViewRenderer::doesLineIntersect(float x1, float y1, float x2, float y2) con
 		return 0; // there's an intersection.
 	};
 	
-	auto recurseTree = [&](int n, auto& recurse) {
-		if (n & kSubsectorIdentifier)	// subsector.
+	if (n & kSubsectorIdentifier)	// subsector.
+	{
+		const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
+		for (int i = 0; i < sub.numSegs; i++)
 		{
-			const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
-			for (int i = 0; i < sub.numSegs; i++)
-			{
-				const Linedef *l = segs[sub.firstSeg + i].linedef;
-				if (doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size)) return true;
-				if (doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size)) return true;
-				if (doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size)) return true;
-				if (doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size)) return true;
-				if (doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size)) return true;
-				if (doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size)) return true;
-				if (doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size)) return true;
-				if (doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size)) return true;
-			}
-			return false;
+			const Linedef *l = segs[sub.firstSeg + i].linedef;
+			bool hit = false;
+			hit |= doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size);
+			hit |= doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size);
+			hit |= doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size);
+			hit |= doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size);
+			hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
+			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
+			hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
+			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
+			if (hit) out.push_back(l);
 		}
+	}
+	else
+	{
 		int side1 = sideForBox(x1, y1, n), side2 = sideForBox(x2, y2, n);
 		if (side1 == side2 && side1)	// both on same side
-			return recurse((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, recurse);	// pass it down
-		return recurse(nodes[n].lChild, recurse) || recurse(nodes[n].rChild, recurse);	// it might intersect on either side.
-	};
-	
-	return recurseTree((int)nodes.size() - 1, recurseTree);
+			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out);	// pass it down
+		else
+		{
+			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out);
+			findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out);	// it might intersect on either side.
+		}
+	}
+}
+
+bool ViewRenderer::doesLineIntersect(float x1, float y1, float x2, float y2) const
+{
+	std::vector<const Linedef *> out;
+	findIntersectingNodes((int)nodes.size() - 1, x1, y1, x2, y2, out);
+	if (!out.size()) return false;
+
+	return true;
 
 	// Test thing collisions here?
 }

@@ -99,7 +99,7 @@ protected:
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 	void updatePlayerSubSectorHeight();
 	
-	bool doesLineIntersect(int x1, int y1, int x2, int y2) const;
+	bool doesLineIntersect(float x1, float y1, float x2, float y2) const;
 	bool isPointOnLeftSide(const Viewpoint &v, int node) const;
 	
 	void renderBSPNodes(int iNodeID);
@@ -118,8 +118,6 @@ protected:
 	std::vector<Seg> segs;
 	std::vector<Subsector> subsectors;
 	std::vector<Node> nodes;
-	std::vector<std::vector<std::vector<const Linedef *> > > blockmap;
-	int16_t blockmap_x, blockmap_y;
 	WADLoader wad;
 	// Render:
 	int renderWidth, renderHeight, halfRenderWidth, halfRenderHeight, distancePlayerToScreen;

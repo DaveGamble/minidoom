@@ -74,23 +74,6 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(WADThing)) {WADThing *wt = (WADThing*)(ptr + i); things.push_back((Thing){wt->x, wt->y, wt->angle, wt->type, wt->flags});}
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
-	struct WADBlockmap { int16_t x, y; uint16_t numCols, numRows; };
-	if (seek("BLOCKMAP"))
-	{
-		WADBlockmap *w = (WADBlockmap *)ptr;
-		blockmap_x = w->x;
-		blockmap_y = w->y;
-		blockmap.resize(w->numRows);
-		for (int i = 0; i < w->numRows; i++) blockmap[i].resize(w->numCols);
-		const uint16_t *u = (const uint16_t *)ptr;
-		const uint16_t *maps = u + 4;
-		for (int i = 0; i < w->numRows; i++)
-			for (int j = 0; j < w->numCols; j++)
-			{
-				const uint16_t *block = u + (*maps++) + 1;
-				while (*block != 0xffff) blockmap[i][j].push_back(&linedefs[*block++]);
-			}
-	}
 	
 	auto addLinedef = [&](Linedef &l, Sidedef *s) { if (s && s->sector) s->sector->linedefs.push_back(&l); };
 	for (int i = 0; i < linedefs.size(); i++) { addLinedef(linedefs[i], linedefs[i].rSidedef); addLinedef(linedefs[i], linedefs[i].lSidedef); }
@@ -491,31 +474,56 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 	renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild);
 }
 
-bool ViewRenderer::doesLineIntersect(int x1, int y1, int x2, int y2) const
+bool ViewRenderer::doesLineIntersect(float x1, float y1, float x2, float y2) const
 {
-	auto getBlock = [&](int x, int y) {
-		if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return std::vector<const Linedef*>();
-		if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return std::vector<const Linedef*>();
-		return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
-	};
-	std::vector<const Linedef *> tests = getBlock(x1, y1);
-	if (x1 >> 7 != x2 >> 7 || y1 >> 7 != y2 >> 7)
-	{
-		std::vector<const Linedef *> tests2 = getBlock(x2, y2);
-		tests.insert(tests.end(), tests2.begin(), tests2.end());
-	}
-	for (const Linedef *l : tests)	// Graphics Gems 3.
-	{
-		if (l->lSidedef && !(l->flags & 1)) continue;	// Could test for doors here.
+	int size = 16 / 2;
+	auto doesLineSegmentIntersect = [](const Linedef *l, float x1, float y1, float x2, float y2) {
+		if (l->lSidedef && !(l->flags & 1)) return false;	// Could test for doors here.
 		const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
 		float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
-		if (den > 0) { if (tn < 0 || tn > den) continue; } else if (tn > 0 || tn < den) continue;
+		if (den > 0) { if (tn < 0 || tn > den) return false; } else if (tn > 0 || tn < den) return false;
 		float un = Ax * Cy - Ay * Cx;
-		if (den > 0) { if (un < 0 || un > den) continue; } else if (un > 0 || un < den) continue;
+		if (den > 0) { if (un < 0 || un > den) return false; } else if (un > 0 || un < den) return false;
 		return true;
-	}
+	};
+	auto sideForBox = [nodes = this->nodes, size](float x, float y, int node)
+	{
+		const float x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
+		const float y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
+		
+		float x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
+		if (x1y1 > 0 && x1y2 > 0 && x2y1 > 0 && x2y2 > 0) return -1;	// right side
+		if (x1y1 < 0 && x1y2 < 0 && x2y1 < 0 && x2y2 < 0) return 1;		// left side
+		return 0; // there's an intersection.
+	};
+	
+	auto recurseTree = [&](int n, auto& recurse) {
+		if (n & kSubsectorIdentifier)	// subsector.
+		{
+			const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
+			for (int i = 0; i < sub.numSegs; i++)
+			{
+				const Linedef *l = segs[sub.firstSeg + i].linedef;
+				if (doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size)) return true;
+				if (doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size)) return true;
+				if (doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size)) return true;
+				if (doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size)) return true;
+				if (doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size)) return true;
+				if (doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size)) return true;
+				if (doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size)) return true;
+				if (doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size)) return true;
+			}
+			return false;
+		}
+		int side1 = sideForBox(x1, y1, n), side2 = sideForBox(x2, y2, n);
+		if (side1 == side2 && side1)	// both on same side
+			return recurse((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, recurse);	// pass it down
+		return recurse(nodes[n].lChild, recurse) || recurse(nodes[n].rChild, recurse);	// it might intersect on either side.
+	};
+	
+	return recurseTree((int)nodes.size() - 1, recurseTree);
+
 	// Test thing collisions here?
-	return false;
 }
 
 bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const { return (v.x - nodes[node].x) * nodes[node].dy <= (v.y - nodes[node].y) * nodes[node].dx; }

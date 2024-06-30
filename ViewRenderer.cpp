@@ -490,15 +490,13 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 	renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild);
 }
 
-std::vector<const Linedef *> ViewRenderer::getBlock(int x, int y) const
-{
-	if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return std::vector<const Linedef*>();
-	if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return std::vector<const Linedef*>();
-	return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
-}
-
 bool ViewRenderer::doesLineIntersect(int x1, int y1, int x2, int y2) const
 {
+	auto getBlock = [&](int x, int y) {
+		if (y < blockmap_y || ((y - blockmap_y) >> 7) >= blockmap.size()) return std::vector<const Linedef*>();
+		if (x < blockmap_x || ((x - blockmap_x) >> 7) >= blockmap[0].size()) return std::vector<const Linedef*>();
+		return blockmap[(y - blockmap_y) >> 7][(x - blockmap_x) >> 7];
+	};
 	std::vector<const Linedef *> tests = getBlock(x1, y1);
 	if (x1 >> 7 != x2 >> 7 || y1 >> 7 != y2 >> 7)
 	{

@@ -99,7 +99,6 @@ protected:
 	const Thing* getThing(int id) const { for (const Thing& t : things) if (t.type == id) return &t; return nullptr; }
 	void updatePlayerSubSectorHeight();
 	
-	std::vector<const Linedef *> getBlock(int x, int y) const;
 	bool doesLineIntersect(int x1, int y1, int x2, int y2) const;
 	bool isPointOnLeftSide(const Viewpoint &v, int node) const;
 	

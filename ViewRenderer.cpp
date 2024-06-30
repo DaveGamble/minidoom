@@ -266,23 +266,13 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 
 	int light = clamp(light_offset + seg.rSector->lightlevel * sector_light_scale + tz * light_depth, 0.f, 31.f);
 
-	float y1, y2, height = patch->height;
-	const float xc = distancePlayerToScreen + tx * halfRenderWidth / tz;
-	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight;
+	const float horizon = halfRenderHeight + view.pitch * halfRenderHeight, height = patch->height, scaling = distancePlayerToScreen / tz;
 
-	if (thing.attr & thing_hangs) {
-		y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->ceilingHeight  - height + patch->yoffset  ) / tz;
-		y2 = horizon + distancePlayerToScreen * (view.z - seg.rSector->ceilingHeight + patch->yoffset) / tz;
-	}
-	else {
-		y1 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight - patch->yoffset) / tz;
-		y2 = horizon + distancePlayerToScreen * (view.z - seg.rSector->floorHeight + height - patch->yoffset) / tz ;
-	}
-	float dv = height / (y2 - y1);
+	const float top = (thing.attr & thing_hangs) ? seg.rSector->ceilingHeight + height - patch->yoffset : seg.rSector->floorHeight + patch->yoffset;
+	float y1 = horizon + scaling * (view.z - top), y2 = horizon + scaling * (view.z - top + height);
+	float dv = tz * invRenderWidth * 2;
 
-	const float idu = (y2 - y1) / height;
-	const float scale = patch->width * idu;
-	const float xoff = (patch->width - patch->xoffset) * idu;
+	const float xc = distancePlayerToScreen + tx * scaling, scale = patch->width * scaling, xoff = (patch->width - patch->xoffset) * scaling;
 	int x1 = std::max(xc - xoff, 0.f), x2 = std::min(xc + scale - xoff, (float)renderWidth);
 	float u = dv * (x1 - xc + xoff);
 

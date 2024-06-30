@@ -474,32 +474,32 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 	renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild);
 }
 
-void ViewRenderer::findIntersectingNodes(int n, float x1, float y1, float x2, float y2, std::vector<const Linedef*>& out) const
+void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out) const
 {
 	int size = 16 / 2;
 
-	auto doesLineSegmentIntersect = [](const Linedef *l, float x1, float y1, float x2, float y2) {
+	auto doesLineSegmentIntersect = [](const Linedef *l, int x1, int y1, int x2, int y2) {
 		if (l->lSidedef && !(l->flags & 1)) return false;	// Could test for doors here.
-		const float Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
+		const int Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
 		
-		const float x1lo = (Ax < 0) ? x2 : x1, x1hi = (Ax < 0) ? x1 : x2, y1lo = (Ay < 0) ? y2 : y1, y1hi = (Ay < 0) ? y1 : y2;
+		const int x1lo = (Ax < 0) ? x2 : x1, x1hi = (Ax < 0) ? x1 : x2, y1lo = (Ay < 0) ? y2 : y1, y1hi = (Ay < 0) ? y1 : y2;
 		if (Bx > 0) { if( x1hi < l->end.x || l->start.x < x1lo) return false; } else if (x1hi < l->start.x || l->end.x < x1lo) return false;
 		if (By > 0) { if (y1hi < l->end.y || l->start.y < y1lo) return false; } else if (y1hi < l->start.y || l->end.y < y1lo) return false;
 	
-		float den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
+		int den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
 		if (!den) return false;
 		if (den > 0) { if (tn < 0 || tn > den) return false; } else if (tn > 0 || tn < den) return false;
-		float un = Ax * Cy - Ay * Cx;
+		int un = Ax * Cy - Ay * Cx;
 		if (den > 0) { if (un < 0 || un > den) return false; } else if (un > 0 || un < den) return false;
 		return true;
 	};
 	
-	auto sideForBox = [nodes = this->nodes, size](float x, float y, int node)
+	auto sideForBox = [nodes = this->nodes, size](int x, int y, int node)
 	{
-		const float x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
-		const float y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
+		const int x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
+		const int y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
 		
-		float x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
+		const int x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
 		if (x1y1 > 0 && x1y2 > 0 && x2y1 > 0 && x2y2 > 0) return -1;	// right side
 		if (x1y1 < 0 && x1y2 < 0 && x2y1 < 0 && x2y2 < 0) return 1;		// left side
 		return 0; // there's an intersection.
@@ -536,7 +536,7 @@ void ViewRenderer::findIntersectingNodes(int n, float x1, float y1, float x2, fl
 	}
 }
 
-bool ViewRenderer::doesLineIntersect(float x1, float y1, float x2, float y2) const
+bool ViewRenderer::doesLineIntersect(int x1, int y1, int x2, int y2) const
 {
 	std::vector<const Linedef *> out;
 	findIntersectingNodes((int)nodes.size() - 1, x1, y1, x2, y2, out);

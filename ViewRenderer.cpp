@@ -143,6 +143,56 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 
 ViewRenderer::~ViewRenderer() {delete[] screenBuffer;}
 
+static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, int y2)
+{
+	const int Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
+	
+	const int x1lo = (Ax < 0) ? x2 : x1, x1hi = (Ax < 0) ? x1 : x2, y1lo = (Ay < 0) ? y2 : y1, y1hi = (Ay < 0) ? y1 : y2;
+	if (Bx > 0) { if( x1hi < l->end.x || l->start.x < x1lo) return false; } else if (x1hi < l->start.x || l->end.x < x1lo) return false;
+	if (By > 0) { if (y1hi < l->end.y || l->start.y < y1lo) return false; } else if (y1hi < l->start.y || l->end.y < y1lo) return false;
+
+	int den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
+	if (!den) return false;
+	if (den > 0) { if (tn < 0 || tn > den) return false; } else if (tn > 0 || tn < den) return false;
+	int un = Ax * Cy - Ay * Cx;
+	if (den > 0) { if (un < 0 || un > den) return false; } else if (un > 0 || un < den) return false;
+	return true;
+}
+
+void ViewRenderer::moveBy(float fwd, float side)
+{
+	float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
+	int size = 16 / 2;
+
+
+	std::vector<const Linedef *> out;
+	findIntersectingNodes((int)nodes.size() - 1, view.x, view.y, view.x + dx, view.y + dy, out, size);
+	
+	std::vector<const Linedef *> hits, triggers;
+	for (const Linedef *l : out) if (!l->lSidedef || (l->flags & 1)) hits.push_back(l); else triggers.push_back(l);	// split 'em
+
+	if (hits.size())
+	{
+		for (const Linedef *l : hits)
+		{
+			int lx = l->end.x - l->start.x, ly = l->end.y - l->start.y;
+			float dot = lx * view.cosa + ly * view.sina;
+			if (dot < 0) {lx *= -1; ly *= -1;}
+			if (dot * dot < 0.5 * (lx * lx + ly * ly)) continue;	// angle too far off, can't do it.
+			float ldet = 1.f / sqrt(lx * lx + ly * ly);
+			dx = (fwd * lx + side * ly) * ldet;
+			dy = (fwd * ly - side * lx) * ldet;
+			break;
+		}
+		out.clear();
+		findIntersectingNodes((int)nodes.size() - 1, view.x, view.y, view.x + dx, view.y + dy, out, size);
+		if (out.size()) return;
+	}
+
+	// Process triggers!
+	view.x += dx;
+	view.y += dy;
+}
 
 void ViewRenderer::rotateBy(float dt)
 {
@@ -150,15 +200,7 @@ void ViewRenderer::rotateBy(float dt)
 	view.angle -= M_PI * 2 * floorf(0.5 * view.angle * M_1_PI);
 	view.cosa = cos(view.angle);
 	view.sina = sin(view.angle);
-};
-
-void ViewRenderer::moveBy(float fwd, float side)
-{
-	float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
-	if (doesLineIntersect(view.x, view.y, view.x + dx, view.y + dy)) return;
-	view.x += dx;
-	view.y += dy;
-};
+}
 
 void ViewRenderer::updatePitch(float dp) { view.pitch = clamp(view.pitch - dp, -1.f, 1.f); }
 
@@ -474,31 +516,12 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 	renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild);
 }
 
-void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out) const
+void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
 {
-	int size = 16 / 2;
-
-	auto doesLineSegmentIntersect = [](const Linedef *l, int x1, int y1, int x2, int y2) {
-		if (l->lSidedef && !(l->flags & 1)) return false;	// Could test for doors here.
-		const int Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
-		
-		const int x1lo = (Ax < 0) ? x2 : x1, x1hi = (Ax < 0) ? x1 : x2, y1lo = (Ay < 0) ? y2 : y1, y1hi = (Ay < 0) ? y1 : y2;
-		if (Bx > 0) { if( x1hi < l->end.x || l->start.x < x1lo) return false; } else if (x1hi < l->start.x || l->end.x < x1lo) return false;
-		if (By > 0) { if (y1hi < l->end.y || l->start.y < y1lo) return false; } else if (y1hi < l->start.y || l->end.y < y1lo) return false;
-	
-		int den = Ay * Bx - Ax * By, tn = By * Cx - Bx * Cy;
-		if (!den) return false;
-		if (den > 0) { if (tn < 0 || tn > den) return false; } else if (tn > 0 || tn < den) return false;
-		int un = Ax * Cy - Ay * Cx;
-		if (den > 0) { if (un < 0 || un > den) return false; } else if (un > 0 || un < den) return false;
-		return true;
-	};
-	
 	auto sideForBox = [nodes = this->nodes, size](int x, int y, int node)
 	{
 		const int x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
 		const int y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
-		
 		const int x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
 		if (x1y1 > 0 && x1y2 > 0 && x2y1 > 0 && x2y2 > 0) return -1;	// right side
 		if (x1y1 < 0 && x1y2 < 0 && x2y1 < 0 && x2y2 < 0) return 1;		// left side
@@ -512,10 +535,6 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 		{
 			const Linedef *l = segs[sub.firstSeg + i].linedef;
 			bool hit = false;
-			hit |= doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size);
-			hit |= doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size);
-			hit |= doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size);
-			hit |= doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size);
 			hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
 			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
 			hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
@@ -527,24 +546,13 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 	{
 		int side1 = sideForBox(x1, y1, n), side2 = sideForBox(x2, y2, n);
 		if (side1 == side2 && side1)	// both on same side
-			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out);	// pass it down
+			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
 		else
 		{
-			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out);
-			findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out);	// it might intersect on either side.
+			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
+			findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);	// it might intersect on either side.
 		}
 	}
-}
-
-bool ViewRenderer::doesLineIntersect(int x1, int y1, int x2, int y2) const
-{
-	std::vector<const Linedef *> out;
-	findIntersectingNodes((int)nodes.size() - 1, x1, y1, x2, y2, out);
-	if (!out.size()) return false;
-
-	return true;
-
-	// Test thing collisions here?
 }
 
 bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const { return (v.x - nodes[node].x) * nodes[node].dy <= (v.y - nodes[node].y) * nodes[node].dx; }

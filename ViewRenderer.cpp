@@ -143,7 +143,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 
 ViewRenderer::~ViewRenderer() {delete[] screenBuffer;}
 
-static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, int y2)
+static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, int y2, int *wherex = nullptr, int *wherey = nullptr)
 {
 	const int Ax = x2 - x1, Ay = y2 - y1, Bx = l->start.x - l->end.x, By = l->start.y - l->end.y, Cx = x1 - l->start.x, Cy = y1 - l->start.y;
 	
@@ -156,6 +156,9 @@ static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, i
 	if (den > 0) { if (tn < 0 || tn > den) return false; } else if (tn > 0 || tn < den) return false;
 	int un = Ax * Cy - Ay * Cx;
 	if (den > 0) { if (un < 0 || un > den) return false; } else if (un > 0 || un < den) return false;
+
+	if (wherex) *wherex = x1 + (tn * Ax + (((tn * Ax >= 0) == (den >= 0)) ? den/2 : -den/2)) / den;
+	if (wherey) *wherey = y1 + (un * Ay + (((un * Ay >= 0) == (den >= 0)) ? den/2 : -den/2)) / den;
 	return true;
 }
 

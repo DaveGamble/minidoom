@@ -15,20 +15,20 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\DIYDoom.cpp">
+    <ClCompile Include="DIYDoom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\ViewRenderer.cpp">
+    <ClCompile Include="ViewRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\thinginfo.inc">
+    <None Include="thinginfo.inc">
       <Filter>Header Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\ViewRenderer.hpp">
+    <ClInclude Include="ViewRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

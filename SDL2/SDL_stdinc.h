@@ -28,7 +28,7 @@
 #ifndef SDL_stdinc_h_
 #define SDL_stdinc_h_
 
-#include <SDL2/SDL_config.h>
+#include "SDL_config.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -424,7 +424,7 @@ SDL_COMPILE_TIME_ASSERT(enum, sizeof(SDL_DUMMY_ENUM) == sizeof(int));
 #endif /* DOXYGEN_SHOULD_IGNORE_THIS */
 /** \endcond */
 
-#include <SDL2/begin_code.h>
+#include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
 extern "C" {
@@ -837,7 +837,7 @@ SDL_FORCE_INLINE int _SDL_size_add_overflow_builtin (size_t a,
 #ifdef __cplusplus
 }
 #endif
-#include <SDL2/close_code.h>
+#include "close_code.h"
 
 #endif /* SDL_stdinc_h_ */
 

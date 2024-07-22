@@ -22,7 +22,7 @@
 #ifndef SDL_main_h_
 #define SDL_main_h_
 
-#include <SDL2/SDL_stdinc.h>
+#include "SDL_stdinc.h"
 
 /**
  *  \file SDL_main.h
@@ -143,7 +143,7 @@
 #define main    SDL_main
 #endif
 
-#include <SDL2/begin_code.h>
+#include "begin_code.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -275,7 +275,7 @@ extern DECLSPEC void SDLCALL SDL_GDKSuspendComplete(void);
 #ifdef __cplusplus
 }
 #endif
-#include <SDL2/close_code.h>
+#include "close_code.h"
 
 #endif /* SDL_main_h_ */
 

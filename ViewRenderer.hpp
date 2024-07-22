@@ -106,7 +106,7 @@ protected:
     void storeWallRange(const Seg &seg, int x1, int x2, float ux1, float ux2, float z1, float z2);
 	void addWallInFOV(const Seg &seg);
 	void addThing(const Thing &thing, const Seg &seg);
-	void mark(int x, int from, int to, float z) { if (to >= from) renderMarks[x].push_back((renderMark){from, to, z}); }
+	void mark(int x, int from, int to, float z) { if (to >= from) renderMarks[x].push_back({from, to, z}); }
 	
 	template<typename F> static F clamp(const F &val, const F &min, const F &max) { return (val < min) ? min : (val > max) ? max : val; }
 	bool didload;

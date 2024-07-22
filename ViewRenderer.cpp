@@ -1,5 +1,12 @@
 #include "ViewRenderer.hpp"
 #include <cassert>
+#include <algorithm>
+#include <ctype.h>
+#define _USE_MATH_DEFINES 
+#include <math.h>
+#ifdef WIN32
+#define strncasecmp(a,b,c) _strnicmp(a,b,c)
+#endif
 
 const float light_depth = 0.025, sector_light_scale = -0.125, light_offset = 15;
 
@@ -40,21 +47,21 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	{
 		WADSector *ws = (WADSector*)(ptr + i);
 		const Texture * sky = (!strncasecmp(ws->ceilingTexture, "F_SKY", 5)) ? skytex : nullptr;
-		sectors.push_back((Sector){ws->fh, ws->ch, wad.getFlat(ws->floorTexture), wad.getFlat(ws->ceilingTexture), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
+		sectors.push_back({ws->fh, ws->ch, wad.getFlat(ws->floorTexture), wad.getFlat(ws->ceilingTexture), ws->lightlevel, ws->lightlevel, ws->lightlevel, ws->type, ws->tag, sky});
 	}
 
 	struct WADSidedef { int16_t dx, dy; char upperTexture[8], lowerTexture[8], middleTexture[8]; uint16_t sector; };
 	if (seek("SIDEDEFS")) for (int i = 0; i < size; i += sizeof(WADSidedef))
 	{
 		WADSidedef *ws = (WADSidedef*)(ptr + i);
-		sidedefs.push_back((Sidedef){ws->dx, ws->dy, wad.getTexture(ws->upperTexture), wad.getTexture(ws->middleTexture), wad.getTexture(ws->lowerTexture), sectors.data() + ws->sector});
+		sidedefs.push_back({ws->dx, ws->dy, wad.getTexture(ws->upperTexture), wad.getTexture(ws->middleTexture), wad.getTexture(ws->lowerTexture), sectors.data() + ws->sector});
 	}
 
 	struct WADLinedef { uint16_t start, end, flags, type, sectorTag, rSidedef, lSidedef; }; // Sidedef 0xFFFF means there is no sidedef
 	if (seek("LINEDEFS")) for (int i = 0; i < size; i += sizeof(WADLinedef))
 	{
 		WADLinedef *wl = (WADLinedef*)(ptr + i);
-		linedefs.push_back((Linedef){vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag, {},
+		linedefs.push_back({vertices[wl->start], vertices[wl->end], wl->flags, wl->type, wl->sectorTag, {},
 			(wl->rSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->rSidedef, (wl->lSidedef == 0xFFFF) ? nullptr : sidedefs.data() + wl->lSidedef
 		});
 	}
@@ -66,12 +73,12 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 		Linedef *pLinedef = &linedefs[ws->linedef];
 		Sidedef *pRightSidedef = ws->dir ? pLinedef->lSidedef : pLinedef->rSidedef;
 		Sidedef *pLeftSidedef = ws->dir ? pLinedef->rSidedef : pLinedef->lSidedef;
-		segs.push_back((Seg){vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, pRightSidedef, ws->dir, (float)ws->offset,
+		segs.push_back({vertices[ws->start], vertices[ws->end], (float)(ws->slopeAngle * M_PI * 2 / 65536.f), pLinedef, pRightSidedef, ws->dir, (float)ws->offset,
 			sqrtf((vertices[ws->start].x - vertices[ws->end].x) * (vertices[ws->start].x - vertices[ws->end].x) + (vertices[ws->start].y - vertices[ws->end].y) * (vertices[ws->start].y - vertices[ws->end].y)),
 			(pRightSidedef) ? pRightSidedef->sector : nullptr, (pLeftSidedef) ? pLeftSidedef->sector : nullptr});
 	}
 	struct WADThing { int16_t x, y; uint16_t angle, type, flags; };
-	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(WADThing)) {WADThing *wt = (WADThing*)(ptr + i); things.push_back((Thing){wt->x, wt->y, wt->angle, wt->type, wt->flags});}
+	if (seek("THINGS")) for (int i = 0; i < size; i += sizeof(WADThing)) {WADThing *wt = (WADThing*)(ptr + i); things.push_back({wt->x, wt->y, wt->angle, wt->type, wt->flags});}
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 	
@@ -120,7 +127,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 				t.imgs.push_back(wad.getPatch(buffer));
 			}
 		}
-		Viewpoint v = (Viewpoint){t.x, t.y};
+		Viewpoint v = {t.x, t.y};
 		int subsector = (int)(nodes.size() - 1);
 		while (!(subsector & kSubsectorIdentifier)) subsector = isPointOnLeftSide(v, subsector) ? nodes[subsector].lChild : nodes[subsector].rChild;
 		segs[subsectors[subsector & (~kSubsectorIdentifier)].firstSeg].rSector->things.push_back(&t);
@@ -214,8 +221,8 @@ void ViewRenderer::render(uint8_t *pScreenBuffer, int iBufferPitch)
 	frame++;
 	texframe = frame / 20;
 	solidWallRanges.clear();
-	solidWallRanges.push_back((SolidSegmentRange){INT_MIN, -1});
-	solidWallRanges.push_back((SolidSegmentRange){renderWidth, INT_MAX});
+	solidWallRanges.push_back({INT_MIN, -1});
+	solidWallRanges.push_back({renderWidth, INT_MAX});
 	std::fill(ceilingClipHeight.begin(), ceilingClipHeight.end(), -1);
 	std::fill(floorClipHeight.begin(), floorClipHeight.end(), renderHeight);
 
@@ -290,7 +297,7 @@ void ViewRenderer::addThing(const Thing &thing, const Seg &seg)
 
 	for ( ; x1 < x2; x1++, u += dv)
 		if (u >= 0 && u < patch->width && y2 > y1)
-			renderLaters[x1].push_back((renderLater){patch, (int)u, (int)y1, (int)y2, 0, dv, tz, lights[light]});
+			renderLaters[x1].push_back({patch, (int)u, (int)y1, (int)y2, 0, dv, tz, lights[light]});
 }
 
 void ViewRenderer::addWallInFOV(const Seg &seg)
@@ -334,7 +341,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg)
         if (x2 < f->start - 1)
         {
             storeWallRange(seg, x1, x2, tov1x, tov2x, tov1z, tov2z); //All of the wall is visible, so insert it
-            if (solid) solidWallRanges.insert(f, (SolidSegmentRange){x1, x2});
+            if (solid) solidWallRanges.insert(f, {x1, x2});
             return;
         }
         storeWallRange(seg, x1, f->start - 1, tov1x, tov2x, tov1z, tov2z); // The end is already included, just update start
@@ -471,7 +478,7 @@ void ViewRenderer::storeWallRange(const Seg &seg, int x1, int x2, float ux1, flo
 				int col, yoffset, texu = ((int)u) % tex->width; if (texu < 0) texu += tex->width;
 				const Patch *p;
 				if ((p = tex->getPatchForColumn(texu, col, yoffset)))
-					renderLaters[x].push_back((renderLater){p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
+					renderLaters[x].push_back({p, col, top, bot,  v + top * dv + tdY - yoffset, dv, z, lut});
 			}
 
 			if (seg.lSector->sky) DrawSky(seg.lSector->sky, ceilbot, upper);
@@ -564,7 +571,7 @@ struct WADPatchHeader { uint16_t width, height; int16_t leftOffset, topOffset; }
 Patch::Patch(const char *_name, const uint8_t *ptr) : name(_name), cols(((WADPatchHeader*)ptr)->width)
 , width(((WADPatchHeader*)ptr)->width), height(((WADPatchHeader*)ptr)->height), xoffset(((WADPatchHeader*)ptr)->leftOffset), yoffset(((WADPatchHeader*)ptr)->topOffset)
 {
-	for (int i = 0; i < width; ++i) for (int off = ((uint32_t*)(ptr))[i + 2]; ptr[off] != 0xff; off += ptr[off + 1] + 4) cols[i].push_back((colData){ptr[off], ptr[off + 1], ptr + off + 3});
+	for (int i = 0; i < width; ++i) for (int off = ((uint32_t*)(ptr))[i + 2]; ptr[off] != 0xff; off += ptr[off + 1] + 4) cols[i].push_back({ptr[off], ptr[off + 1], ptr + off + 3});
 }
 
 void Patch::render(uint8_t *buf, int rowlen, int screenx, int screeny, const uint8_t *lut, float scale) const
@@ -615,7 +622,7 @@ Texture::Texture(const char *_name, const uint8_t *ptr, WADLoader *wad) : name(_
 				}
 				patch->composeColumn(cols[x].overlap.data(), height, x - texturePatch[i].dx, texturePatch[i].dy);	// Render your goodies on top.
 			}
-			else cols[x] = (colData){ x - texturePatch[i].dx, texturePatch[i].dy, patch, std::vector<uint8_t>()};	// Save this as the handler for this column.
+			else cols[x] = { x - texturePatch[i].dx, texturePatch[i].dy, patch, std::vector<uint8_t>()};	// Save this as the handler for this column.
 		}
 	}
 }

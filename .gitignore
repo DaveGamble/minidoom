@@ -1,2 +1,5 @@
 *.xcworkspace
 xcuserdata
+.vs
+Debug
+x64

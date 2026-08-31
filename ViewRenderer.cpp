@@ -171,16 +171,6 @@ static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, i
 
 void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
 {
-	auto sideForBox = [nodes = this->nodes, size](int x, int y, int node)
-	{
-		const int x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
-		const int y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
-		const int x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
-		if (x1y1 > 0 && x1y2 > 0 && x2y1 > 0 && x2y2 > 0) return -1;	// right side
-		if (x1y1 < 0 && x1y2 < 0 && x2y1 < 0 && x2y2 < 0) return 1;		// left side
-		return 0; // there's an intersection.
-	};
-	
 	if (n & kSubsectorIdentifier)	// subsector.
 	{
 		const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
@@ -197,7 +187,12 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 	}
 	else
 	{
-		int side1 = sideForBox(x1, y1, n), side2 = sideForBox(x2, y2, n);
+		const int nx = nodes[n].x, ny = nodes[n].y, ndx = nodes[n].dx, ndy = nodes[n].dy;
+		const int tx1 = (x1 - size - nx) * ndy, tx2 = (x1 + size - nx) * ndy, ty1 = (y1 - size - ny) * ndx, ty2 = (y1 + size - ny) * ndx;
+		const int tx3 = (x2 - size - nx) * ndy, tx4 = (x2 + size - nx) * ndy, ty3 = (y2 - size - ny) * ndx, ty4 = (y2 + size - ny) * ndx;
+		const int side1 = (tx1 > ty1 && tx1 > ty2 && tx2 > ty1 && tx2 > ty2) ? -1 : (tx1 < ty1 && tx1 < ty2 && tx2 < ty1 && tx2 < ty2) ? 1 : 0;
+		const int side2 = (tx3 > ty3 && tx3 > ty4 && tx4 > ty3 && tx4 > ty4) ? -1 : (tx3 < ty3 && tx3 < ty4 && tx4 < ty3 && tx4 < ty4) ? 1 : 0;
+
 		if (side1 == side2 && side1)	// both on same side
 			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
 		else

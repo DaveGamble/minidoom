@@ -39,7 +39,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	std::vector<Vertex> vertices;
 	if (seek("VERTEXES")) for (int i = 0; i < size; i += sizeof(Vertex)) vertices.push_back(*(Vertex*)(ptr + i));
 
-	auto skyt = wad.getTexture("SKY1");
+	std::vector<const Texture *> skyt = wad.getTexture("SKY1");
 	const Texture *skytex = skyt.size() ? skyt[0] : nullptr;
 
 	struct WADSector { int16_t fh, ch; char floorTexture[8], ceilingTexture[8]; uint16_t lightlevel, type, tag; };
@@ -82,7 +82,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	if (seek("NODES")) for (int i = 0; i < size; i += sizeof(Node)) nodes.push_back(*(Node*)(ptr + i));
 	if (seek("SSECTORS")) for (int i = 0; i < size; i += sizeof(Subsector)) subsectors.push_back(*(Subsector*)(ptr + i));
 	
-	auto addLinedef = [&](Linedef &l, Sidedef *s) { if (s && s->sector) s->sector->linedefs.push_back(&l); };
+	auto addLinedef = [](Linedef &l, Sidedef *s) { if (s && s->sector) s->sector->linedefs.push_back(&l); };
 	for (int i = 0; i < linedefs.size(); i++) { addLinedef(linedefs[i], linedefs[i].rSidedef); addLinedef(linedefs[i], linedefs[i].lSidedef); }
 	for (Sector &s : sectors)
 	{
@@ -107,7 +107,7 @@ ViewRenderer::ViewRenderer(int renderXSize, int renderYSize, const char *wadname
 	for (Thing& t : things)
 	{
 		if (t.type == 11 || (t.type >= 1 && t.type <=4)) continue;// Player start positions.
-		auto info = std::lower_bound(thinginfos.begin(), thinginfos.end(), t.type, [] (const thinginfo &a, const int &b) { return a.id < b; });
+		std::vector<thinginfo>::iterator info = std::lower_bound(thinginfos.begin(), thinginfos.end(), t.type, [] (const thinginfo &a, const int &b) { return a.id < b; });
 		
 		if (info == thinginfos.end() || info->id != t.type) {printf("Unknown thing, id %d\n", t.type); continue;}
 		const char *basename = info->name;
@@ -368,7 +368,7 @@ void ViewRenderer::addWallInFOV(const Seg &seg)
 	
 	if (solid && solidWallRanges.size() < 2) return;
 
-    auto f = solidWallRanges.begin(); while (x1 - 1 > f->end) ++f;
+	std::list<SolidSegmentRange>::iterator f = solidWallRanges.begin(); while (x1 - 1 > f->end) ++f;
 
     if (x1 < f->start)
     {

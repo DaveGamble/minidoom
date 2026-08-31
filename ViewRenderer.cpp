@@ -169,6 +169,45 @@ static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, i
 	return true;
 }
 
+void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
+{
+	auto sideForBox = [nodes = this->nodes, size](int x, int y, int node)
+	{
+		const int x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
+		const int y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
+		const int x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
+		if (x1y1 > 0 && x1y2 > 0 && x2y1 > 0 && x2y2 > 0) return -1;	// right side
+		if (x1y1 < 0 && x1y2 < 0 && x2y1 < 0 && x2y2 < 0) return 1;		// left side
+		return 0; // there's an intersection.
+	};
+	
+	if (n & kSubsectorIdentifier)	// subsector.
+	{
+		const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
+		for (int i = 0; i < sub.numSegs; i++)
+		{
+			const Linedef *l = segs[sub.firstSeg + i].linedef;
+			bool hit = false;
+			hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
+			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
+			hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
+			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
+			if (hit) out.push_back(l);
+		}
+	}
+	else
+	{
+		int side1 = sideForBox(x1, y1, n), side2 = sideForBox(x2, y2, n);
+		if (side1 == side2 && side1)	// both on same side
+			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
+		else
+		{
+			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
+			findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);	// it might intersect on either side.
+		}
+	}
+}
+
 void ViewRenderer::moveBy(float fwd, float side)
 {
 	float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
@@ -524,45 +563,6 @@ void ViewRenderer::renderBSPNodes(int iNodeID)
 	const bool left = isPointOnLeftSide(view, iNodeID);
 	renderBSPNodes(left ? nodes[iNodeID].lChild : nodes[iNodeID].rChild);
 	renderBSPNodes(left ? nodes[iNodeID].rChild : nodes[iNodeID].lChild);
-}
-
-void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
-{
-	auto sideForBox = [nodes = this->nodes, size](int x, int y, int node)
-	{
-		const int x1 = (x - size - nodes[node].x) * nodes[node].dy, x2 = (x + size - nodes[node].x) * nodes[node].dy;
-		const int y1 = (y - size - nodes[node].y) * nodes[node].dx, y2 = (y + size - nodes[node].y) * nodes[node].dx;
-		const int x1y1 = x1 - y1, x1y2 = x1 - y2, x2y1 = x2 - y1, x2y2 = x2 - y2;
-		if (x1y1 > 0 && x1y2 > 0 && x2y1 > 0 && x2y2 > 0) return -1;	// right side
-		if (x1y1 < 0 && x1y2 < 0 && x2y1 < 0 && x2y2 < 0) return 1;		// left side
-		return 0; // there's an intersection.
-	};
-	
-	if (n & kSubsectorIdentifier)	// subsector.
-	{
-		const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
-		for (int i = 0; i < sub.numSegs; i++)
-		{
-			const Linedef *l = segs[sub.firstSeg + i].linedef;
-			bool hit = false;
-			hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
-			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
-			hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
-			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
-			if (hit) out.push_back(l);
-		}
-	}
-	else
-	{
-		int side1 = sideForBox(x1, y1, n), side2 = sideForBox(x2, y2, n);
-		if (side1 == side2 && side1)	// both on same side
-			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
-		else
-		{
-			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
-			findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);	// it might intersect on either side.
-		}
-	}
 }
 
 bool ViewRenderer::isPointOnLeftSide(const Viewpoint &v, int node) const { return (v.x - nodes[node].x) * nodes[node].dy <= (v.y - nodes[node].y) * nodes[node].dx; }

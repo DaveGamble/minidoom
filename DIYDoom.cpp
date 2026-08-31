@@ -16,6 +16,7 @@ int main(int argc, char* argv[])
 	SDL_Renderer *sdl_renderer = SDL_CreateRenderer(window, -1, 0);
 	SDL_Texture *texture = SDL_CreateTexture(sdl_renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, m_iRenderWidth, m_iRenderHeight);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_Delay(1000);
 	// SDL
 
 	bool isOver = false;

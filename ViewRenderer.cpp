@@ -171,36 +171,29 @@ static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, i
 
 void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
 {
-	if (n & kSubsectorIdentifier)	// subsector.
+	if (!(n & kSubsectorIdentifier))	// Traverse BSP to find subsectors
 	{
-		const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
-		for (int i = 0; i < sub.numSegs; i++)
-		{
-			const Linedef *l = segs[sub.firstSeg + i].linedef;
-			bool hit = false;
-			hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
-			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
-			hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
-			hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
-			if (hit) out.push_back(l);
-		}
-	}
-	else
-	{
-		int side1 = 0, side2 = 0;
+		int sides = 0;
 		for (int i = 0; i < 4; i++)
 		{
-			side1 += isPointOnLeftSide({(int16_t)(x1 + (i & 1 ? 1 : -1) * size), (int16_t)(y1 + (i & 2 ? 1 : -1) * size)}, n);
-			side2 += isPointOnLeftSide({(int16_t)(x2 + (i & 1 ? 1 : -1) * size), (int16_t)(y2 + (i & 2 ? 1 : -1) * size)}, n);
+			sides += isPointOnLeftSide({(int16_t)(x1 + (i & 1 ? 1 : -1) * size), (int16_t)(y1 + (i & 2 ? 1 : -1) * size)}, n);
+			sides += isPointOnLeftSide({(int16_t)(x2 + (i & 1 ? 1 : -1) * size), (int16_t)(y2 + (i & 2 ? 1 : -1) * size)}, n);
 		}
+		if (sides != 0) findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
+		if (sides != 8) findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);	// it might intersect on either side.
+		return;
+	}
 
-		if (side1 == side2 && (side1 == 0 || side1 == 4))	// both on same side
-			findIntersectingNodes((side1 == 4) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
-		else
-		{
-			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
-			findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);	// it might intersect on either side.
-		}
+	const Subsector &sub = subsectors[n & ~kSubsectorIdentifier];
+	for (int i = 0; i < sub.numSegs; i++)
+	{
+		const Linedef *l = segs[sub.firstSeg + i].linedef;
+		bool hit = false;
+		hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
+		hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
+		hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
+		hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
+		if (hit) out.push_back(l);
 	}
 }
 

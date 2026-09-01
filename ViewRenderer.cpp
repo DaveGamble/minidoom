@@ -225,7 +225,12 @@ void ViewRenderer::moveBy(float fwd, float side)
 	findIntersectingNodes((int)nodes.size() - 1, view.x, view.y, view.x + dx, view.y + dy, out, size);
 	
 	std::vector<const Linedef *> hits, triggers;
-	for (const Linedef *l : out) if (!l->lSidedef || (l->flags & 1)) hits.push_back(l); else triggers.push_back(l);	// split 'em
+	for (const Linedef *l : out)
+	{
+		if (!l->lSidedef || (l->flags & 1)) hits.push_back(l);
+		else if (l->lSidedef->sector->floorHeight > view.z + 2 && (view.x + dx - l->start.x) * (l->end.y - l->start.y) <= (view.y + dy - l->start.y) * (l->end.x - l->start.x)) hits.push_back(l);
+		else triggers.push_back(l);	// split 'em
+	}
 		
 	if (hits.size())
 	{

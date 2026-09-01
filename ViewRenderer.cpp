@@ -208,32 +208,36 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 
 void ViewRenderer::moveBy(float fwd, float side)
 {
+	constexpr int size = 16 / 2;
 	float dx = fwd * view.cosa + side * view.sina, dy = fwd * view.sina - side * view.cosa;
-	int size = 16 / 2;
-
-
 	std::vector<const Linedef *> out;
 	findIntersectingNodes((int)nodes.size() - 1, view.x, view.y, view.x + dx, view.y + dy, out, size);
 	
 	std::vector<const Linedef *> hits, triggers;
 	for (const Linedef *l : out) if (!l->lSidedef || (l->flags & 1)) hits.push_back(l); else triggers.push_back(l);	// split 'em
-
+		
 	if (hits.size())
 	{
+
+		float mint = 1;
+		const Linedef *nearest = hits[0];
 		for (const Linedef *l : hits)
 		{
-			int lx = l->end.x - l->start.x, ly = l->end.y - l->start.y;
-			float dot = lx * view.cosa + ly * view.sina;
-			if (dot < 0) {lx *= -1; ly *= -1;}
-			if (dot * dot < 0.5 * (lx * lx + ly * ly)) continue;	// angle too far off, can't do it.
-			float ldet = 1.f / sqrt(lx * lx + ly * ly);
-			dx = (fwd * lx + side * ly) * ldet;
-			dy = (fwd * ly - side * lx) * ldet;
-			break;
+			float t = 0;
+			for (float scl = 0.5; scl >= 0.0625; scl *= 0.5)
+				if (!doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx * (t + scl), view.y + dy * (t + scl), size)) t += scl;
+			if (t < mint) {nearest = l; mint = t;}
 		}
-		out.clear();
-		findIntersectingNodes((int)nodes.size() - 1, view.x, view.y, view.x + dx, view.y + dy, out, size);
-		if (out.size()) return;
+		
+		float ldx = nearest->end.x - nearest->start.x, ldy = nearest->end.y - nearest->start.y;
+		float proj = (ldx * dx + ldy * dy) / (ldx * ldx + ldy * ldy);
+		dx = ldx * proj;
+		dy = ldy * proj;
+		for (const Linedef *l : hits)
+		{
+//			if (l == nearest) continue;
+//			while (doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx, view.y + dy, size) && (dx || dy)) {dx *= 0.5; dy *= 0.5; }
+		}
 	}
 
 	// Process triggers!

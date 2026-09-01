@@ -183,6 +183,17 @@ static bool doesLineSegmentIntersectPlayerMovement(const Linedef *l, int x1, int
 	return false;
 }
 
+static void repairViewQuantization(const Linedef *l, Viewpoint& view, float &dx, float &dy, int size)
+{
+	if (doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx, view.y + dy, size))
+	{
+		int tries[8][2] = {{0,1}, {0,-1}, {1,0}, {-1,0}, {1,1}, {1,-1}, {-1,1}, {-1,-1}};
+		int i = 0;
+		while (i < 8 && doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx + tries[i][0], view.y + dy + tries[i][1], size)) i++;
+		if (i != 8) {dx += tries[i][0]; dy += tries[i][1];}
+	}
+}
+
 void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
 {
 	if (!(n & kSubsectorIdentifier))	// Traverse BSP to find subsectors
@@ -218,11 +229,11 @@ void ViewRenderer::moveBy(float fwd, float side)
 		
 	if (hits.size())
 	{
-
 		float mint = 1;
 		const Linedef *nearest = hits[0];
 		for (const Linedef *l : hits)
 		{
+			if (l == nearest) continue;
 			float t = 0;
 			for (float scl = 0.5; scl >= 0.0625; scl *= 0.5)
 				if (!doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx * (t + scl), view.y + dy * (t + scl), size)) t += scl;
@@ -233,10 +244,21 @@ void ViewRenderer::moveBy(float fwd, float side)
 		float proj = (ldx * dx + ldy * dy) / (ldx * ldx + ldy * ldy);
 		dx = ldx * proj;
 		dy = ldy * proj;
+		repairViewQuantization(nearest, view, dx, dy, size);
+		mint = 1;
 		for (const Linedef *l : hits)
 		{
-//			if (l == nearest) continue;
-//			while (doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx, view.y + dy, size) && (dx || dy)) {dx *= 0.5; dy *= 0.5; }
+			if (!doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx, view.y + dy, size)) continue;
+			float t = 0;
+			for (float scl = 0.5; scl >= 0.0625; scl *= 0.5)
+				if (!doesLineSegmentIntersectPlayerMovement(l, view.x, view.y, view.x + dx * (t + scl), view.y + dy + (t * scl), size)) t += scl;
+			if (t < mint) mint = t;
+		}
+		if (mint != 1)
+		{
+			dx *= mint;
+			dy *= mint;
+			repairViewQuantization(nearest, view, dx, dy, size);
 		}
 	}
 

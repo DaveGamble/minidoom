@@ -169,6 +169,20 @@ static bool doesLineSegmentIntersect(const Linedef *l, int x1, int y1, int x2, i
 	return true;
 }
 
+
+static bool doesLineSegmentIntersectPlayerMovement(const Linedef *l, int x1, int y1, int x2, int y2, int size)
+{
+	if (doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size)) return true;
+	if (doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size)) return true;
+	if (doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size)) return true;
+	if (doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size)) return true;
+	if (doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size)) return true;
+	if (doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size)) return true;
+	if (doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size)) return true;
+	if (doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size)) return true;
+	return false;
+}
+
 void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, std::vector<const Linedef*>& out, int size) const
 {
 	if (!(n & kSubsectorIdentifier))	// Traverse BSP to find subsectors
@@ -188,16 +202,7 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 	for (int i = 0; i < sub.numSegs; i++)
 	{
 		const Linedef *l = segs[sub.firstSeg + i].linedef;
-		bool hit = false;
-		hit |= doesLineSegmentIntersect(l, x2 - size, y2 + size, x2 + size, y2 + size);
-		hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
-		hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
-		hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
-		hit |= doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size);
-		hit |= doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size);
-		hit |= doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size);
-		hit |= doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size);
-		if (hit) out.push_back(l);
+		if (doesLineSegmentIntersectPlayerMovement(l, x1, y1, x2, y2, size)) out.push_back(l);
 	}
 }
 

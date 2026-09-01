@@ -193,6 +193,10 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 		hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 + size, y2 - size);
 		hit |= doesLineSegmentIntersect(l, x2 + size, y2 - size, x2 + size, y2 + size);
 		hit |= doesLineSegmentIntersect(l, x2 - size, y2 - size, x2 - size, y2 + size);
+		hit |= doesLineSegmentIntersect(l, x1 - size, y1 - size, x2 - size, y2 - size);
+		hit |= doesLineSegmentIntersect(l, x1 + size, y1 - size, x2 + size, y2 - size);
+		hit |= doesLineSegmentIntersect(l, x1 - size, y1 + size, x2 - size, y2 + size);
+		hit |= doesLineSegmentIntersect(l, x1 + size, y1 + size, x2 + size, y2 + size);
 		if (hit) out.push_back(l);
 	}
 }

@@ -180,7 +180,7 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 			sides += isPointOnLeftSide({(int16_t)(x2 + (i & 1 ? 1 : -1) * size), (int16_t)(y2 + (i & 2 ? 1 : -1) * size)}, n);
 		}
 		if (sides != 0) findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
-		if (sides != 8) findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);	// it might intersect on either side.
+		if (sides != 8) findIntersectingNodes(nodes[n].rChild, x1, y1, x2, y2, out, size);
 		return;
 	}
 

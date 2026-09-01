@@ -187,14 +187,15 @@ void ViewRenderer::findIntersectingNodes(int n, int x1, int y1, int x2, int y2, 
 	}
 	else
 	{
-		const int nx = nodes[n].x, ny = nodes[n].y, ndx = nodes[n].dx, ndy = nodes[n].dy;
-		const int tx1 = (x1 - size - nx) * ndy, tx2 = (x1 + size - nx) * ndy, ty1 = (y1 - size - ny) * ndx, ty2 = (y1 + size - ny) * ndx;
-		const int tx3 = (x2 - size - nx) * ndy, tx4 = (x2 + size - nx) * ndy, ty3 = (y2 - size - ny) * ndx, ty4 = (y2 + size - ny) * ndx;
-		const int side1 = (tx1 > ty1 && tx1 > ty2 && tx2 > ty1 && tx2 > ty2) ? -1 : (tx1 < ty1 && tx1 < ty2 && tx2 < ty1 && tx2 < ty2) ? 1 : 0;
-		const int side2 = (tx3 > ty3 && tx3 > ty4 && tx4 > ty3 && tx4 > ty4) ? -1 : (tx3 < ty3 && tx3 < ty4 && tx4 < ty3 && tx4 < ty4) ? 1 : 0;
+		int side1 = 0, side2 = 0;
+		for (int i = 0; i < 4; i++)
+		{
+			side1 += isPointOnLeftSide({(int16_t)(x1 + (i & 1 ? 1 : -1) * size), (int16_t)(y1 + (i & 2 ? 1 : -1) * size)}, n);
+			side2 += isPointOnLeftSide({(int16_t)(x2 + (i & 1 ? 1 : -1) * size), (int16_t)(y2 + (i & 2 ? 1 : -1) * size)}, n);
+		}
 
-		if (side1 == side2 && side1)	// both on same side
-			findIntersectingNodes((side1 == 1) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
+		if (side1 == side2 && (side1 == 0 || side1 == 4))	// both on same side
+			findIntersectingNodes((side1 == 4) ? nodes[n].lChild : nodes[n].rChild, x1, y1, x2, y2, out, size);	// pass it down
 		else
 		{
 			findIntersectingNodes(nodes[n].lChild, x1, y1, x2, y2, out, size);
